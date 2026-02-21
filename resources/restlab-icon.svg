@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8"/>
+      <stop offset="100%" style="stop-color:#6366f1"/>
+    </linearGradient>
+    <linearGradient id="flaskGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e7ff"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded background -->
+  <rect x="0" y="0" width="128" height="128" rx="24" ry="24" fill="url(#bgGrad)"/>
+  
+  <!-- Flask body -->
+  <g transform="translate(24, 16) scale(3.3)">
+    <path d="M9 3h6v5l4 9a2 2 0 0 1-1.8 2.9H6.8A2 2 0 0 1 5 17l4-9V3z" 
+          fill="url(#flaskGrad)" 
+          stroke="#ffffff" 
+          stroke-width="1.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+    <!-- Flask neck line -->
+    <line x1="9" y1="3" x2="15" y2="3" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Liquid -->
+    <path d="M7 14.5 L17 14.5 L18.2 17.5 Q18.5 18.5 17.5 19 L6.5 19 Q5.5 18.5 5.8 17.5 Z" 
+          fill="rgba(56, 189, 248, 0.6)"/>
+    <!-- Bubbles -->
+    <circle cx="10" cy="17" r="0.8" fill="#ffffff"/>
+    <circle cx="13" cy="16.5" r="0.6" fill="#ffffff"/>
+    <circle cx="11.5" cy="18" r="0.5" fill="#ffffff"/>
+  </g>
+</svg>

@@ -1,0 +1,117 @@
+/* Drag preview element */
+.drag-preview {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  padding: 6px 12px;
+  background: var(--restlab-gradient);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  z-index: 9999;
+}
+
+/* Active drop target styling */
+.drop-target-active {
+  background: rgba(56, 189, 248, 0.25) !important;
+  border-color: var(--restlab-accent) !important;
+  box-shadow:
+    0 0 0 2px rgba(56, 189, 248, 0.4),
+    0 0 20px rgba(56, 189, 248, 0.3),
+    inset 0 0 20px rgba(56, 189, 248, 0.15) !important;
+  animation: dropTargetPulse 1.5s ease-in-out infinite;
+}
+
+.drop-target-active::before {
+  height: 80% !important;
+  background: var(--restlab-gradient) !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+
+@keyframes dropTargetPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(56, 189, 248, 0.4),
+      0 0 20px rgba(56, 189, 248, 0.3),
+      inset 0 0 20px rgba(56, 189, 248, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(56, 189, 248, 0.6),
+      0 0 30px rgba(56, 189, 248, 0.5),
+      inset 0 0 30px rgba(56, 189, 248, 0.25);
+  }
+}
+
+/* Drop zone highlight for request area */
+.drop-zone-highlight {
+  background: rgba(56, 189, 248, 0.08);
+  border-radius: 6px;
+  margin: 2px 0;
+  transition: all 0.2s ease;
+  border: 1px dashed rgba(56, 189, 248, 0.3);
+}
+
+/* Empty folder drop hint */
+.drop-hint-visible {
+  color: var(--restlab-accent) !important;
+  font-weight: 600;
+  animation: dropHintFade 1s ease-in-out infinite;
+}
+
+@keyframes dropHintFade {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Make items slightly transparent while dragging */
+.dragging-active[draggable="true"]:active {
+  opacity: 0.5;
+}
+
+/* Root level drop zone */
+.root-drop-zone {
+  position: relative;
+}
+
+.root-drop-indicator {
+  margin-top: 8px;
+  padding: 12px 16px;
+  border: 2px dashed rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  background: rgba(56, 189, 248, 0.05);
+  text-align: center;
+  font-size: 12px;
+  color: var(--restlab-accent);
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.root-drop-indicator:hover {
+  border-color: var(--restlab-accent);
+  background: rgba(56, 189, 248, 0.1);
+  opacity: 1;
+}
+
+/* Cursor styles during drag */
+[draggable="true"] {
+  cursor: grab;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+/* Prevent text selection during drag */
+.dragging-active * {
+  user-select: none;
+}

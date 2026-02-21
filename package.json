@@ -1,0 +1,127 @@
+{
+  "name": "restlab",
+  "displayName": "REST Lab",
+  "description": "A modern REST API client for VS Code - Test, debug, and manage your APIs with a beautiful interface",
+  "publisher": "slverma",
+  "version": "0.0.10",
+  "icon": "resources/restlab-icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/slverma/rest-lab"
+  },
+  "license": "MIT",
+  "keywords": [
+    "rest",
+    "api",
+    "http",
+    "client",
+    "postman",
+    "testing",
+    "request",
+    "response",
+    "restful",
+    "endpoint",
+    "web services",
+    "api testing",
+    "http client",
+    "curl",
+    "insomnia",
+    "swagger",
+    "openapi",
+    "debug",
+    "fetch",
+    "fetchclient",
+    "restclient",
+    "rest client",
+    "http request",
+    "api client",
+    "graphql",
+    "thunder client",
+    "webhook",
+    "api development",
+    "api debugging",
+    "api management",
+    "api testing tool",
+    "api testing extension",
+    "rest api testing",
+    "rest api client",
+    "rest api debugging",
+    "rest api management",
+    "rest api testing tool",
+    "rest api testing extension",
+    "rest api development",
+    "echoApi"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "restlab-sidebar",
+          "title": "REST Lab",
+          "icon": "resources/sidebar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "restlab-sidebar": [
+        {
+          "type": "webview",
+          "id": "restlab-sidebar-view",
+          "name": "REST Lab",
+          "icon": "resources/sidebar-icon.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "restlab.createFolder",
+        "title": "Create Folder",
+        "category": "REST Lab"
+      },
+      {
+        "command": "restlab.importCollection",
+        "title": "Import Collection",
+        "category": "REST Lab"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build:prod",
+    "compile": "npm run build",
+    "build": "tsx scripts/build.ts",
+    "build:prod": "NODE_ENV=production tsx scripts/build.ts",
+    "watch": "tsx scripts/build.ts --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/vscode": "^1.85.0",
+    "@types/vscode-webview": "^1.57.4",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "axios": "^1.13.2",
+    "form-data": "^4.0.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

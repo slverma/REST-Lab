@@ -1,0 +1,427 @@
+@import "tailwindcss";
+
+/* VS Code Theme Variables Integration */
+@layer base {
+  :root {
+    /* RES TLab brand colors */
+    --restlab-gradient: linear-gradient(90deg, #38bdf8 0%, #6366f1 100%);
+    --restlab-gradient-hover: linear-gradient(90deg, #0ea5e9 0%, #4f46e5 100%);
+    --restlab-accent: #38bdf8;
+    --restlab-accent-hover: #0ea5e9;
+    --restlab-accent-subtle: rgba(56, 189, 248, 0.1);
+    --restlab-accent-glow: rgba(56, 189, 248, 0.4);
+
+    /* Glass effect */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: var(
+      --vscode-font-family,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif
+    );
+    font-size: var(--vscode-font-size, 13px);
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-sideBar-background);
+  }
+}
+
+/* Custom utility classes for REST Lab */
+@utility bg-glass {
+  background: var(--glass-bg);
+}
+
+@utility border-glass {
+  border-color: var(--glass-border);
+}
+
+@utility text-vscode {
+  color: var(--vscode-foreground);
+}
+
+@utility text-vscode-muted {
+  color: var(--vscode-descriptionForeground);
+}
+
+@utility bg-vscode-sidebar {
+  background-color: var(--vscode-sideBar-background);
+}
+
+@utility bg-vscode-editor {
+  background-color: var(--vscode-editor-background);
+}
+
+@utility bg-vscode-input {
+  background-color: var(--vscode-input-background);
+}
+
+@utility border-vscode-input {
+  border-color: var(--vscode-input-border);
+}
+
+@utility bg-vscode-dropdown {
+  background-color: var(--vscode-dropdown-background, #3c3c3c);
+}
+
+@utility border-vscode-dropdown {
+  border-color: var(--vscode-dropdown-border, #454545);
+}
+
+@utility bg-vscode-hover {
+  background-color: var(--vscode-list-hoverBackground, #2a2d2e);
+}
+
+@utility bg-vscode-active {
+  background-color: var(--vscode-list-activeSelectionBackground, #094771);
+}
+
+@utility bg-restlab-gradient {
+  background: var(--restlab-gradient);
+}
+
+@utility bg-restlab-gradient-hover {
+  background: var(--restlab-gradient-hover);
+}
+
+@utility text-gradient {
+  background: var(--restlab-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility shadow-glow {
+  box-shadow: 0 0 8px var(--restlab-accent-glow);
+}
+
+@utility shadow-glow-lg {
+  box-shadow: 0 4px 16px var(--restlab-accent-glow);
+}
+
+@utility scrollbar-thin {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--vscode-scrollbarSlider-background);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--vscode-scrollbarSlider-hoverBackground);
+  }
+}
+
+/* Component classes */
+@layer components {
+  /* Method badge variants */
+  .method-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    border-width: 1px;
+    border-style: solid;
+  }
+
+  .method-get {
+    background: linear-gradient(
+      90deg,
+      rgba(34, 197, 94, 0.15) 0%,
+      rgba(74, 222, 128, 0.15) 100%
+    );
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+
+  .method-post {
+    background: linear-gradient(
+      90deg,
+      rgba(59, 130, 246, 0.15) 0%,
+      rgba(99, 102, 241, 0.15) 100%
+    );
+    color: #3b82f6;
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+
+  .method-put {
+    background: linear-gradient(
+      90deg,
+      rgba(249, 115, 22, 0.15) 0%,
+      rgba(245, 158, 11, 0.15) 100%
+    );
+    color: #f97316;
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+
+  .method-patch {
+    background: linear-gradient(
+      90deg,
+      rgba(168, 85, 247, 0.15) 0%,
+      rgba(192, 132, 252, 0.15) 100%
+    );
+    color: #a855f7;
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+
+  .method-delete {
+    background: linear-gradient(
+      90deg,
+      rgba(239, 68, 68, 0.15) 0%,
+      rgba(248, 113, 113, 0.15) 100%
+    );
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+  }
+
+  /* Tooltip styles */
+  .custom-tooltip {
+    padding: 4px 8px;
+    margin: 2px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    background: var(--vscode-editorWidget-background, #252526);
+    color: var(--vscode-editorWidget-foreground, #cccccc);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--vscode-editorWidget-border, #454545);
+    z-index: 2147483647;
+    animation: tooltipFadeIn 0.15s ease-out;
+  }
+
+  /* Tooltip arrow - top position */
+  .custom-tooltip.tooltip-top::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--vscode-editorWidget-background, #252526);
+  }
+
+  /* Tooltip arrow - bottom position */
+  .custom-tooltip.tooltip-bottom::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: var(--vscode-editorWidget-background, #252526);
+  }
+
+  /* Tooltip arrow - left position */
+  .custom-tooltip.tooltip-left::after {
+    content: "";
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 4px solid transparent;
+    border-left-color: var(--vscode-editorWidget-background, #252526);
+  }
+
+  /* Tooltip arrow - right position */
+  .custom-tooltip.tooltip-right::after {
+    content: "";
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 4px solid transparent;
+    border-right-color: var(--vscode-editorWidget-background, #252526);
+  }
+
+  /* Primary button with gradient */
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--restlab-gradient);
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px var(--restlab-accent-glow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transition: left 0.5s ease;
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--restlab-accent-glow);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:focus {
+    outline: 2px solid var(--restlab-accent);
+    outline-offset: 2px;
+  }
+
+  /* Action button */
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--vscode-icon-foreground);
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.15s ease;
+  }
+
+  /* Header action button */
+  .header-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    background: var(--glass-bg);
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .header-action-btn:hover {
+    background: var(--restlab-accent-subtle);
+    border-color: var(--restlab-accent);
+    color: var(--restlab-accent);
+  }
+
+  /* Dropdown menu */
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 180px;
+    background: var(--vscode-dropdown-background, #3c3c3c);
+    border: 1px solid var(--vscode-dropdown-border, #454545);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    overflow: hidden;
+    animation: fadeIn 0.15s ease-out;
+  }
+
+  .dropdown-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vscode-descriptionForeground, #858585);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--vscode-dropdown-border, #454545);
+  }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    color: var(--vscode-dropdown-foreground, #cccccc);
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s ease;
+  }
+
+  .dropdown-item:hover {
+    background: var(--vscode-list-hoverBackground, #2a2d2e);
+  }
+
+  .dropdown-item:active {
+    background: var(--vscode-list-activeSelectionBackground, #094771);
+  }
+}
+
+/* Animations */
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
