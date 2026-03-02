@@ -16,6 +16,7 @@ import {
   formDataToBody,
   getEditorLanguageFromContentType,
   hasFileFields,
+  interpolateVariables,
   isFormContentType,
   stripJsonComments,
 } from "../helpers/helper";
@@ -43,6 +44,9 @@ interface RequestContextValue {
   // State
   config: RequestConfig;
   folderConfig: FolderConfig;
+  envVariables: Record<string, string>;
+  environments: { id: string; name: string }[];
+  activeEnvironmentId: string | null;
   response: ResponseData | null;
   isLoading: boolean;
   activeTab: ActiveTab;
@@ -74,6 +78,7 @@ interface RequestContextValue {
   handleBeautifyJson: () => void;
   toggleLayout: () => void;
   handleResizeStart: (e: React.MouseEvent) => void;
+  handleSetActiveEnvironment: (envId: string | null) => void;
 
   // Header handlers
   handleAddHeader: () => void;
@@ -135,6 +140,14 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   });
 
   const [folderConfig, setFolderConfig] = useState<FolderConfig>({});
+  const [envVariables, setEnvVariables] = useState<Record<string, string>>({});
+  const [environments, setEnvironments] = useState<
+    { id: string; name: string }[]
+  >([]);
+  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string | null>(
+    null,
+  );
+  const [collectionId, setCollectionId] = useState<string | null>(null);
   const [response, setResponse] = useState<ResponseData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("headers");
@@ -152,6 +165,8 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const splitContainerRef = useRef<HTMLDivElement>(null);
+  // Keep a ref in sync so the stable message handler never sees a stale collectionId
+  const collectionIdRef = useRef<string | null>(null);
 
   // Computed values
   const requestEditorLanguage = useMemo(
@@ -224,6 +239,11 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
         case "configLoaded":
           setConfig(message.config);
           setFolderConfig(message.folderConfig || {});
+          setEnvVariables(message.envVariables || {});
+          setEnvironments(message.environments || []);
+          setActiveEnvironmentId(message.activeEnvironmentId ?? null);
+          setCollectionId(message.collectionId ?? null);
+          collectionIdRef.current = message.collectionId ?? null;
           setIsSaved(true);
           if (METHODS_WITH_BODY.includes(message.config.method)) {
             setActiveTab("body");
@@ -231,6 +251,29 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
           break;
         case "folderConfigUpdated":
           setFolderConfig(message.folderConfig || {});
+          if (message.envVariables !== undefined) {
+            setEnvVariables(message.envVariables);
+          }
+          if (message.environments !== undefined) {
+            setEnvironments(message.environments);
+          }
+          if (message.activeEnvironmentId !== undefined) {
+            setActiveEnvironmentId(message.activeEnvironmentId);
+          }
+          break;
+        case "environmentUpdated":
+          if (
+            !message.collectionId ||
+            message.collectionId === collectionIdRef.current
+          ) {
+            setEnvVariables(message.envVariables || {});
+            if (message.activeEnvironmentId !== undefined) {
+              setActiveEnvironmentId(message.activeEnvironmentId);
+            }
+            if (message.environments !== undefined) {
+              setEnvironments(message.environments);
+            }
+          }
           break;
         case "responseReceived":
           setResponse(message.response);
@@ -298,9 +341,16 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       }
     }
 
-    const fullUrl = folderConfig.baseUrl
+    const rawUrl = folderConfig.baseUrl
       ? `${folderConfig.baseUrl}${config.url}`
       : config.url;
+
+    // Interpolate {{variables}} in URL, header values, and body
+    const fullUrl = interpolateVariables(rawUrl, envVariables);
+    const interpolatedHeaders = allHeaders.map((h) => ({
+      key: h.key,
+      value: interpolateVariables(h.value, envVariables),
+    }));
 
     let requestBody: string | undefined = config.body;
     let formDataWithFiles: FormDataItem[] | undefined;
@@ -316,27 +366,36 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       requestBody = stripJsonComments(config.body || "");
     }
 
+    // Apply variable interpolation to body
+    if (requestBody) {
+      requestBody = interpolateVariables(requestBody, envVariables);
+    }
+
     vscode.postMessage({
       type: "sendRequest",
       method: config.method,
       url: fullUrl,
-      headers: allHeaders,
+      headers: interpolatedHeaders,
       body: requestBody,
       formData: formDataWithFiles,
     });
 
     vscode.postMessage({ type: "saveConfig", config });
     setIsSaved(true);
-  }, [config, folderConfig]);
+  }, [config, folderConfig, envVariables]);
 
   const handleCopyCurl = useCallback(() => {
-    const curl = generateCurlCommand(folderConfig, config);
+    const curl = generateCurlCommand(folderConfig, config, envVariables);
     navigator.clipboard.writeText(curl);
     vscode.postMessage({
       type: "showInfo",
       message: "cURL command copied to clipboard!",
     });
-  }, [folderConfig, config]);
+  }, [folderConfig, config, envVariables]);
+
+  const handleSetActiveEnvironment = useCallback((envId: string | null) => {
+    vscode.postMessage({ type: "setActiveEnvironment", envId });
+  }, []);
 
   const handleBeautifyJson = useCallback(async () => {
     if (!config.body) return;
@@ -465,6 +524,9 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     // State
     config,
     folderConfig,
+    envVariables,
+    environments,
+    activeEnvironmentId,
     response,
     isLoading,
     activeTab,
@@ -496,6 +558,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     handleBeautifyJson,
     toggleLayout,
     handleResizeStart,
+    handleSetActiveEnvironment,
 
     // Header handlers
     handleAddHeader,

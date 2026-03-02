@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
+import { RequestEditorProvider } from "./RequestEditorProvider";
 import {
-  SidebarProvider,
   FolderConfig as SidebarFolderConfig,
+  SidebarProvider,
 } from "./SidebarProvider";
 
 interface FolderConfig {
@@ -11,6 +12,8 @@ interface FolderConfig {
   description?: string;
   baseUrl?: string;
   headers?: { key: string; value: string }[];
+  environments?: unknown[];
+  activeEnvironmentId?: string | null;
 }
 
 export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
@@ -44,9 +47,13 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
     }
 
     // Create a virtual document for the folder configuration
+    const isCollection = sidebarProvider
+      ? sidebarProvider.isRootFolder(folderId)
+      : false;
+
     const panel = vscode.window.createWebviewPanel(
       "restlab.folderConfig",
-      `📁 ${folderName}`,
+      isCollection ? `🗂️ ${folderName}` : `📁 ${folderName}`,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -68,6 +75,7 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
       panel.webview,
       folderId,
       folderName,
+      isCollection,
     );
 
     // Load saved config
@@ -103,6 +111,17 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
             `restlab.folder.${folderId}`,
             message.config,
           );
+          // Broadcast env variables to open request panels if this is a collection
+          if (isCollection && sidebarProvider) {
+            const collData = sidebarProvider.getCollectionData(folderId);
+            RequestEditorProvider.broadcastToAllPanels({
+              type: "environmentUpdated",
+              collectionId: folderId,
+              envVariables: sidebarProvider.getActiveEnvVariables(folderId),
+              environments: collData.environments,
+              activeEnvironmentId: collData.activeEnvironmentId,
+            });
+          }
           vscode.window.showInformationMessage(
             `Folder "${folderName}" configuration saved!`,
           );
@@ -132,6 +151,7 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
     webview: vscode.Webview,
     folderId: string,
     folderName: string,
+    isCollection: boolean = false,
   ): string {
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.joinPath(
@@ -162,7 +182,7 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
                 <title>${folderName}</title>
             </head>
             <body>
-                <div id="root" data-folder-id="${folderId}" data-folder-name="${folderName}"></div>
+                <div id="root" data-folder-id="${folderId}" data-folder-name="${folderName}" data-is-collection="${isCollection}"></div>
                 <script nonce="${nonce}" src="${scriptUri}"></script>
             </body>
             </html>`;

@@ -48,6 +48,20 @@ export interface RequestConfig {
 export interface FolderConfig {
   baseUrl?: string;
   headers?: Header[];
+  environments?: Environment[];
+  activeEnvironmentId?: string | null;
+}
+
+export interface EnvVariable {
+  key: string;
+  value: string;
+  enabled: boolean;
+}
+
+export interface Environment {
+  id: string;
+  name: string;
+  variables: EnvVariable[];
 }
 
 export interface ResponseData {

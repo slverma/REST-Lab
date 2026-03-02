@@ -1,9 +1,9 @@
-import * as vscode from "vscode";
 import axios, { AxiosRequestConfig } from "axios";
 import FormData from "form-data";
+import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
-import { SidebarProvider } from "./SidebarProvider";
 import { RequestConfig } from "../webview/types/internal.types";
+import { SidebarProvider } from "./SidebarProvider";
 
 export class RequestEditorProvider {
   // Track open panels by request ID
@@ -17,6 +17,13 @@ export class RequestEditorProvider {
     if (panel) {
       panel.title = `🔗 ${newTitle}`;
     }
+  }
+
+  /** Send a message to every open request-editor panel */
+  public static broadcastToAllPanels(message: unknown): void {
+    RequestEditorProvider.openPanels.forEach((panel) => {
+      panel.webview.postMessage(message);
+    });
   }
 
   public static openRequestEditor(
@@ -66,9 +73,20 @@ export class RequestEditorProvider {
               headers?: { key: string; value: string }[];
             }>(`restlab.folder.${folderId}`) || {};
 
+        const envVariables = sidebarProvider
+          ? sidebarProvider.getActiveEnvVariables(folderId)
+          : {};
+
+        const collectionData = sidebarProvider
+          ? sidebarProvider.getCollectionData(folderId)
+          : { environments: [], activeEnvironmentId: null };
+
         panel.webview.postMessage({
           type: "folderConfigUpdated",
           folderConfig: folderConfig,
+          envVariables: envVariables,
+          environments: collectionData.environments,
+          activeEnvironmentId: collectionData.activeEnvironmentId,
         });
       }
     });
@@ -98,6 +116,19 @@ export class RequestEditorProvider {
                 headers?: { key: string; value: string }[];
               }>(`restlab.folder.${folderId}`) || {};
 
+          // Get active environment variables
+          const envVariables = sidebarProvider
+            ? sidebarProvider.getActiveEnvVariables(folderId)
+            : {};
+
+          const collectionId = sidebarProvider
+            ? sidebarProvider.getRootCollectionId(folderId)
+            : folderId;
+
+          const collectionData = sidebarProvider
+            ? sidebarProvider.getCollectionData(folderId)
+            : { environments: [], activeEnvironmentId: null };
+
           panel.webview.postMessage({
             type: "configLoaded",
             config: {
@@ -112,6 +143,10 @@ export class RequestEditorProvider {
               formData: savedRequest?.formData || [],
             },
             folderConfig: folderConfig,
+            envVariables: envVariables,
+            collectionId: collectionId,
+            environments: collectionData.environments,
+            activeEnvironmentId: collectionData.activeEnvironmentId,
           });
           break;
         case "saveConfig":
@@ -136,6 +171,24 @@ export class RequestEditorProvider {
             );
             // Update panel title
             panel.title = `🔗 ${message.config.name}`;
+          }
+          break;
+        case "setActiveEnvironment":
+          if (sidebarProvider) {
+            await sidebarProvider.setCollectionActiveEnvironment(
+              folderId,
+              message.envId ?? null,
+            );
+            const newEnvVars = sidebarProvider.getActiveEnvVariables(folderId);
+            const newCollData = sidebarProvider.getCollectionData(folderId);
+            const rootId = sidebarProvider.getRootCollectionId(folderId);
+            RequestEditorProvider.broadcastToAllPanels({
+              type: "environmentUpdated",
+              collectionId: rootId,
+              envVariables: newEnvVars,
+              environments: newCollData.environments,
+              activeEnvironmentId: newCollData.activeEnvironmentId,
+            });
           }
           break;
         case "sendRequest":

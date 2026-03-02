@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { getNonce } from "../utils/getNonce";
-import { parseImportedFile, ImportResult } from "../utils/importParser";
 import {
   exportToPostman,
-  exportToThunderClient,
   exportToRESTLab,
+  exportToThunderClient,
 } from "../utils/exportParser";
+import { getNonce } from "../utils/getNonce";
+import { ImportResult, parseImportedFile } from "../utils/importParser";
 import { FolderEditorProvider } from "./FolderEditorProvider";
 import { RequestEditorProvider } from "./RequestEditorProvider";
 
@@ -28,6 +28,18 @@ export interface Folder {
 export interface FolderConfig {
   baseUrl?: string;
   headers?: { key: string; value: string }[];
+}
+
+export interface EnvVariable {
+  key: string;
+  value: string;
+  enabled: boolean;
+}
+
+export interface Environment {
+  id: string;
+  name: string;
+  variables: EnvVariable[];
 }
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
@@ -901,6 +913,72 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  // ── Collection-level environment helpers ─────────────────────────────
+
+  /** Walk the parent chain and return the root collection id */
+  public getRootCollectionId(folderId: string): string {
+    const folder = this._findFolder(folderId);
+    if (!folder || !folder.parentId) return folderId;
+    return this.getRootCollectionId(folder.parentId);
+  }
+
+  /** Returns true if folderId has no parent (i.e. is a root collection) */
+  public isRootFolder(folderId: string): boolean {
+    const folder = this._findFolder(folderId);
+    return !folder?.parentId;
+  }
+
+  /** Returns a flat { key → value } map for the active env of the collection that owns folderId */
+  public getActiveEnvVariables(folderId: string): Record<string, string> {
+    const collectionId = this.getRootCollectionId(folderId);
+    const config = this._context.globalState.get<any>(
+      `restlab.folder.${collectionId}`,
+    );
+    if (!config?.activeEnvironmentId) return {};
+    const envs: Environment[] = config.environments || [];
+    const env = envs.find(
+      (e: Environment) => e.id === config.activeEnvironmentId,
+    );
+    if (!env) return {};
+    const vars: Record<string, string> = {};
+    for (const v of env.variables) {
+      if (v.enabled && v.key.trim()) vars[v.key.trim()] = v.value;
+    }
+    return vars;
+  }
+
+  /** Returns the full environments list + active ID for the collection owning folderId */
+  public getCollectionData(folderId: string): {
+    environments: Environment[];
+    activeEnvironmentId: string | null;
+  } {
+    const collectionId = this.getRootCollectionId(folderId);
+    const config = this._context.globalState.get<any>(
+      `restlab.folder.${collectionId}`,
+    );
+    return {
+      environments: config?.environments || [],
+      activeEnvironmentId: config?.activeEnvironmentId ?? null,
+    };
+  }
+
+  /** Persists a new active-environment selection for the collection owning folderId */
+  public async setCollectionActiveEnvironment(
+    folderId: string,
+    envId: string | null,
+  ): Promise<void> {
+    const collectionId = this.getRootCollectionId(folderId);
+    const config =
+      this._context.globalState.get<any>(`restlab.folder.${collectionId}`) ||
+      {};
+    config.activeEnvironmentId = envId;
+    await this._context.globalState.update(
+      `restlab.folder.${collectionId}`,
+      config,
+    );
+  }
+
+  // ── Folder persistence ──────────────────────────────────────────────
   private _saveFolders() {
     this._context.globalState.update("restlab.folders", this._folders);
   }
