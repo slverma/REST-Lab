@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
+import React, { useEffect, useRef } from "react";
 
 type MonacoEditorProps = {
   value: string;
@@ -12,6 +12,7 @@ type MonacoEditorProps = {
   showHint?: string;
   formatOnChange?: boolean;
   editorInstanceRef?: React.MutableRefObject<Monaco.editor.IStandaloneCodeEditor | null>;
+  envVariables?: Record<string, string>;
 };
 
 const BodyEditor: React.FC<MonacoEditorProps> = ({
@@ -24,9 +25,17 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
   showHint,
   formatOnChange = false,
   editorInstanceRef,
+  envVariables = {},
 }) => {
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  // Keep a ref in sync so the completion provider always reads fresh vars
+  const envVarsRef = useRef<Record<string, string>>(envVariables);
+  const completionDisposableRef = useRef<Monaco.IDisposable | null>(null);
+
+  useEffect(() => {
+    envVarsRef.current = envVariables;
+  }, [envVariables]);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -65,6 +74,47 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
     // Store ref if provided
     if (editorInstanceRef) {
       editorInstanceRef.current = editor;
+    }
+
+    // Register {{ variable completion provider (fires when user types `{`)
+    if (!readOnly) {
+      completionDisposableRef.current =
+        monaco.languages.registerCompletionItemProvider(
+          editor.getModel()?.getLanguageId() ?? "plaintext",
+          {
+            triggerCharacters: ["{"],
+            provideCompletionItems: (model, position) => {
+              const textBefore = model.getValueInRange({
+                startLineNumber: position.lineNumber,
+                startColumn: 1,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column,
+              });
+              // Only suggest when the two preceding chars are `{{`
+              if (!textBefore.endsWith("{{")) return { suggestions: [] };
+              const vars = envVarsRef.current;
+              const varKeys = Object.keys(vars);
+              if (varKeys.length === 0) return { suggestions: [] };
+              return {
+                suggestions: varKeys.map((key) => ({
+                  label: `{{${key}}}`,
+                  kind: monaco.languages.CompletionItemKind.Variable,
+                  insertText: `${key}}}`,
+                  detail: vars[key] ? `= ${vars[key]}` : "(empty value)",
+                  documentation: {
+                    value: `**${key}** = ${vars[key] ?? ""} \n\nEnvironment variable`,
+                  },
+                  range: {
+                    startLineNumber: position.lineNumber,
+                    startColumn: position.column,
+                    endLineNumber: position.lineNumber,
+                    endColumn: position.column,
+                  },
+                })),
+              };
+            },
+          },
+        );
     }
   };
 
@@ -115,6 +165,7 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
           formatOnPaste: !readOnly && formatOnChange,
           contextmenu: true,
           quickSuggestions: false,
+          suggestOnTriggerCharacters: true,
         }}
       />
       {placeholder && !value && (

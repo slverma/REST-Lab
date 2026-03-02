@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Tooltip from "../components/Tooltip";
 import ChevronIcon from "../components/icons/ChevronIcon";
+import CollectionIcon from "../components/icons/CollectionIcon";
 import EmptyGlassIcon from "../components/icons/EmptyGlassIcon";
 import FolderIcon from "../components/icons/FolderIcon";
 import NoItemsIcon from "../components/icons/NoItemsIcon";
@@ -134,7 +135,11 @@ const FolderItem: React.FC<FolderItemProps> = ({
           className={expandedFolders.has(folder.id) ? "rotate-90" : ""}
         />
 
-        <FolderIcon className="flex-shrink-0 text-vscode transition-colors duration-150 group-hover:text-sky-400 group-hover:drop-shadow-[0_0_4px_rgba(56,189,248,0.4)]" />
+        {depth === 0 ? (
+          <CollectionIcon className="flex-shrink-0 text-vscode transition-colors duration-150 group-hover:text-sky-400 group-hover:drop-shadow-[0_0_4px_rgba(56,189,248,0.4)]" />
+        ) : (
+          <FolderIcon className="flex-shrink-0 text-vscode transition-colors duration-150 group-hover:text-sky-400 group-hover:drop-shadow-[0_0_4px_rgba(56,189,248,0.4)]" />
+        )}
         <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium">
           {folder.name}
         </span>
@@ -265,10 +270,8 @@ export const Sidebar: React.FC = () => {
 
     const handleMessage = (event: MessageEvent) => {
       const message = event.data;
-      switch (message.type) {
-        case "foldersUpdated":
-          setFolders(message.folders);
-          break;
+      if (message.type === "foldersUpdated") {
+        setFolders(message.folders);
       }
     };
 

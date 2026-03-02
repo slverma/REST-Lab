@@ -169,22 +169,22 @@ body {
 /* Request Bar */
 .request-bar {
   display: flex;
-  gap: 8px;
-  padding: 16px 0;
+  gap: 6px;
+  padding: 8px 0;
   align-items: center;
 }
 
 .method-select {
-  padding: 12px 14px;
+  padding: 6px 10px;
   border: 2px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  min-width: 110px;
+  min-width: 96px;
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -237,9 +237,9 @@ body {
 
 .url-input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 6px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: "SF Mono", "Fira Code", "Consolas", monospace;
@@ -258,10 +258,10 @@ body {
 .send-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
+  gap: 6px;
+  padding: 7px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--restlab-gradient);
   color: #ffffff;
   font-size: 13px;
@@ -312,10 +312,10 @@ body {
 .save-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 7px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   font-size: 13px;
@@ -368,10 +368,10 @@ body {
 .curl-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 7px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   font-size: 13px;
@@ -401,10 +401,10 @@ body {
 .beautify-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 7px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   font-size: 13px;
@@ -440,11 +440,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: 7px;
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   cursor: pointer;
@@ -470,7 +470,7 @@ body {
 .base-url-hint {
   font-size: 12px;
   color: var(--vscode-descriptionForeground);
-  padding-bottom: 12px;
+  padding-bottom: 6px;
 }
 
 .base-url-hint code {
@@ -478,6 +478,97 @@ body {
   padding: 2px 6px;
   border-radius: 4px;
   font-family: monospace;
+}
+
+/* ── Inline Environment Selector (inside request-bar) ──────────────── */
+.request-env-select {
+  padding: 5px 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 7px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-descriptionForeground);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+  max-width: 130px;
+  flex-shrink: 0;
+}
+
+.request-env-select.has-active {
+  border-color: rgba(56, 189, 248, 0.45);
+  color: var(--restlab-accent);
+  background: var(--restlab-accent-subtle);
+}
+
+.request-env-select:focus {
+  outline: none;
+  border-color: var(--restlab-accent);
+}
+
+/* ── VarInput — {{ variable autocomplete popup ────────────────────── */
+.var-input-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+}
+
+/* The container inside .request-bar should grow to fill space */
+.request-bar > .var-input-container {
+  flex: 1;
+}
+
+.var-input-container input {
+  width: 100%;
+}
+
+.var-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 280px;
+  max-width: 480px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--restlab-accent);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  overflow: hidden;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.var-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.var-popup-item:hover,
+.var-popup-item.active {
+  background: var(--restlab-accent-subtle);
+}
+
+.var-popup-key {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 12px;
+  color: var(--restlab-accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.var-popup-value {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Tabs */

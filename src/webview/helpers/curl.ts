@@ -1,14 +1,21 @@
 import { FolderConfig, RequestConfig } from "../types/internal.types";
-import { formDataToBody, isFormContentType, stripJsonComments } from "./helper";
+import {
+  formDataToBody,
+  interpolateVariables,
+  isFormContentType,
+  stripJsonComments,
+} from "./helper";
 
 export const generateCurlCommand = (
   folderConfig: FolderConfig,
   config: RequestConfig,
+  envVariables: Record<string, string> = {},
 ): string => {
-  // Build full URL
-  const fullUrl = folderConfig.baseUrl
+  // Build full URL and apply variable substitution
+  const rawUrl = folderConfig.baseUrl
     ? `${folderConfig.baseUrl}${config.url}`
     : config.url;
+  const fullUrl = interpolateVariables(rawUrl, envVariables);
 
   // Start with curl command
   let curl = `curl -X ${config.method}`;
@@ -37,8 +44,9 @@ export const generateCurlCommand = (
 
   // Add headers
   allHeaders.forEach((h) => {
+    const resolvedValue = interpolateVariables(h.value, envVariables);
     curl += ` \\
-  -H '${h.key}: ${h.value.replace(/'/g, "'\\''")}'`;
+  -H '${h.key}: ${resolvedValue.replace(/'/g, "'\\''")}'`;
   });
 
   // Add body
@@ -65,8 +73,11 @@ export const generateCurlCommand = (
         }
       }
     } else if (config.body) {
-      // Strip comments from body for cURL command
-      const cleanBody = stripJsonComments(config.body);
+      // Strip comments and interpolate variables in body for cURL command
+      const cleanBody = interpolateVariables(
+        stripJsonComments(config.body),
+        envVariables,
+      );
       curl += ` \\
   -d '${cleanBody.replace(/'/g, "'\\''")}'`;
     }

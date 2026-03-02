@@ -4,6 +4,7 @@ import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { COMMON_HEADERS } from "../config";
 import { useRequestContext } from "./RequestContext";
+import VarInput from "./VarInput";
 
 const HeaderTab = () => {
   const {
@@ -59,12 +60,9 @@ const HeaderTab = () => {
                 suggestions={COMMON_HEADERS}
                 className="header-key"
               />
-              <input
-                type="text"
+              <VarInput
                 value={header.value}
-                onChange={(e) =>
-                  handleUpdateHeader(index, "value", e.target.value)
-                }
+                onChange={(val) => handleUpdateHeader(index, "value", val)}
                 placeholder="Value"
                 className="header-value"
               />

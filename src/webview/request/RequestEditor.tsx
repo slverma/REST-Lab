@@ -16,6 +16,7 @@ import {
   getBodyPlaceholder,
   getFileExtension,
   getStatusColor,
+  interpolateVariables,
   isFormContentType,
 } from "../helpers/helper";
 import { RequestEditorProps } from "../types/internal.types";
@@ -23,11 +24,15 @@ import BodyEditor from "./BodyEditor";
 import FormFieldEditor from "./FormFieldEditor";
 import HeaderTab from "./HeaderTab";
 import { RequestContextProvider, useRequestContext } from "./RequestContext";
+import VarInput from "./VarInput";
 
 const RequestEditorContent: React.FC = () => {
   const {
     config,
     folderConfig,
+    envVariables,
+    environments,
+    activeEnvironmentId,
     response,
     isLoading,
     activeTab,
@@ -51,6 +56,7 @@ const RequestEditorContent: React.FC = () => {
     handleBeautifyJson,
     toggleLayout,
     handleResizeStart,
+    handleSetActiveEnvironment,
     vscode,
   } = useRequestContext();
 
@@ -84,10 +90,9 @@ const RequestEditorContent: React.FC = () => {
             </option>
           ))}
         </select>
-        <input
-          type="text"
+        <VarInput
           value={config.url}
-          onChange={(e) => handleConfigChange({ url: e.target.value })}
+          onChange={(val) => handleConfigChange({ url: val })}
           placeholder={
             folderConfig.baseUrl
               ? "/endpoint"
@@ -95,6 +100,21 @@ const RequestEditorContent: React.FC = () => {
           }
           className="url-input"
         />
+        {environments.length > 0 && (
+          <select
+            className={`request-env-select ${activeEnvironmentId ? "has-active" : ""}`}
+            value={activeEnvironmentId || ""}
+            onChange={(e) => handleSetActiveEnvironment(e.target.value || null)}
+            title="Active environment"
+          >
+            <option value="">No Env</option>
+            {environments.map((env) => (
+              <option key={env.id} value={env.id}>
+                {env.name}
+              </option>
+            ))}
+          </select>
+        )}
         <button
           className="send-btn"
           onClick={handleSendRequest}
@@ -140,6 +160,28 @@ const RequestEditorContent: React.FC = () => {
           Base URL: <code>{folderConfig.baseUrl}</code>
         </div>
       )}
+
+      {/* Resolved URL hint when env variables are present */}
+      {(() => {
+        const rawUrl = folderConfig.baseUrl
+          ? `${folderConfig.baseUrl}${config.url}`
+          : config.url;
+        const resolvedUrl = interpolateVariables(rawUrl, envVariables);
+        const hasVars = /\{\{\w+\}\}/.test(rawUrl);
+        if (!hasVars || !resolvedUrl) return null;
+        return (
+          <div
+            className="base-url-hint"
+            style={{
+              borderColor: "rgba(56,189,248,0.2)",
+              color: "rgba(56,189,248,0.7)",
+            }}
+          >
+            <span style={{ opacity: 0.6, marginRight: "4px" }}>→</span>
+            <code style={{ color: "inherit" }}>{resolvedUrl}</code>
+          </div>
+        );
+      })()}
 
       <div
         className={`split-container ${splitLayout} ${
@@ -229,6 +271,7 @@ const RequestEditorContent: React.FC = () => {
                         }
                         showHint="Ctrl+F search • Ctrl+/ comment • Alt+Shift+F format"
                         editorInstanceRef={bodyEditorRef}
+                        envVariables={envVariables}
                       />
                     )}
                   </div>

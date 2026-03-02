@@ -1,4 +1,4 @@
-import { FormDataItem } from "../types/internal.types";
+import { Environment, FormDataItem } from "../types/internal.types";
 
 // Get editor language based on content type
 export const getEditorLanguageFromContentType = (
@@ -121,3 +121,30 @@ export const stripJsonComments = (jsonString: string): string => {
 // Check if form has files
 export const hasFileFields = (formData?: FormDataItem[]) =>
   (formData || []).some((item) => item.type === "file" && item.fileData);
+
+// Interpolate {{variable}} placeholders in a string using a variables map
+export const interpolateVariables = (
+  text: string,
+  variables: Record<string, string>,
+): string => {
+  if (!text || Object.keys(variables).length === 0) return text;
+  return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    return Object.prototype.hasOwnProperty.call(variables, key)
+      ? variables[key]
+      : match;
+  });
+};
+
+// Build a flat { key → value } map from an Environment (only enabled variables)
+export const buildEnvVariables = (
+  environment?: Environment | null,
+): Record<string, string> => {
+  if (!environment) return {};
+  const vars: Record<string, string> = {};
+  for (const v of environment.variables) {
+    if (v.enabled && v.key.trim()) {
+      vars[v.key.trim()] = v.value;
+    }
+  }
+  return vars;
+};
