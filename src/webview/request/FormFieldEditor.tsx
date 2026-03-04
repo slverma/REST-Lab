@@ -1,4 +1,5 @@
 import React from "react";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import FileIcon from "../components/icons/FileIcon";
 import PlusIcon from "../components/icons/PlusIcon";
 import TextIcon from "../components/icons/TextIcon";
@@ -34,8 +35,7 @@ const FormFieldEditor = () => {
       ) : (
         (config.formData || []).map((item, index) => (
           <div key={index} className="form-data-row">
-            <input
-              type="text"
+            <AutoGrowTextarea
               value={item.key}
               onChange={(e) =>
                 handleUpdateFormData(index, "key", e.target.value)
@@ -77,8 +77,7 @@ const FormFieldEditor = () => {
                 </label>
               </div>
             ) : (
-              <input
-                type="text"
+              <AutoGrowTextarea
                 value={item.value}
                 onChange={(e) =>
                   handleUpdateFormData(index, "value", e.target.value)

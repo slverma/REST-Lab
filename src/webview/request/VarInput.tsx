@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useAutoGrow } from "../helpers/useAutoGrow";
 import { useRequestContext } from "./RequestContext";
 
 interface VarInputProps {
@@ -9,8 +10,8 @@ interface VarInputProps {
 }
 
 /**
- * A text input that shows a variable-completion popup when the user types `{{`.
- * Reads available env variables from RequestContext.
+ * A textarea that auto-grows up to 5 lines and shows a variable-completion
+ * popup when the user types `{{`. Reads available env variables from RequestContext.
  */
 const VarInput: React.FC<VarInputProps> = ({
   value,
@@ -24,17 +25,18 @@ const VarInput: React.FC<VarInputProps> = ({
   const [showPopup, setShowPopup] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  useAutoGrow(inputRef, value);
 
   /** Returns the partial key after `{{` at the cursor, or null if not applicable */
-  const getCursorFilter = (el: HTMLInputElement): string | null => {
+  const getCursorFilter = (el: HTMLTextAreaElement): string | null => {
     const cursor = el.selectionStart ?? el.value.length;
     const before = el.value.slice(0, cursor);
     const match = before.match(/\{\{(\w*)$/);
     return match ? match[1] : null;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
     const filter = getCursorFilter(e.target);
     if (filter !== null && varKeys.length > 0) {
@@ -49,7 +51,11 @@ const VarInput: React.FC<VarInputProps> = ({
   const getFiltered = () =>
     varKeys.filter((k) => k.toLowerCase().includes(filterText.toLowerCase()));
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !showPopup) {
+      e.preventDefault();
+      return;
+    }
     if (!showPopup) return;
     const filtered = getFiltered();
     if (e.key === "ArrowDown") {
@@ -89,15 +95,15 @@ const VarInput: React.FC<VarInputProps> = ({
 
   return (
     <div className="var-input-container">
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
+        rows={1}
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onBlur={() => setTimeout(() => setShowPopup(false), 150)}
         placeholder={placeholder}
-        className={className}
+        className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
       {showPopup && filtered.length > 0 && (

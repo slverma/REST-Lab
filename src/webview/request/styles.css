@@ -171,7 +171,7 @@ body {
   display: flex;
   gap: 6px;
   padding: 8px 0;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .method-select {
@@ -508,12 +508,21 @@ body {
   border-color: var(--restlab-accent);
 }
 
+/* ── Auto-grow textarea base ─────────────────────────────────────────── */
+.autogrow-textarea {
+  resize: none;
+  overflow-y: hidden;
+  display: block;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
 /* ── VarInput — {{ variable autocomplete popup ────────────────────── */
 .var-input-container {
   position: relative;
   flex: 1;
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
 }
 
 /* The container inside .request-bar should grow to fill space */
@@ -521,7 +530,8 @@ body {
   flex: 1;
 }
 
-.var-input-container input {
+.var-input-container input,
+.var-input-container textarea {
   width: 100%;
 }
 
@@ -834,7 +844,7 @@ body {
 .header-row {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 8px;
 }
 
@@ -1099,7 +1109,7 @@ body {
 .form-data-row {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .form-data-key,
@@ -1498,7 +1508,8 @@ body {
   flex: 1;
 }
 
-.autocomplete-container input {
+.autocomplete-container input,
+.autocomplete-container textarea {
   width: 100%;
 }
 

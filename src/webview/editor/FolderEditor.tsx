@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import ArrowUpIcon from "../components/icons/ArrowIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
 import DocumentIcon from "../components/icons/DocumentIcon";
@@ -42,6 +43,7 @@ interface FolderEditorProps {
 interface InheritedConfig {
   baseUrl?: string;
   headers?: Header[];
+  envVariables?: Record<string, string>;
 }
 const COMMON_HEADERS = [
   "Accept",
@@ -98,8 +100,22 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const computed = getComputedStyle(el);
+    const lh = parseFloat(computed.lineHeight) || 20;
+    const pt = parseFloat(computed.paddingTop) || 0;
+    const pb = parseFloat(computed.paddingBottom) || 0;
+    const max = lh * 5 + pt + pb;
+    const needed = Math.min(el.scrollHeight, max);
+    el.style.height = needed + "px";
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value]);
 
   useEffect(() => {
     if (value) {
@@ -130,6 +146,10 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !showSuggestions) {
+      e.preventDefault();
+      return;
+    }
     if (!showSuggestions) return;
 
     if (e.key === "ArrowDown") {
@@ -157,15 +177,15 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
   return (
     <div className="autocomplete-container">
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
+        rows={1}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={className}
+        className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
       {showSuggestions && filteredSuggestions.length > 0 && (
@@ -180,6 +200,142 @@ const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
               onMouseEnter={() => setActiveSuggestionIndex(index)}
             >
               {suggestion}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── EnvVarInput ─────────────────────────────────────────────────────────────────
+// A text input that shows a variable-completion popup when the user types `{{`.
+// Accepts envVariables directly as a prop (no context needed).
+interface EnvVarInputProps {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  className?: string;
+  envVariables: Record<string, string>;
+}
+
+const EnvVarInput: React.FC<EnvVarInputProps> = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+  envVariables,
+}) => {
+  const varKeys = Object.keys(envVariables);
+  const [showPopup, setShowPopup] = React.useState(false);
+  const [filterText, setFilterText] = React.useState("");
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const computed = getComputedStyle(el);
+    const lh = parseFloat(computed.lineHeight) || 20;
+    const pt = parseFloat(computed.paddingTop) || 0;
+    const pb = parseFloat(computed.paddingBottom) || 0;
+    const max = lh * 5 + pt + pb;
+    const needed = Math.min(el.scrollHeight, max);
+    el.style.height = needed + "px";
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value]);
+
+  const getCursorFilter = (el: HTMLTextAreaElement): string | null => {
+    const cursor = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, cursor);
+    const match = before.match(/\{\{(\w*)$/);
+    return match ? match[1] : null;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange(e.target.value);
+    const filter = getCursorFilter(e.target);
+    if (filter !== null && varKeys.length > 0) {
+      setShowPopup(true);
+      setFilterText(filter);
+      setActiveIdx(0);
+    } else {
+      setShowPopup(false);
+    }
+  };
+
+  const getFiltered = () =>
+    varKeys.filter((k) => k.toLowerCase().includes(filterText.toLowerCase()));
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !showPopup) {
+      e.preventDefault();
+      return;
+    }
+    if (!showPopup) return;
+    const filtered = getFiltered();
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && filtered.length > 0) {
+      e.preventDefault();
+      insertVar(filtered[activeIdx]);
+    } else if (e.key === "Escape") {
+      setShowPopup(false);
+    }
+  };
+
+  const insertVar = (varKey: string) => {
+    const el = inputRef.current;
+    if (!el) return;
+    const cursor = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, cursor);
+    const after = el.value.slice(cursor);
+    const newBefore = before.replace(/\{\{(\w*)$/, `{{${varKey}}}`);
+    const newValue = newBefore + after;
+    onChange(newValue);
+    setShowPopup(false);
+    setTimeout(() => {
+      if (el) {
+        el.setSelectionRange(newBefore.length, newBefore.length);
+        el.focus();
+      }
+    }, 0);
+  };
+
+  const filtered = getFiltered();
+
+  return (
+    <div className="var-input-container">
+      <textarea
+        ref={inputRef}
+        rows={1}
+        value={value}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onBlur={() => setTimeout(() => setShowPopup(false), 150)}
+        placeholder={placeholder}
+        className={`autogrow-textarea${className ? ` ${className}` : ""}`}
+        autoComplete="off"
+      />
+      {showPopup && filtered.length > 0 && (
+        <div className="var-popup">
+          {filtered.map((k, i) => (
+            <div
+              key={k}
+              className={`var-popup-item ${i === activeIdx ? "active" : ""}`}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                insertVar(k);
+              }}
+              onMouseEnter={() => setActiveIdx(i)}
+            >
+              <span className="var-popup-key">{`{{${k}}}`}</span>
+              <span className="var-popup-value">{envVariables[k]}</span>
             </div>
           ))}
         </div>
@@ -224,6 +380,12 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
         setConfig(loaded);
         if (message.inheritedConfig) {
           setInheritedConfig(message.inheritedConfig);
+        } else if (message.envVariables) {
+          // fallback: backend sends envVariables at top level
+          setInheritedConfig((prev) => ({
+            ...prev,
+            envVariables: message.envVariables,
+          }));
         }
         setIsDirty(false);
         const envs: Environment[] = loaded.environments || [];
@@ -440,8 +602,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
             <div className="form-section">
               <h2>{isCollection ? "Collection" : "Folder"} Name</h2>
               <div className="form-group">
-                <input
-                  type="text"
+                <AutoGrowTextarea
                   value={config.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                   placeholder={`Enter ${isCollection ? "collection" : "folder"} name`}
@@ -452,13 +613,30 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
             <div className="form-section">
               <h2>Base URL</h2>
               <div className="form-group">
-                <input
-                  type="text"
+                <EnvVarInput
                   value={config.baseUrl || ""}
-                  onChange={(e) => handleChange("baseUrl", e.target.value)}
+                  onChange={(val) => handleChange("baseUrl", val)}
                   placeholder={
                     inheritedConfig.baseUrl || "https://api.example.com/v1"
                   }
+                  envVariables={(() => {
+                    // Use active local environment (for collections) or inherited env variables
+                    const activeEnv = (config.environments || []).find(
+                      (e) => e.id === config.activeEnvironmentId,
+                    );
+                    const localVars: Record<string, string> = {};
+                    if (activeEnv) {
+                      for (const v of activeEnv.variables) {
+                        if (v.enabled && v.key.trim()) {
+                          localVars[v.key.trim()] = v.value;
+                        }
+                      }
+                    }
+                    return {
+                      ...(inheritedConfig.envVariables || {}),
+                      ...localVars,
+                    };
+                  })()}
                 />
                 {inheritedConfig.baseUrl && !config.baseUrl && (
                   <p className="field-hint inherited-hint">
@@ -523,14 +701,30 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
                         suggestions={COMMON_HEADERS}
                         className="header-key"
                       />
-                      <input
-                        type="text"
+                      <EnvVarInput
                         value={header.value}
-                        onChange={(e) =>
-                          handleUpdateHeader(index, "value", e.target.value)
+                        onChange={(val) =>
+                          handleUpdateHeader(index, "value", val)
                         }
                         placeholder="Header value"
                         className="header-value"
+                        envVariables={(() => {
+                          const activeEnv = (config.environments || []).find(
+                            (e) => e.id === config.activeEnvironmentId,
+                          );
+                          const localVars: Record<string, string> = {};
+                          if (activeEnv) {
+                            for (const v of activeEnv.variables) {
+                              if (v.enabled && v.key.trim()) {
+                                localVars[v.key.trim()] = v.value;
+                              }
+                            }
+                          }
+                          return {
+                            ...(inheritedConfig.envVariables || {}),
+                            ...localVars,
+                          };
+                        })()}
                       />
                       <button
                         className="remove-btn"
@@ -697,8 +891,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
                                 handleUpdateVariable(idx, "enabled", !v.enabled)
                               }
                             />
-                            <input
-                              type="text"
+                            <AutoGrowTextarea
                               className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
                               placeholder="key"
                               value={v.key}
@@ -706,8 +899,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
                                 handleUpdateVariable(idx, "key", e.target.value)
                               }
                             />
-                            <input
-                              type="text"
+                            <AutoGrowTextarea
                               className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
                               placeholder="value"
                               value={v.value}

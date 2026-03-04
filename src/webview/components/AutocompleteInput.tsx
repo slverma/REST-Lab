@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useAutoGrow } from "../helpers/useAutoGrow";
 const AutocompleteInput: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -9,8 +10,9 @@ const AutocompleteInput: React.FC<{
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  useAutoGrow(inputRef, value);
 
   useEffect(() => {
     if (value) {
@@ -39,7 +41,11 @@ const AutocompleteInput: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !showSuggestions) {
+      e.preventDefault();
+      return;
+    }
     if (!showSuggestions) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -60,15 +66,15 @@ const AutocompleteInput: React.FC<{
 
   return (
     <div className="autocomplete-container">
-      <input
+      <textarea
         ref={inputRef}
-        type="text"
+        rows={1}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={className}
+        className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
       {showSuggestions && filteredSuggestions.length > 0 && (

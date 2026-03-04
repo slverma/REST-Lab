@@ -100,10 +100,15 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
             }
           }
 
+          // Gather active env variables for the folder's parent collection
+          const envVariables = sidebarProvider
+            ? sidebarProvider.getActiveEnvVariables(folderId)
+            : {};
+
           panel.webview.postMessage({
             type: "configLoaded",
             config: savedConfig || { id: folderId, name: folderName },
-            inheritedConfig: inheritedConfig,
+            inheritedConfig: { ...inheritedConfig, envVariables },
           });
           break;
         case "saveConfig":
