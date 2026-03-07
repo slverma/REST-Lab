@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { parseCurlCommand } from "../utils/curlParser";
 import {
   exportToPostman,
   exportToRESTLab,
@@ -105,6 +106,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (requestName) {
             this.addRequest(message.folderId, requestName);
           }
+          break;
+        case "createRequestFromCurl":
+          await this._handleCreateRequestFromCurl(message.folderId);
           break;
         case "openRequest":
           vscode.commands.executeCommand(
@@ -361,7 +365,85 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       folder.requests = folder.requests.filter((r) => r.id !== requestId);
       this._saveFolders();
       this._sendFoldersToWebview();
+      // Close the editor tab if it is currently open
+      RequestEditorProvider.closePanel(requestId);
     }
+  }
+
+  private async _handleCreateRequestFromCurl(folderId: string) {
+    const folder = this._findFolder(folderId);
+    if (!folder) {
+      vscode.window.showErrorMessage("Collection not found");
+      return;
+    }
+
+    const curlInput = await vscode.window.showInputBox({
+      prompt: "Paste your cURL command",
+      placeHolder:
+        "curl -X POST 'https://api.example.com/endpoint' -H 'Content-Type: application/json' -d '{}'",
+      ignoreFocusOut: true,
+    });
+
+    if (!curlInput) {
+      return;
+    }
+
+    const parsed = parseCurlCommand(curlInput);
+    if (!parsed) {
+      vscode.window.showErrorMessage(
+        "Could not parse cURL command. Make sure it starts with 'curl'.",
+      );
+      return;
+    }
+
+    // Derive a sensible request name from the URL
+    let requestName: string;
+    try {
+      const urlObj = new URL(parsed.url);
+      const pathParts = urlObj.pathname.replace(/^\/|\/$/g, "").split("/");
+      requestName =
+        pathParts[pathParts.length - 1] || urlObj.hostname || "New Request";
+    } catch {
+      requestName = parsed.url || "New Request";
+    }
+
+    const newRequestId = `request-${Date.now()}`;
+    const newRequest: Request = {
+      id: newRequestId,
+      name: requestName,
+      folderId,
+      method: parsed.method,
+    };
+
+    if (!folder.requests) {
+      folder.requests = [];
+    }
+    folder.requests.push(newRequest);
+
+    // Save the full request config (URL, headers, params, body, etc.)
+    await this._context.globalState.update(`restlab.request.${newRequestId}`, {
+      id: newRequestId,
+      name: requestName,
+      folderId,
+      method: parsed.method,
+      url: parsed.url,
+      headers: parsed.headers,
+      params: parsed.params,
+      body: parsed.body ?? "",
+      contentType: parsed.contentType ?? "",
+      formData: parsed.formData ?? [],
+    });
+
+    this._saveFolders();
+    this._sendFoldersToWebview();
+
+    // Open the new request immediately
+    vscode.commands.executeCommand(
+      "restlab.openRequest",
+      newRequestId,
+      requestName,
+      folderId,
+    );
   }
 
   public async renameFolder(folderId: string) {

@@ -19,6 +19,14 @@ export class RequestEditorProvider {
     }
   }
 
+  // Close the panel for the given request ID if it is open
+  public static closePanel(requestId: string): void {
+    const panel = RequestEditorProvider.openPanels.get(requestId);
+    if (panel) {
+      panel.dispose();
+    }
+  }
+
   /** Send a message to every open request-editor panel */
   public static broadcastToAllPanels(message: unknown): void {
     RequestEditorProvider.openPanels.forEach((panel) => {
