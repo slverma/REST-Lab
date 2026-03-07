@@ -23,6 +23,7 @@ export interface ImportProvider {
 export interface Header {
   key: string;
   value: string;
+  enabled?: boolean;
 }
 
 export interface FormDataItem {
@@ -40,6 +41,7 @@ export interface RequestConfig {
   method: string;
   url: string;
   headers?: Header[];
+  params?: Header[];
   body?: string;
   contentType?: string;
   formData?: FormDataItem[];
@@ -48,6 +50,7 @@ export interface RequestConfig {
 export interface FolderConfig {
   baseUrl?: string;
   headers?: Header[];
+  params?: Header[];
   environments?: Environment[];
   activeEnvironmentId?: string | null;
 }

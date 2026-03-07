@@ -170,12 +170,12 @@ body {
 .request-bar {
   display: flex;
   gap: 6px;
-  padding: 8px 0;
-  align-items: flex-start;
+  padding: 4px 0;
+  align-items: center;
 }
 
 .method-select {
-  padding: 6px 10px;
+  padding: 5px 10px;
   border: 2px solid var(--glass-border);
   border-radius: 7px;
   background-color: var(--vscode-input-background);
@@ -237,6 +237,7 @@ body {
 
 .url-input {
   flex: 1;
+  min-width: 0;
   padding: 6px 12px;
   border: 1px solid var(--glass-border);
   border-radius: 7px;
@@ -245,6 +246,8 @@ body {
   font-family: "SF Mono", "Fira Code", "Consolas", monospace;
   font-size: 13px;
   transition: all 0.2s ease;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .url-input:focus {
@@ -259,7 +262,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 18px;
+  padding: 7px 10px;
   border: none;
   border-radius: 7px;
   background: var(--restlab-gradient);
@@ -313,7 +316,7 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 12px;
+  padding: 6px 8px;
   border: 1px solid var(--glass-border);
   border-radius: 7px;
   background: var(--glass-bg);
@@ -365,36 +368,71 @@ body {
 }
 
 /* cURL Button */
-.curl-btn {
+/* More Actions Dropdown */
+.request-more-container {
+  position: relative;
+}
+
+.request-more-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
   border: 1px solid var(--glass-border);
   border-radius: 7px;
   background: var(--glass-bg);
   color: var(--vscode-foreground);
-  font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   backdrop-filter: blur(8px);
+  flex-shrink: 0;
 }
 
-.curl-btn:hover {
-  background: var(--restlab-gradient-secondary);
-  border-color: transparent;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+.request-more-btn:hover {
+  background: var(--restlab-accent-subtle);
+  border-color: var(--restlab-accent);
+  color: var(--restlab-accent);
 }
 
-.curl-btn svg {
-  opacity: 0.8;
+.request-more-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 200;
+  overflow: hidden;
+  padding: 4px;
 }
 
-.curl-btn:hover svg {
-  opacity: 1;
+.request-more-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--vscode-foreground);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.request-more-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.request-more-item svg {
+  opacity: 0.7;
+  flex-shrink: 0;
 }
 
 /* Beautify Button */
@@ -482,7 +520,7 @@ body {
 
 /* ── Inline Environment Selector (inside request-bar) ──────────────── */
 .request-env-select {
-  padding: 5px 8px;
+  padding: 6px 8px;
   border: 1px solid var(--glass-border);
   border-radius: 7px;
   background: var(--vscode-input-background);
@@ -1614,22 +1652,19 @@ body {
   }
 
   .send-btn,
-  .save-btn,
-  .curl-btn {
+  .save-btn {
     padding: 10px 12px;
     font-size: 12px;
   }
 
   .send-btn .btn-text,
   .save-btn .btn-text,
-  .curl-btn .btn-text,
   .beautify-btn .btn-text {
     display: none;
   }
 
   .send-btn,
   .save-btn,
-  .curl-btn,
   .beautify-btn {
     gap: 0;
   }
@@ -1665,8 +1700,7 @@ body {
 
   .send-btn,
   .beautify-btn,
-  .save-btn,
-  .curl-btn {
+  .save-btn {
     padding: 8px 10px;
   }
 

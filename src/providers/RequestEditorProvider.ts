@@ -15,7 +15,7 @@ export class RequestEditorProvider {
   public static updatePanelTitle(requestId: string, newTitle: string): void {
     const panel = RequestEditorProvider.openPanels.get(requestId);
     if (panel) {
-      panel.title = `🔗 ${newTitle}`;
+      panel.title = newTitle;
     }
   }
 
@@ -43,7 +43,7 @@ export class RequestEditorProvider {
     // Create a new panel
     const panel = vscode.window.createWebviewPanel(
       "restlab.requestEditor",
-      `🔗 ${requestName}`,
+      requestName,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -54,16 +54,36 @@ export class RequestEditorProvider {
       },
     );
 
+    panel.iconPath = {
+      light: vscode.Uri.joinPath(
+        context.extensionUri,
+        "resources",
+        "request-icon.svg",
+      ),
+      dark: vscode.Uri.joinPath(
+        context.extensionUri,
+        "resources",
+        "request-icon-dark.svg",
+      ),
+    };
+
     // Store the panel reference
     RequestEditorProvider.openPanels.set(requestId, panel);
+
+    // Notify sidebar of the initially active panel
+    sidebarProvider?.notifyActiveRequest(requestId);
 
     // Remove from map when panel is closed
     panel.onDidDispose(() => {
       RequestEditorProvider.openPanels.delete(requestId);
+      sidebarProvider?.notifyActiveRequest(null);
     });
 
     // Refresh folder config when panel becomes visible
     panel.onDidChangeViewState((e) => {
+      if (e.webviewPanel.active) {
+        sidebarProvider?.notifyActiveRequest(requestId);
+      }
       if (e.webviewPanel.visible) {
         // Send updated folder config to webview
         const folderConfig = sidebarProvider
@@ -138,6 +158,7 @@ export class RequestEditorProvider {
               method: savedRequest?.method || "GET",
               url: savedRequest?.url || "",
               headers: savedRequest?.headers || [],
+              params: savedRequest?.params || [],
               body: savedRequest?.body || "",
               contentType: savedRequest?.contentType || "",
               formData: savedRequest?.formData || [],
@@ -170,7 +191,7 @@ export class RequestEditorProvider {
               message.config.name,
             );
             // Update panel title
-            panel.title = `🔗 ${message.config.name}`;
+            panel.title = message.config.name;
           }
           break;
         case "setActiveEnvironment":

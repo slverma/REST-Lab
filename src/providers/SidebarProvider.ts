@@ -28,6 +28,7 @@ export interface Folder {
 export interface FolderConfig {
   baseUrl?: string;
   headers?: { key: string; value: string }[];
+  params?: { key: string; value: string }[];
 }
 
 export interface EnvVariable {
@@ -289,9 +290,25 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       }
     }
 
+    // Merge params - child takes priority, same key logic
+    const mergedParams = [...(parentConfig.params || [])];
+    if (currentConfig.params) {
+      for (const childParam of currentConfig.params) {
+        const existingIndex = mergedParams.findIndex(
+          (p) => p.key.toLowerCase() === childParam.key.toLowerCase(),
+        );
+        if (existingIndex >= 0) {
+          mergedParams[existingIndex] = childParam;
+        } else {
+          mergedParams.push(childParam);
+        }
+      }
+    }
+
     return {
       baseUrl: currentConfig.baseUrl || parentConfig.baseUrl,
       headers: mergedHeaders.length > 0 ? mergedHeaders : undefined,
+      params: mergedParams.length > 0 ? mergedParams : undefined,
     };
   }
 
@@ -981,6 +998,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   // ── Folder persistence ──────────────────────────────────────────────
   private _saveFolders() {
     this._context.globalState.update("restlab.folders", this._folders);
+  }
+
+  public notifyActiveRequest(requestId: string | null) {
+    if (this._view) {
+      this._view.webview.postMessage({
+        type: "activeRequestChanged",
+        requestId,
+      });
+    }
   }
 
   private _sendFoldersToWebview() {

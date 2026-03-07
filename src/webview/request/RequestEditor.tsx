@@ -1,32 +1,45 @@
-import React from "react";
-import BeautifyIcon from "../components/icons/BeautifyIcon";
+import React, { useRef, useState } from "react";
 import CodeIcon from "../components/icons/CodeIcon";
 import CopyIcon from "../components/icons/CopyIcon";
 import DownloadIcon from "../components/icons/DownloadIcon";
+import MoreActionIcon from "../components/icons/MoreActionIcon";
 import PencilIcon from "../components/icons/PencilIcon";
 import SaveIcon from "../components/icons/SaveIcon";
 import SendIcon from "../components/icons/SendIcon";
 import SplitIcon from "../components/icons/SplitIcon";
 import WarningIcon from "../components/icons/WarningIcon";
 import Tooltip from "../components/Tooltip";
-import { CONTENT_TYPES, HTTP_METHODS, METHODS_WITH_BODY } from "../config";
+import { HTTP_METHODS, METHODS_WITH_BODY } from "../config";
 import {
   formatJson,
   formatSize,
-  getBodyPlaceholder,
   getFileExtension,
   getStatusColor,
   interpolateVariables,
-  isFormContentType,
 } from "../helpers/helper";
 import { RequestEditorProps } from "../types/internal.types";
 import BodyEditor from "./BodyEditor";
-import FormFieldEditor from "./FormFieldEditor";
+import BodyTab from "./BodyTab";
 import HeaderTab from "./HeaderTab";
+import ParamsTab from "./ParamsTab";
 import { RequestContextProvider, useRequestContext } from "./RequestContext";
 import VarInput from "./VarInput";
 
 const RequestEditorContent: React.FC = () => {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!moreOpen) return;
+    const handle = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [moreOpen]);
+
   const {
     config,
     folderConfig,
@@ -132,14 +145,29 @@ const RequestEditorContent: React.FC = () => {
           <SaveIcon />
           <span className="btn-text">{isSaved ? "Saved" : "Save"}</span>
         </button>
-        <button
-          className="curl-btn"
-          onClick={handleCopyCurl}
-          title="Copy as cURL command"
-        >
-          <CodeIcon />
-          <span className="btn-text">cURL</span>
-        </button>
+        <div className="request-more-container" ref={moreRef}>
+          <button
+            className="request-more-btn"
+            title="More actions"
+            onClick={() => setMoreOpen((o) => !o)}
+          >
+            <MoreActionIcon />
+          </button>
+          {moreOpen && (
+            <div className="request-more-dropdown">
+              <button
+                className="request-more-item"
+                onClick={() => {
+                  handleCopyCurl();
+                  setMoreOpen(false);
+                }}
+              >
+                <CodeIcon />
+                <span>Copy as cURL</span>
+              </button>
+            </div>
+          )}
+        </div>
         {(response || isLoading) && (
           <button
             className="layout-toggle-btn"
@@ -155,30 +183,31 @@ const RequestEditorContent: React.FC = () => {
         )}
       </div>
 
-      {folderConfig.baseUrl && (
-        <div className="base-url-hint">
-          Base URL: <code>{folderConfig.baseUrl}</code>
-        </div>
-      )}
-
-      {/* Resolved URL hint when env variables are present */}
       {(() => {
         const rawUrl = folderConfig.baseUrl
           ? `${folderConfig.baseUrl}${config.url}`
           : config.url;
         const resolvedUrl = interpolateVariables(rawUrl, envVariables);
         const hasVars = /\{\{\w+\}\}/.test(rawUrl);
-        if (!hasVars || !resolvedUrl) return null;
+        if (!folderConfig.baseUrl && !hasVars) return null;
         return (
-          <div
-            className="base-url-hint"
-            style={{
-              borderColor: "rgba(56,189,248,0.2)",
-              color: "rgba(56,189,248,0.7)",
-            }}
-          >
-            <span style={{ opacity: 0.6, marginRight: "4px" }}>→</span>
-            <code style={{ color: "inherit" }}>{resolvedUrl}</code>
+          <div className="base-url-hint">
+            {folderConfig.baseUrl && (
+              <>
+                <span style={{ opacity: 0.5, marginRight: "4px" }}>
+                  Base URL:
+                </span>
+                <code>{folderConfig.baseUrl}</code>
+              </>
+            )}
+            {hasVars && resolvedUrl && (
+              <>
+                <span style={{ opacity: 0.5, margin: "0 6px" }}>→</span>
+                <code style={{ color: "rgba(56,189,248,0.8)" }}>
+                  {resolvedUrl}
+                </code>
+              </>
+            )}
           </div>
         );
       })()}
@@ -211,6 +240,15 @@ const RequestEditorContent: React.FC = () => {
                 </button>
               )}
               <button
+                className={`tab ${activeTab === "params" ? "active" : ""}`}
+                onClick={() => setActiveTab("params")}
+              >
+                Params
+                {(config.params?.length || 0) > 0 && (
+                  <span className="badge">{config.params?.length}</span>
+                )}
+              </button>
+              <button
                 className={`tab ${activeTab === "headers" ? "active" : ""}`}
                 onClick={() => setActiveTab("headers")}
               >
@@ -222,60 +260,17 @@ const RequestEditorContent: React.FC = () => {
             </div>
 
             <div className="tab-content">
-              {activeTab === "body" &&
-                METHODS_WITH_BODY.includes(config.method) && (
-                  <div className="body-section">
-                    <div className="content-type-selector">
-                      <label>Content Type:</label>
-                      <select
-                        value={config.contentType || ""}
-                        onChange={(e) =>
-                          handleConfigChange({ contentType: e.target.value })
-                        }
-                        className="content-type-select"
-                      >
-                        {CONTENT_TYPES.map((ct) => (
-                          <option key={ct.value} value={ct.value}>
-                            {ct.label}
-                            {ct.value ? ` (${ct.value})` : ""}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        className="beautify-btn"
-                        onClick={handleBeautifyJson}
-                        disabled={
-                          !config.body ||
-                          config.contentType !== "application/json"
-                        }
-                        title="Format JSON (Beautify)"
-                      >
-                        <BeautifyIcon />
-                        <span className="btn-text">Beautify</span>
-                      </button>
-                    </div>
-
-                    {isFormContentType(config.contentType) ? (
-                      <FormFieldEditor />
-                    ) : (
-                      <BodyEditor
-                        value={config.body || ""}
-                        onChange={(value) =>
-                          handleConfigChange({ body: value })
-                        }
-                        placeholder={getBodyPlaceholder(config.contentType)}
-                        className="body-editor"
-                        language={requestEditorLanguage}
-                        formatOnChange={
-                          config.contentType === "application/json"
-                        }
-                        showHint="Ctrl+F search • Ctrl+/ comment • Alt+Shift+F format"
-                        editorInstanceRef={bodyEditorRef}
-                        envVariables={envVariables}
-                      />
-                    )}
-                  </div>
-                )}
+              {activeTab === "body" && (
+                <BodyTab
+                  config={config}
+                  handleConfigChange={handleConfigChange}
+                  handleBeautifyJson={handleBeautifyJson}
+                  requestEditorLanguage={requestEditorLanguage}
+                  bodyEditorRef={bodyEditorRef}
+                  envVariables={envVariables}
+                />
+              )}
+              {activeTab === "params" && <ParamsTab />}
               {activeTab === "headers" && <HeaderTab />}
             </div>
           </div>
