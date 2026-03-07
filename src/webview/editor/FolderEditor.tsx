@@ -1,76 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import ArrowUpIcon from "../components/icons/ArrowIcon";
+import React, { useEffect, useState } from "react";
 import CollectionIcon from "../components/icons/CollectionIcon";
-import DocumentIcon from "../components/icons/DocumentIcon";
 import FolderIcon from "../components/icons/FolderIcon";
-import PlusIcon from "../components/icons/PlusIcon";
 import SaveIcon from "../components/icons/SaveIcon";
-import TrashIcon from "../components/icons/TrashIcon";
-
-interface Header {
-  key: string;
-  value: string;
-}
-
-interface EnvVariable {
-  key: string;
-  value: string;
-  enabled: boolean;
-}
-
-interface Environment {
-  id: string;
-  name: string;
-  variables: EnvVariable[];
-}
-
-interface FolderConfig {
-  id: string;
-  name: string;
-  baseUrl?: string;
-  headers?: Header[];
-  environments?: Environment[];
-  activeEnvironmentId?: string | null;
-}
-
-interface FolderEditorProps {
-  folderId: string;
-  folderName: string;
-  isCollection: boolean;
-}
-
-interface InheritedConfig {
-  baseUrl?: string;
-  headers?: Header[];
-}
-const COMMON_HEADERS = [
-  "Accept",
-  "Accept-Charset",
-  "Accept-Encoding",
-  "Accept-Language",
-  "Authorization",
-  "Cache-Control",
-  "Content-Type",
-  "Content-Length",
-  "Content-Encoding",
-  "Cookie",
-  "Host",
-  "If-Match",
-  "If-Modified-Since",
-  "If-None-Match",
-  "Origin",
-  "Pragma",
-  "Referer",
-  "User-Agent",
-  "X-Api-Key",
-  "X-Auth-Token",
-  "X-Correlation-ID",
-  "X-Forwarded-For",
-  "X-Forwarded-Host",
-  "X-Forwarded-Proto",
-  "X-Request-ID",
-  "X-Requested-With",
-];
+import EnvironmentsTab from "./EnvironmentsTab";
+import SettingsTab from "./SettingsTab";
+import {
+  Environment,
+  FolderConfig,
+  FolderEditorProps,
+  InheritedConfig,
+} from "./types";
 
 declare function acquireVsCodeApi(): {
   postMessage: (message: unknown) => void;
@@ -79,114 +18,6 @@ declare function acquireVsCodeApi(): {
 };
 
 const vscode = acquireVsCodeApi();
-
-interface AutocompleteInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  suggestions: string[];
-  className?: string;
-}
-
-const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
-  value,
-  onChange,
-  placeholder,
-  suggestions,
-  className,
-}) => {
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
-  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (value) {
-      const filtered = suggestions.filter((s) =>
-        s.toLowerCase().includes(value.toLowerCase()),
-      );
-      setFilteredSuggestions(filtered);
-    } else {
-      setFilteredSuggestions(suggestions);
-    }
-    setActiveSuggestionIndex(0);
-  }, [value, suggestions]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(event.target as Node)
-      ) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showSuggestions) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveSuggestionIndex((prev) =>
-        prev < filteredSuggestions.length - 1 ? prev + 1 : prev,
-      );
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveSuggestionIndex((prev) => (prev > 0 ? prev - 1 : 0));
-    } else if (e.key === "Enter" && filteredSuggestions.length > 0) {
-      e.preventDefault();
-      onChange(filteredSuggestions[activeSuggestionIndex]);
-      setShowSuggestions(false);
-    } else if (e.key === "Escape") {
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSelect = (suggestion: string) => {
-    onChange(suggestion);
-    setShowSuggestions(false);
-    inputRef.current?.focus();
-  };
-
-  return (
-    <div className="autocomplete-container">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setShowSuggestions(true)}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        className={className}
-        autoComplete="off"
-      />
-      {showSuggestions && filteredSuggestions.length > 0 && (
-        <div ref={suggestionsRef} className="autocomplete-dropdown">
-          {filteredSuggestions.map((suggestion, index) => (
-            <div
-              key={suggestion}
-              className={`autocomplete-item ${
-                index === activeSuggestionIndex ? "active" : ""
-              }`}
-              onClick={() => handleSelect(suggestion)}
-              onMouseEnter={() => setActiveSuggestionIndex(index)}
-            >
-              {suggestion}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export const FolderEditor: React.FC<FolderEditorProps> = ({
   folderId,
@@ -198,88 +29,128 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
     name: folderName,
     baseUrl: "",
     headers: [],
+    params: [],
     environments: [],
     activeEnvironmentId: null,
   });
   const [inheritedConfig, setInheritedConfig] = useState<InheritedConfig>({});
   const [isDirty, setIsDirty] = useState(false);
-  const [activeTab, setActiveTab] = useState<"settings" | "environments">(
-    "settings",
-  );
+  const [activeTab, setActiveTab] = useState<"settings" | "environments">("settings");
+
+  // Environment UI state
   const [selectedEnvId, setSelectedEnvId] = useState<string | null>(null);
   const [renamingEnvId, setRenamingEnvId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Message handling ─────────────────────────────────────────────
 
   useEffect(() => {
     vscode.postMessage({ type: "getConfig" });
     const handleMessage = (event: MessageEvent) => {
-      const message = event.data;
-      if (message.type === "configLoaded") {
-        const loaded: FolderConfig = {
-          environments: [],
-          activeEnvironmentId: null,
-          ...message.config,
-        };
-        setConfig(loaded);
-        if (message.inheritedConfig) {
-          setInheritedConfig(message.inheritedConfig);
-        }
-        setIsDirty(false);
-        const envs: Environment[] = loaded.environments || [];
-        setSelectedEnvId(loaded.activeEnvironmentId ?? envs[0]?.id ?? null);
+      const msg = event.data;
+      if (msg.type !== "configLoaded") return;
+      const loaded: FolderConfig = {
+        environments: [],
+        activeEnvironmentId: null,
+        ...msg.config,
+      };
+      setConfig(loaded);
+      if (msg.inheritedConfig) {
+        setInheritedConfig(msg.inheritedConfig);
+      } else if (msg.envVariables) {
+        setInheritedConfig((prev) => ({ ...prev, envVariables: msg.envVariables }));
       }
+      setIsDirty(false);
+      const envs: Environment[] = loaded.environments || [];
+      setSelectedEnvId(loaded.activeEnvironmentId ?? envs[0]?.id ?? null);
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  useEffect(() => {
-    if (renamingEnvId && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
-    }
-  }, [renamingEnvId]);
+  // ── Settings handlers ────────────────────────────────────────────
 
-  // ── Settings handlers ─────────────────────────────────────────────
+  const mark = () => setIsDirty(true);
 
-  const handleChange = (field: keyof FolderConfig, value: string) => {
-    setConfig((prev) => ({ ...prev, [field]: value }));
-    setIsDirty(true);
+  const handleChangeName = (value: string) => {
+    setConfig((prev) => ({ ...prev, name: value }));
+    mark();
+  };
+
+  const handleChangeBaseUrl = (value: string) => {
+    setConfig((prev) => ({ ...prev, baseUrl: value }));
+    mark();
   };
 
   const handleAddHeader = () => {
-    setConfig((prev) => ({
-      ...prev,
-      headers: [...(prev.headers || []), { key: "", value: "" }],
-    }));
-    setIsDirty(true);
+    setConfig((prev) => ({ ...prev, headers: [...(prev.headers || []), { key: "", value: "" }] }));
+    mark();
   };
 
-  const handleUpdateHeader = (
-    index: number,
-    field: "key" | "value",
-    value: string,
-  ) => {
+  const handleUpdateHeader = (index: number, field: "key" | "value", value: string) => {
     setConfig((prev) => {
-      const newHeaders = [...(prev.headers || [])];
-      newHeaders[index] = { ...newHeaders[index], [field]: value };
-      return { ...prev, headers: newHeaders };
+      const next = [...(prev.headers || [])];
+      next[index] = { ...next[index], [field]: value };
+      return { ...prev, headers: next };
     });
-    setIsDirty(true);
+    mark();
   };
 
   const handleRemoveHeader = (index: number) => {
-    setConfig((prev) => ({
-      ...prev,
-      headers: (prev.headers || []).filter((_, i) => i !== index),
-    }));
-    setIsDirty(true);
+    setConfig((prev) => ({ ...prev, headers: (prev.headers || []).filter((_, i) => i !== index) }));
+    mark();
   };
 
-  // ── Environment helpers ────────────────────────────────────────────
+  const handleToggleHeader = (index: number) => {
+    setConfig((prev) => {
+      const next = [...(prev.headers || [])];
+      next[index] = { ...next[index], enabled: next[index].enabled !== false ? false : true };
+      return { ...prev, headers: next };
+    });
+    mark();
+  };
+
+  const handleAddParam = () => {
+    setConfig((prev) => ({ ...prev, params: [...(prev.params || []), { key: "", value: "" }] }));
+    mark();
+  };
+
+  const handleUpdateParam = (index: number, field: "key" | "value", value: string) => {
+    setConfig((prev) => {
+      const next = [...(prev.params || [])];
+      next[index] = { ...next[index], [field]: value };
+      return { ...prev, params: next };
+    });
+    mark();
+  };
+
+  const handleRemoveParam = (index: number) => {
+    setConfig((prev) => ({ ...prev, params: (prev.params || []).filter((_, i) => i !== index) }));
+    mark();
+  };
+
+  const handleToggleParam = (index: number) => {
+    setConfig((prev) => {
+      const next = [...(prev.params || [])];
+      next[index] = { ...next[index], enabled: next[index].enabled !== false ? false : true };
+      return { ...prev, params: next };
+    });
+    mark();
+  };
+
+  // ── Environment handlers ─────────────────────────────────────────
 
   const getEnvs = () => config.environments || [];
+
+  const updateEnvVariables = (envId: string, vars: Environment["variables"]) => {
+    setConfig((prev) => ({
+      ...prev,
+      environments: (prev.environments || []).map((e) =>
+        e.id === envId ? { ...e, variables: vars } : e,
+      ),
+    }));
+    mark();
+  };
 
   const handleAddEnvironment = () => {
     const newEnv: Environment = {
@@ -287,12 +158,9 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
       name: `Environment ${getEnvs().length + 1}`,
       variables: [],
     };
-    setConfig((prev) => ({
-      ...prev,
-      environments: [...(prev.environments || []), newEnv],
-    }));
+    setConfig((prev) => ({ ...prev, environments: [...(prev.environments || []), newEnv] }));
     setSelectedEnvId(newEnv.id);
-    setIsDirty(true);
+    mark();
   };
 
   const handleDeleteEnvironment = (envId: string) => {
@@ -303,10 +171,8 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
       activeEnvironmentId:
         prev.activeEnvironmentId === envId ? null : prev.activeEnvironmentId,
     }));
-    if (selectedEnvId === envId) {
-      setSelectedEnvId(remaining[0]?.id ?? null);
-    }
-    setIsDirty(true);
+    if (selectedEnvId === envId) setSelectedEnvId(remaining[0]?.id ?? null);
+    mark();
   };
 
   const handleSetActive = (envId: string) => {
@@ -314,7 +180,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
       ...prev,
       activeEnvironmentId: prev.activeEnvironmentId === envId ? null : envId,
     }));
-    setIsDirty(true);
+    mark();
   };
 
   const handleStartRename = (env: Environment) => {
@@ -330,21 +196,9 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
           e.id === envId ? { ...e, name: renameValue.trim() } : e,
         ),
       }));
-      setIsDirty(true);
+      mark();
     }
     setRenamingEnvId(null);
-  };
-
-  // ── Variable helpers ──────────────────────────────────────────────
-
-  const updateEnvVariables = (envId: string, vars: EnvVariable[]) => {
-    setConfig((prev) => ({
-      ...prev,
-      environments: (prev.environments || []).map((e) =>
-        e.id === envId ? { ...e, variables: vars } : e,
-      ),
-    }));
-    setIsDirty(true);
   };
 
   const selectedEnv = getEnvs().find((e) => e.id === selectedEnvId) ?? null;
@@ -359,15 +213,13 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
 
   const handleUpdateVariable = (
     idx: number,
-    field: keyof EnvVariable,
+    field: "key" | "value" | "enabled",
     value: string | boolean,
   ) => {
     if (!selectedEnv) return;
     updateEnvVariables(
       selectedEnv.id,
-      selectedEnv.variables.map((v, i) =>
-        i === idx ? { ...v, [field]: value } : v,
-      ),
+      selectedEnv.variables.map((v, i) => (i === idx ? { ...v, [field]: value } : v)),
     );
   };
 
@@ -379,7 +231,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
     );
   };
 
-  // ── Save ──────────────────────────────────────────────────────────
+  // ── Save ─────────────────────────────────────────────────────────
 
   const handleSave = () => {
     vscode.postMessage({ type: "saveConfig", config });
@@ -434,307 +286,42 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
       </div>
 
       <div className="editor-content">
-        {/* ––– Settings Tab ––– */}
         {activeTab === "settings" && (
-          <>
-            <div className="form-section">
-              <h2>{isCollection ? "Collection" : "Folder"} Name</h2>
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={config.name}
-                  onChange={(e) => handleChange("name", e.target.value)}
-                  placeholder={`Enter ${isCollection ? "collection" : "folder"} name`}
-                />
-              </div>
-            </div>
-
-            <div className="form-section">
-              <h2>Base URL</h2>
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={config.baseUrl || ""}
-                  onChange={(e) => handleChange("baseUrl", e.target.value)}
-                  placeholder={
-                    inheritedConfig.baseUrl || "https://api.example.com/v1"
-                  }
-                />
-                {inheritedConfig.baseUrl && !config.baseUrl && (
-                  <p className="field-hint inherited-hint">
-                    <ArrowUpIcon />
-                    Inherited from parent:{" "}
-                    <code>{inheritedConfig.baseUrl}</code>
-                  </p>
-                )}
-                <p className="field-hint">
-                  All requests in this {isCollection ? "collection" : "folder"}{" "}
-                  will use this as the base URL
-                </p>
-              </div>
-            </div>
-
-            <div className="form-section">
-              <div className="section-header">
-                <h2>Headers</h2>
-                <button className="add-btn" onClick={handleAddHeader}>
-                  <PlusIcon />
-                  Add Header
-                </button>
-              </div>
-              {inheritedConfig.headers &&
-                inheritedConfig.headers.length > 0 && (
-                  <div className="inherited-headers">
-                    <p className="inherited-label">
-                      <ArrowUpIcon />
-                      Inherited from parent folder:
-                    </p>
-                    <div className="inherited-headers-list">
-                      {inheritedConfig.headers.map((header, index) => (
-                        <div
-                          key={`inherited-${index}`}
-                          className="header-row inherited"
-                        >
-                          <span className="header-key">{header.key}</span>
-                          <span className="header-value">{header.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              <div className="headers-list">
-                {(config.headers || []).length === 0 ? (
-                  <div className="empty-message">
-                    <DocumentIcon />
-                    <p>No headers configured</p>
-                    <span>
-                      Headers added here will be included in all requests
-                    </span>
-                  </div>
-                ) : (
-                  (config.headers || []).map((header, index) => (
-                    <div key={index} className="header-row">
-                      <AutocompleteInput
-                        value={header.key}
-                        onChange={(value) =>
-                          handleUpdateHeader(index, "key", value)
-                        }
-                        placeholder="Header name"
-                        suggestions={COMMON_HEADERS}
-                        className="header-key"
-                      />
-                      <input
-                        type="text"
-                        value={header.value}
-                        onChange={(e) =>
-                          handleUpdateHeader(index, "value", e.target.value)
-                        }
-                        placeholder="Header value"
-                        className="header-value"
-                      />
-                      <button
-                        className="remove-btn"
-                        onClick={() => handleRemoveHeader(index)}
-                        title="Remove header"
-                        aria-label="Remove header"
-                      >
-                        <TrashIcon />
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </>
+          <SettingsTab
+            config={config}
+            inheritedConfig={inheritedConfig}
+            isCollection={isCollection}
+            onChangeName={handleChangeName}
+            onChangeBaseUrl={handleChangeBaseUrl}
+            onAddHeader={handleAddHeader}
+            onUpdateHeader={handleUpdateHeader}
+            onRemoveHeader={handleRemoveHeader}
+            onToggleHeader={handleToggleHeader}
+            onAddParam={handleAddParam}
+            onUpdateParam={handleUpdateParam}
+            onRemoveParam={handleRemoveParam}
+            onToggleParam={handleToggleParam}
+          />
         )}
 
-        {/* ––– Environments Tab ––– */}
         {activeTab === "environments" && isCollection && (
-          <div className="environments-panel">
-            {/* Left: environment list */}
-            <div className="env-list-column">
-              <div className="env-list-header">
-                <span className="env-section-label">Environments</span>
-                <button
-                  className="add-btn"
-                  onClick={handleAddEnvironment}
-                  title="Add Environment"
-                >
-                  <PlusIcon />
-                  New
-                </button>
-              </div>
-              {getEnvs().length > 0 && (
-                <p className="env-list-hint">
-                  ● = active &nbsp;·&nbsp; double-click name to rename
-                </p>
-              )}
-              {getEnvs().length === 0 ? (
-                <div className="env-empty-state">
-                  <p>No environments yet.</p>
-                  <p>Click "New" to create one.</p>
-                </div>
-              ) : (
-                <div className="env-list">
-                  {getEnvs().map((env) => {
-                    const isActive = config.activeEnvironmentId === env.id;
-                    const isSelected = selectedEnvId === env.id;
-                    const isRenaming = renamingEnvId === env.id;
-                    return (
-                      <div
-                        key={env.id}
-                        className={`env-item ${isSelected ? "selected" : ""}`}
-                        onClick={() => setSelectedEnvId(env.id)}
-                      >
-                        <button
-                          className={`env-active-btn ${isActive ? "active" : ""}`}
-                          title={
-                            isActive
-                              ? "Active (click to deactivate)"
-                              : "Set as active"
-                          }
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSetActive(env.id);
-                          }}
-                        />
-                        {isRenaming ? (
-                          <input
-                            ref={renameInputRef}
-                            className="env-rename-input"
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            onBlur={() => handleCommitRename(env.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleCommitRename(env.id);
-                              if (e.key === "Escape") setRenamingEnvId(null);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                          />
-                        ) : (
-                          <span
-                            className="env-name"
-                            onDoubleClick={(e) => {
-                              e.stopPropagation();
-                              handleStartRename(env);
-                            }}
-                            title="Double-click to rename"
-                          >
-                            {env.name}
-                          </span>
-                        )}
-                        <button
-                          className="env-delete-btn"
-                          title="Delete environment"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteEnvironment(env.id);
-                          }}
-                        >
-                          <TrashIcon />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Right: variable table */}
-            <div className="env-vars-column">
-              {!selectedEnv ? (
-                <div className="env-empty-state">
-                  <p>
-                    {getEnvs().length === 0
-                      ? "Create an environment to add variables"
-                      : "Select an environment to manage variables"}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="env-vars-header">
-                    <span className="env-section-label">
-                      Variables &mdash;{" "}
-                      <span className="env-name-accent">
-                        {selectedEnv.name}
-                      </span>
-                      {config.activeEnvironmentId === selectedEnv.id && (
-                        <span className="env-active-badge">&nbsp;Active</span>
-                      )}
-                    </span>
-                    <button
-                      className="add-btn"
-                      onClick={handleAddVariable}
-                      title="Add Variable"
-                    >
-                      <PlusIcon />
-                      Add
-                    </button>
-                  </div>
-                  {selectedEnv.variables.length === 0 ? (
-                    <div className="env-empty-state">
-                      <p>No variables. Click "Add" to create one.</p>
-                      <p className="env-hint">
-                        Use <code>{"{{variableName}}"}</code> in URLs, headers
-                        and body.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="env-vars-col-header">
-                        <span />
-                        <span>Key</span>
-                        <span>Value</span>
-                        <span />
-                      </div>
-                      <div className="env-vars-list">
-                        {selectedEnv.variables.map((v, idx) => (
-                          <div key={idx} className="env-var-row">
-                            <button
-                              className={`env-var-toggle ${v.enabled ? "enabled" : ""}`}
-                              title={v.enabled ? "Disable" : "Enable"}
-                              onClick={() =>
-                                handleUpdateVariable(idx, "enabled", !v.enabled)
-                              }
-                            />
-                            <input
-                              type="text"
-                              className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
-                              placeholder="key"
-                              value={v.key}
-                              onChange={(e) =>
-                                handleUpdateVariable(idx, "key", e.target.value)
-                              }
-                            />
-                            <input
-                              type="text"
-                              className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
-                              placeholder="value"
-                              value={v.value}
-                              onChange={(e) =>
-                                handleUpdateVariable(
-                                  idx,
-                                  "value",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                            <button
-                              className="remove-btn"
-                              title="Remove variable"
-                              onClick={() => handleRemoveVariable(idx)}
-                            >
-                              <TrashIcon />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+          <EnvironmentsTab
+            config={config}
+            selectedEnvId={selectedEnvId}
+            renamingEnvId={renamingEnvId}
+            renameValue={renameValue}
+            onSelectEnv={setSelectedEnvId}
+            onSetActive={handleSetActive}
+            onAddEnvironment={handleAddEnvironment}
+            onDeleteEnvironment={handleDeleteEnvironment}
+            onStartRename={handleStartRename}
+            onCommitRename={handleCommitRename}
+            onCancelRename={() => setRenamingEnvId(null)}
+            onRenameValueChange={setRenameValue}
+            onAddVariable={handleAddVariable}
+            onUpdateVariable={handleUpdateVariable}
+            onRemoveVariable={handleRemoveVariable}
+          />
         )}
       </div>
     </div>

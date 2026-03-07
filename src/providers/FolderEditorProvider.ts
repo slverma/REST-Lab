@@ -28,7 +28,7 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
   public static updatePanelTitle(folderId: string, newTitle: string): void {
     const panel = FolderEditorProvider.openPanels.get(folderId);
     if (panel) {
-      panel.title = `📁 ${newTitle}`;
+      panel.title = newTitle;
     }
   }
 
@@ -53,7 +53,7 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
 
     const panel = vscode.window.createWebviewPanel(
       "restlab.folderConfig",
-      isCollection ? `🗂️ ${folderName}` : `📁 ${folderName}`,
+      folderName,
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -61,6 +61,20 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
         localResourceRoots: [context.extensionUri],
       },
     );
+
+    const iconBase = isCollection ? "collection-icon" : "folder-icon";
+    panel.iconPath = {
+      light: vscode.Uri.joinPath(
+        context.extensionUri,
+        "resources",
+        `${iconBase}.svg`,
+      ),
+      dark: vscode.Uri.joinPath(
+        context.extensionUri,
+        "resources",
+        `${iconBase}-dark.svg`,
+      ),
+    };
 
     // Store the panel reference
     FolderEditorProvider.openPanels.set(folderId, panel);
@@ -100,10 +114,15 @@ export class FolderEditorProvider implements vscode.CustomTextEditorProvider {
             }
           }
 
+          // Gather active env variables for the folder's parent collection
+          const envVariables = sidebarProvider
+            ? sidebarProvider.getActiveEnvVariables(folderId)
+            : {};
+
           panel.webview.postMessage({
             type: "configLoaded",
             config: savedConfig || { id: folderId, name: folderName },
-            inheritedConfig: inheritedConfig,
+            inheritedConfig: { ...inheritedConfig, envVariables },
           });
           break;
         case "saveConfig":

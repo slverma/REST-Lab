@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { Environment, EnvVariable } from "../types/internal.types";
@@ -306,8 +307,7 @@ export const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
                       />
 
                       {/* Key input */}
-                      <input
-                        type="text"
+                      <AutoGrowTextarea
                         className={`w-full bg-white/5 border border-white/10 rounded text-[11px] text-vscode px-1.5 py-1 outline-none focus:border-sky-400/60 focus:bg-sky-500/5 placeholder:text-white/20 transition-all ${!v.enabled ? "opacity-40" : ""}`}
                         placeholder="key"
                         value={v.key}
@@ -317,8 +317,7 @@ export const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
                       />
 
                       {/* Value input */}
-                      <input
-                        type="text"
+                      <AutoGrowTextarea
                         className={`w-full bg-white/5 border border-white/10 rounded text-[11px] text-vscode px-1.5 py-1 outline-none focus:border-sky-400/60 focus:bg-sky-500/5 placeholder:text-white/20 transition-all ${!v.enabled ? "opacity-40" : ""}`}
                         placeholder="value"
                         value={v.value}

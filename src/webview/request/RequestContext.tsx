@@ -37,7 +37,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 
 type SplitLayout = "horizontal" | "vertical";
-type ActiveTab = "headers" | "body";
+type ActiveTab = "headers" | "body" | "params";
 type ResponseTab = "body" | "headers";
 
 interface RequestContextValue {
@@ -88,6 +88,19 @@ interface RequestContextValue {
     value: string,
   ) => void;
   handleRemoveHeader: (index: number) => void;
+  handleToggleHeader: (index: number) => void;
+  handleToggleInheritedHeader: (headerKey: string) => void;
+
+  // Param handlers
+  handleAddParam: () => void;
+  handleUpdateParam: (
+    index: number,
+    field: "key" | "value",
+    value: string,
+  ) => void;
+  handleRemoveParam: (index: number) => void;
+  handleToggleParam: (index: number) => void;
+  handleToggleInheritedParam: (paramKey: string) => void;
 
   // Form data handlers
   handleAddFormData: () => void;
@@ -134,6 +147,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     method: "GET",
     url: "",
     headers: [],
+    params: [],
     body: "",
     contentType: "",
     formData: [],
@@ -324,10 +338,26 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     setIsLoading(true);
     setResponse(null);
 
+    // Build effective headers: folder headers excluding disabled overrides + request-only headers
+    const inheritedHeaderKeys = new Set(
+      (folderConfig.headers || []).map((h) => h.key.toLowerCase()),
+    );
+    const disabledHeaderKeys = new Set(
+      (config.headers || [])
+        .filter(
+          (h) =>
+            inheritedHeaderKeys.has(h.key.toLowerCase()) && h.enabled === false,
+        )
+        .map((h) => h.key.toLowerCase()),
+    );
     let allHeaders = [
-      ...(folderConfig.headers || []),
-      ...(config.headers || []),
-    ];
+      ...(folderConfig.headers || []).filter(
+        (h) => !disabledHeaderKeys.has(h.key.toLowerCase()),
+      ),
+      ...(config.headers || []).filter(
+        (h) => !inheritedHeaderKeys.has(h.key.toLowerCase()),
+      ),
+    ].filter((h) => h.enabled !== false);
 
     if (config.contentType) {
       const hasContentType = allHeaders.some(
@@ -345,8 +375,40 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       ? `${folderConfig.baseUrl}${config.url}`
       : config.url;
 
+    // Build effective params: folder params excluding disabled overrides + request-only params
+    const inheritedParamKeys = new Set(
+      (folderConfig.params || []).map((p) => p.key.toLowerCase()),
+    );
+    const disabledParamKeys = new Set(
+      (config.params || [])
+        .filter(
+          (p) =>
+            inheritedParamKeys.has(p.key.toLowerCase()) && p.enabled === false,
+        )
+        .map((p) => p.key.toLowerCase()),
+    );
+    const allParams = [
+      ...(folderConfig.params || []).filter(
+        (p) => !disabledParamKeys.has(p.key.toLowerCase()),
+      ),
+      ...(config.params || []).filter(
+        (p) => !inheritedParamKeys.has(p.key.toLowerCase()),
+      ),
+    ].filter((p) => p.key && p.enabled !== false);
+    const rawUrlWithParams =
+      allParams.length > 0
+        ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}${allParams
+            .map(
+              (p) =>
+                `${encodeURIComponent(p.key)}=${encodeURIComponent(
+                  interpolateVariables(p.value, envVariables),
+                )}`,
+            )
+            .join("&")}`
+        : rawUrl;
+
     // Interpolate {{variables}} in URL, header values, and body
-    const fullUrl = interpolateVariables(rawUrl, envVariables);
+    const fullUrl = interpolateVariables(rawUrlWithParams, envVariables);
     const interpolatedHeaders = allHeaders.map((h) => ({
       key: h.key,
       value: interpolateVariables(h.value, envVariables),
@@ -450,6 +512,153 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     }));
     setIsSaved(false);
   }, []);
+
+  // Param handlers
+  const handleAddParam = useCallback(() => {
+    setConfig((prev) => ({
+      ...prev,
+      params: [...(prev.params || []), { key: "", value: "" }],
+    }));
+    setIsSaved(false);
+  }, []);
+
+  const handleUpdateParam = useCallback(
+    (index: number, field: "key" | "value", value: string) => {
+      setConfig((prev) => {
+        const newParams = [...(prev.params || [])];
+        newParams[index] = { ...newParams[index], [field]: value };
+        return { ...prev, params: newParams };
+      });
+      setIsSaved(false);
+    },
+    [],
+  );
+
+  const handleRemoveParam = useCallback((index: number) => {
+    setConfig((prev) => ({
+      ...prev,
+      params: (prev.params || []).filter((_, i) => i !== index),
+    }));
+    setIsSaved(false);
+  }, []);
+
+  const handleToggleHeader = useCallback((index: number) => {
+    setConfig((prev) => {
+      const newHeaders = [...(prev.headers || [])];
+      newHeaders[index] = {
+        ...newHeaders[index],
+        enabled: newHeaders[index].enabled !== false ? false : true,
+      };
+      return { ...prev, headers: newHeaders };
+    });
+    setIsSaved(false);
+  }, []);
+
+  const handleToggleParam = useCallback((index: number) => {
+    setConfig((prev) => {
+      const newParams = [...(prev.params || [])];
+      newParams[index] = {
+        ...newParams[index],
+        enabled: newParams[index].enabled !== false ? false : true,
+      };
+      return { ...prev, params: newParams };
+    });
+    setIsSaved(false);
+  }, []);
+
+  const handleToggleInheritedHeader = useCallback(
+    (headerKey: string) => {
+      setConfig((prev) => {
+        const existingIndex = (prev.headers || []).findIndex(
+          (h) => h.key.toLowerCase() === headerKey.toLowerCase(),
+        );
+
+        if (existingIndex >= 0) {
+          const existing = (prev.headers || [])[existingIndex];
+          if (existing.enabled === false) {
+            // Re-enabling: remove the disabled override entirely
+            return {
+              ...prev,
+              headers: (prev.headers || []).filter(
+                (_, i) => i !== existingIndex,
+              ),
+            };
+          } else {
+            // Disabling: mark as disabled override
+            const newHeaders = [...(prev.headers || [])];
+            newHeaders[existingIndex] = {
+              ...newHeaders[existingIndex],
+              enabled: false,
+            };
+            return { ...prev, headers: newHeaders };
+          }
+        } else {
+          // Header doesn't exist in request config, create disabled override
+          const inheritedHeader = (folderConfig.headers || []).find(
+            (h) => h.key.toLowerCase() === headerKey.toLowerCase(),
+          );
+          if (inheritedHeader) {
+            return {
+              ...prev,
+              headers: [
+                ...(prev.headers || []),
+                { ...inheritedHeader, enabled: false },
+              ],
+            };
+          }
+          return prev;
+        }
+      });
+      setIsSaved(false);
+    },
+    [folderConfig.headers],
+  );
+
+  const handleToggleInheritedParam = useCallback(
+    (paramKey: string) => {
+      setConfig((prev) => {
+        const existingIndex = (prev.params || []).findIndex(
+          (p) => p.key.toLowerCase() === paramKey.toLowerCase(),
+        );
+
+        if (existingIndex >= 0) {
+          const existing = (prev.params || [])[existingIndex];
+          if (existing.enabled === false) {
+            // Re-enabling: remove the disabled override entirely
+            return {
+              ...prev,
+              params: (prev.params || []).filter((_, i) => i !== existingIndex),
+            };
+          } else {
+            // Disabling: mark as disabled override
+            const newParams = [...(prev.params || [])];
+            newParams[existingIndex] = {
+              ...newParams[existingIndex],
+              enabled: false,
+            };
+            return { ...prev, params: newParams };
+          }
+        } else {
+          // Param doesn't exist in request config, create disabled override
+          const inheritedParam = (folderConfig.params || []).find(
+            (p) => p.key.toLowerCase() === paramKey.toLowerCase(),
+          );
+          if (inheritedParam) {
+            return {
+              ...prev,
+              params: [
+                ...(prev.params || []),
+                { ...inheritedParam, enabled: false },
+              ],
+            };
+          }
+          return prev;
+        }
+      });
+      setIsSaved(false);
+    },
+    [folderConfig.params],
+  );
 
   // Form data handlers
   const handleAddFormData = useCallback(() => {
@@ -564,6 +773,15 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     handleAddHeader,
     handleUpdateHeader,
     handleRemoveHeader,
+    handleToggleHeader,
+    handleToggleInheritedHeader,
+
+    // Param handlers
+    handleAddParam,
+    handleUpdateParam,
+    handleRemoveParam,
+    handleToggleParam,
+    handleToggleInheritedParam,
 
     // Form data handlers
     handleAddFormData,

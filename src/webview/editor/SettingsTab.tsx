@@ -1,0 +1,250 @@
+import React from "react";
+import AutoGrowTextarea from "../components/AutoGrowTextarea";
+import AutocompleteInput from "../components/AutocompleteInput";
+import ArrowUpIcon from "../components/icons/ArrowIcon";
+import DocumentIcon from "../components/icons/DocumentIcon";
+import PlusIcon from "../components/icons/PlusIcon";
+import TrashIcon from "../components/icons/TrashIcon";
+import { COMMON_HEADERS } from "../config";
+import EnvVarInput from "./EnvVarInput";
+import { FolderConfig, Header, InheritedConfig } from "./types";
+
+interface SettingsTabProps {
+  config: FolderConfig;
+  inheritedConfig: InheritedConfig;
+  isCollection: boolean;
+  onChangeName: (value: string) => void;
+  onChangeBaseUrl: (value: string) => void;
+  onAddHeader: () => void;
+  onUpdateHeader: (
+    index: number,
+    field: "key" | "value",
+    value: string,
+  ) => void;
+  onRemoveHeader: (index: number) => void;
+  onToggleHeader: (index: number) => void;
+  onAddParam: () => void;
+  onUpdateParam: (index: number, field: "key" | "value", value: string) => void;
+  onRemoveParam: (index: number) => void;
+  onToggleParam: (index: number) => void;
+}
+
+/** Builds the env-variable map for the active local environment merged with inherited vars. */
+function buildEnvVars(
+  config: FolderConfig,
+  inheritedConfig: InheritedConfig,
+): Record<string, string> {
+  const activeEnv = (config.environments || []).find(
+    (e) => e.id === config.activeEnvironmentId,
+  );
+  const localVars: Record<string, string> = {};
+  if (activeEnv) {
+    for (const v of activeEnv.variables) {
+      if (v.enabled && v.key.trim()) {
+        localVars[v.key.trim()] = v.value;
+      }
+    }
+  }
+  return { ...(inheritedConfig.envVariables || {}), ...localVars };
+}
+
+const InheritedList: React.FC<{ items: Header[]; label: string }> = ({
+  items,
+  label,
+}) => (
+  <div className="inherited-headers">
+    <p className="inherited-label">
+      <ArrowUpIcon />
+      {label}
+    </p>
+    <div className="inherited-headers-list">
+      {items.map((item, index) => (
+        <div key={`inherited-${index}`} className="header-row inherited">
+          <span className="header-key">{item.key}</span>
+          <span className="header-value">{item.value}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const SettingsTab: React.FC<SettingsTabProps> = ({
+  config,
+  inheritedConfig,
+  isCollection,
+  onChangeName,
+  onChangeBaseUrl,
+  onAddHeader,
+  onUpdateHeader,
+  onRemoveHeader,
+  onToggleHeader,
+  onAddParam,
+  onUpdateParam,
+  onRemoveParam,
+  onToggleParam,
+}) => {
+  const envVars = buildEnvVars(config, inheritedConfig);
+  const entityLabel = isCollection ? "collection" : "folder";
+
+  return (
+    <>
+      {/* ── Name ── */}
+      <div className="form-section">
+        <h2>{isCollection ? "Collection" : "Folder"} Name</h2>
+        <div className="form-group">
+          <AutoGrowTextarea
+            value={config.name}
+            onChange={(e) => onChangeName(e.target.value)}
+            placeholder={`Enter ${entityLabel} name`}
+          />
+        </div>
+      </div>
+
+      {/* ── Base URL ── */}
+      <div className="form-section">
+        <h2>Base URL</h2>
+        <div className="form-group">
+          <EnvVarInput
+            value={config.baseUrl || ""}
+            onChange={onChangeBaseUrl}
+            placeholder={
+              inheritedConfig.baseUrl || "https://api.example.com/v1"
+            }
+            envVariables={envVars}
+          />
+          {inheritedConfig.baseUrl && !config.baseUrl && (
+            <p className="field-hint inherited-hint">
+              <ArrowUpIcon />
+              Inherited from parent: <code>{inheritedConfig.baseUrl}</code>
+            </p>
+          )}
+          <p className="field-hint">
+            All requests in this {entityLabel} will use this as the base URL
+          </p>
+        </div>
+      </div>
+
+      {/* ── Headers ── */}
+      <div className="form-section">
+        <div className="section-header">
+          <h2>Headers</h2>
+          <button className="add-btn" onClick={onAddHeader}>
+            <PlusIcon />
+            Add Header
+          </button>
+        </div>
+        {inheritedConfig.headers && inheritedConfig.headers.length > 0 && (
+          <InheritedList
+            items={inheritedConfig.headers}
+            label="Inherited from parent folder:"
+          />
+        )}
+        <div className="headers-list">
+          {(config.headers || []).length === 0 ? (
+            <div className="empty-message">
+              <DocumentIcon />
+              <p>No headers configured</p>
+              <span>Headers added here will be included in all requests</span>
+            </div>
+          ) : (
+            (config.headers || []).map((header, index) => (
+              <div key={index} className="header-row">
+                <input
+                  type="checkbox"
+                  checked={header.enabled !== false}
+                  onChange={() => onToggleHeader(index)}
+                  title="Enable/Disable header"
+                  className="header-checkbox"
+                />
+                <AutocompleteInput
+                  value={header.key}
+                  onChange={(value) => onUpdateHeader(index, "key", value)}
+                  placeholder="Header name"
+                  suggestions={COMMON_HEADERS}
+                  className="header-key"
+                />
+                <EnvVarInput
+                  value={header.value}
+                  onChange={(val) => onUpdateHeader(index, "value", val)}
+                  placeholder="Header value"
+                  className="header-value"
+                  envVariables={envVars}
+                />
+                <button
+                  className="remove-btn"
+                  onClick={() => onRemoveHeader(index)}
+                  title="Remove header"
+                  aria-label="Remove header"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* ── Query Parameters ── */}
+      <div className="form-section">
+        <div className="section-header">
+          <h2>Query Parameters</h2>
+          <button className="add-btn" onClick={onAddParam}>
+            <PlusIcon />
+            Add Param
+          </button>
+        </div>
+        {inheritedConfig.params && inheritedConfig.params.length > 0 && (
+          <InheritedList
+            items={inheritedConfig.params}
+            label="Inherited from parent folder:"
+          />
+        )}
+        <div className="headers-list">
+          {(config.params || []).length === 0 ? (
+            <div className="empty-message">
+              <DocumentIcon />
+              <p>No query parameters configured</p>
+              <span>Params added here will be appended to all requests</span>
+            </div>
+          ) : (
+            (config.params || []).map((param, index) => (
+              <div key={index} className="header-row">
+                <input
+                  type="checkbox"
+                  checked={param.enabled !== false}
+                  onChange={() => onToggleParam(index)}
+                  title="Enable/Disable parameter"
+                  className="header-checkbox"
+                />
+                <input
+                  type="text"
+                  value={param.key}
+                  onChange={(e) => onUpdateParam(index, "key", e.target.value)}
+                  placeholder="Parameter name"
+                  className="header-key"
+                />
+                <EnvVarInput
+                  value={param.value}
+                  onChange={(val) => onUpdateParam(index, "value", val)}
+                  placeholder="Parameter value"
+                  className="header-value"
+                  envVariables={envVars}
+                />
+                <button
+                  className="remove-btn"
+                  onClick={() => onRemoveParam(index)}
+                  title="Remove parameter"
+                  aria-label="Remove parameter"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default SettingsTab;

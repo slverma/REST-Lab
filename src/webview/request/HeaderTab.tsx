@@ -13,6 +13,8 @@ const HeaderTab = () => {
     handleAddHeader,
     handleUpdateHeader,
     handleRemoveHeader,
+    handleToggleHeader,
+    handleToggleInheritedHeader,
   } = useRequestContext();
 
   return (
@@ -20,22 +22,26 @@ const HeaderTab = () => {
       {folderConfig.headers && folderConfig.headers.length > 0 && (
         <div className="inherited-headers">
           <h3>Inherited from Collection</h3>
-          {folderConfig.headers.map((header, index) => (
-            <div key={index} className="header-row inherited">
-              <input
-                type="text"
-                value={header.key}
-                disabled
-                className="header-key"
-              />
-              <input
-                type="text"
-                value={header.value}
-                disabled
-                className="header-value"
-              />
-            </div>
-          ))}
+          {folderConfig.headers.map((header) => {
+            const isDisabledInRequest = (config.headers || []).some(
+              (h) =>
+                h.key.toLowerCase() === header.key.toLowerCase() &&
+                h.enabled === false,
+            );
+            return (
+              <div key={header.key} className="header-row inherited">
+                <input
+                  type="checkbox"
+                  checked={!isDisabledInRequest}
+                  onChange={() => handleToggleInheritedHeader(header.key)}
+                  title="Enable/Disable inherited header"
+                  className="header-checkbox"
+                />
+                <span className="header-key">{header.key}</span>
+                <span className="header-value">{header.value}</span>
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -51,30 +57,48 @@ const HeaderTab = () => {
         {(config.headers || []).length === 0 ? (
           <p className="empty-hint">No custom headers</p>
         ) : (
-          (config.headers || []).map((header, index) => (
-            <div key={index} className="header-row">
-              <AutocompleteInput
-                value={header.key}
-                onChange={(value) => handleUpdateHeader(index, "key", value)}
-                placeholder="Header name"
-                suggestions={COMMON_HEADERS}
-                className="header-key"
-              />
-              <VarInput
-                value={header.value}
-                onChange={(val) => handleUpdateHeader(index, "value", val)}
-                placeholder="Value"
-                className="header-value"
-              />
-              <button
-                className="remove-btn"
-                onClick={() => handleRemoveHeader(index)}
-                title="Remove Header"
-              >
-                <TrashIcon />
-              </button>
-            </div>
-          ))
+          (config.headers || [])
+            .map((header, index) => ({ header, index }))
+            .filter(
+              (item) =>
+                !(
+                  (folderConfig.headers || []).some(
+                    (h) =>
+                      h.key.toLowerCase() === item.header.key.toLowerCase(),
+                  ) && item.header.enabled === false
+                ),
+            )
+            .map(({ header, index }) => (
+              <div key={index} className="header-row">
+                <input
+                  type="checkbox"
+                  checked={header.enabled !== false}
+                  onChange={() => handleToggleHeader(index)}
+                  title="Enable/Disable header"
+                  className="header-checkbox"
+                />
+                <AutocompleteInput
+                  value={header.key}
+                  onChange={(value) => handleUpdateHeader(index, "key", value)}
+                  placeholder="Header name"
+                  suggestions={COMMON_HEADERS}
+                  className="header-key"
+                />
+                <VarInput
+                  value={header.value}
+                  onChange={(val) => handleUpdateHeader(index, "value", val)}
+                  placeholder="Value"
+                  className="header-value"
+                />
+                <button
+                  className="remove-btn"
+                  onClick={() => handleRemoveHeader(index)}
+                  title="Remove Header"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            ))
         )}
       </div>
     </div>

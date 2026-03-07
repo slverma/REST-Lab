@@ -6,7 +6,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [0.0.9] - 2026-02-12
+## [0.2.0] - 2026-03-07
+
+### Added
+
+#### Tab Icons
+
+- **Panel Icons** - Added matching SVG icons to collection, folder, and request editor tabs
+  - Icons match the corresponding items shown in the sidebar tree
+  - Separate light and dark theme variants for correct contrast in all VS Code themes
+
+#### Sidebar Active Highlighting
+
+- **Active Request Indicator** - Currently open request is now highlighted in the sidebar
+  - Highlighted with a blue tint and border accent
+  - Automatically expands the containing folder when a request is opened
+  - Clears highlight when the request panel is closed
+  - Updates correctly when switching between open tabs
+
+### Changed
+
+#### FolderEditor Refactor
+
+- **Split into multiple files** for improved developer readability
+  - `types.ts` — shared `Header`, `EnvVariable`, `Environment`, `FolderConfig`, `InheritedConfig`, and `FolderEditorProps` interfaces
+  - `EnvVarInput.tsx` — textarea with `{{variable}}` autocomplete popup
+  - `SettingsTab.tsx` — Name, Base URL, Headers, and Query Parameters sections
+  - `EnvironmentsTab.tsx` — environment list with rename/active/delete and variable table
+  - `FolderEditor.tsx` reduced from ~1100 lines to ~250-line orchestration layer
+
+### Fixed
+
+#### Inherited Params / Headers
+
+- **Disabled inherited items no longer sent to server** — overriding a parent header/param with `enabled: false` now correctly suppresses the inherited value
+- **Re-enabling no longer adds a duplicate entry** — toggling an inherited override back on removes the override entirely instead of creating a separate enabled item
+- Fix applied to both request sending (`RequestContext.tsx`) and cURL export (`curl.ts`)
+
+---
+
+## [0.1.0] - 2026-02-12
 
 ### Changed
 

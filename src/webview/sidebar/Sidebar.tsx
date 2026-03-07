@@ -53,6 +53,7 @@ interface FolderItemProps {
   isDragging: boolean;
   dragOverFolderId: string | null;
   expandedFolders: Set<string>;
+  activeRequestId: string | null;
   onToggleFolder: (folderId: string) => void;
   onDragStart: (
     e: React.DragEvent,
@@ -96,6 +97,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
   isDragging,
   dragOverFolderId,
   expandedFolders,
+  activeRequestId,
   onToggleFolder,
   onDragStart,
   onDragEnd,
@@ -176,6 +178,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
                 isDragging={isDragging}
                 dragOverFolderId={dragOverFolderId}
                 expandedFolders={expandedFolders}
+                activeRequestId={activeRequestId}
                 onToggleFolder={onToggleFolder}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
@@ -216,7 +219,11 @@ const FolderItem: React.FC<FolderItemProps> = ({
               folder.requests?.map((request) => (
                 <div
                   key={request.id}
-                  className={`group flex items-center gap-2 py-2 px-2.5 mb-0.5 cursor-pointer rounded-md transition-all duration-200 border border-transparent ml-2.5 relative before:content-[''] before:absolute before:-left-2 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-0 before:bg-restlab-gradient before:rounded-sm before:transition-all before:duration-200 hover:bg-glass hover:border-glass hover:before:h-1/2 ${isDragging ? "dragging-active" : ""}`}
+                  className={`group flex items-center gap-2 py-2 px-2.5 mb-0.5 cursor-pointer rounded-md transition-all duration-200 border ml-2.5 relative before:content-[''] before:absolute before:-left-2 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:rounded-sm before:transition-all before:duration-200 hover:bg-glass hover:border-glass hover:before:h-1/2 ${isDragging ? "dragging-active" : ""} ${
+                    request.id === activeRequestId
+                      ? "bg-sky-500/15 border-sky-500/30 before:h-1/2 before:bg-restlab-gradient"
+                      : "border-transparent before:h-0 before:bg-restlab-gradient"
+                  }`}
                   onClick={() => onOpenRequest(request)}
                   role="button"
                   tabIndex={0}
@@ -262,6 +269,7 @@ export const Sidebar: React.FC = () => {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
     new Set(),
   );
+  const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -272,12 +280,43 @@ export const Sidebar: React.FC = () => {
       const message = event.data;
       if (message.type === "foldersUpdated") {
         setFolders(message.folders);
+      } else if (message.type === "activeRequestChanged") {
+        setActiveRequestId(message.requestId ?? null);
       }
     };
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
+
+  // Auto-expand folders containing the active request
+  useEffect(() => {
+    if (!activeRequestId) return;
+    const findPath = (
+      items: Folder[],
+      id: string,
+      path: string[],
+    ): string[] | null => {
+      for (const folder of items) {
+        if (folder.requests?.some((r) => r.id === id)) {
+          return [...path, folder.id];
+        }
+        if (folder.subfolders) {
+          const result = findPath(folder.subfolders, id, [...path, folder.id]);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    const path = findPath(folders, activeRequestId, []);
+    if (path) {
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        path.forEach((fid) => next.add(fid));
+        return next;
+      });
+    }
+  }, [activeRequestId, folders]);
 
   const handleCreateFolder = () => {
     vscode.postMessage({ type: "createFolder" });
@@ -537,6 +576,7 @@ export const Sidebar: React.FC = () => {
                 isDragging={isDragging}
                 dragOverFolderId={dragOverFolderId}
                 expandedFolders={expandedFolders}
+                activeRequestId={activeRequestId}
                 onToggleFolder={handleToggleFolder}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}

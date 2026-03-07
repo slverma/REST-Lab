@@ -1,34 +1,44 @@
-import React, { useRef, useState } from "react";
-import { useAutoGrow } from "../helpers/useAutoGrow";
-import { useRequestContext } from "./RequestContext";
+import React, { useRef } from "react";
 
-interface VarInputProps {
+interface EnvVarInputProps {
   value: string;
   onChange: (val: string) => void;
   placeholder?: string;
   className?: string;
+  envVariables: Record<string, string>;
 }
 
 /**
- * A textarea that auto-grows up to 5 lines and shows a variable-completion
- * popup when the user types `{{`. Reads available env variables from RequestContext.
+ * A textarea that auto-grows and shows a `{{variable}}` completion popup
+ * when the user types `{{`. Receives envVariables directly as a prop.
  */
-const VarInput: React.FC<VarInputProps> = ({
+const EnvVarInput: React.FC<EnvVarInputProps> = ({
   value,
   onChange,
   placeholder,
   className,
+  envVariables,
 }) => {
-  const { envVariables } = useRequestContext();
   const varKeys = Object.keys(envVariables);
-
-  const [showPopup, setShowPopup] = useState(false);
-  const [filterText, setFilterText] = useState("");
-  const [activeIdx, setActiveIdx] = useState(0);
+  const [showPopup, setShowPopup] = React.useState(false);
+  const [filterText, setFilterText] = React.useState("");
+  const [activeIdx, setActiveIdx] = React.useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  useAutoGrow(inputRef, value);
 
-  /** Returns the partial key after `{{` at the cursor, or null if not applicable */
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const computed = getComputedStyle(el);
+    const lh = parseFloat(computed.lineHeight) || 20;
+    const pt = parseFloat(computed.paddingTop) || 0;
+    const pb = parseFloat(computed.paddingBottom) || 0;
+    const max = lh * 5 + pt + pb;
+    const needed = Math.min(el.scrollHeight, max);
+    el.style.height = needed + "px";
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value]);
+
   const getCursorFilter = (el: HTMLTextAreaElement): string | null => {
     const cursor = el.selectionStart ?? el.value.length;
     const before = el.value.slice(0, cursor);
@@ -51,6 +61,23 @@ const VarInput: React.FC<VarInputProps> = ({
   const getFiltered = () =>
     varKeys.filter((k) => k.toLowerCase().includes(filterText.toLowerCase()));
 
+  const insertVar = (varKey: string) => {
+    const el = inputRef.current;
+    if (!el) return;
+    const cursor = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, cursor);
+    const after = el.value.slice(cursor);
+    const newBefore = before.replace(/\{\{(\w*)$/, `{{${varKey}}}`);
+    onChange(newBefore + after);
+    setShowPopup(false);
+    setTimeout(() => {
+      if (el) {
+        el.setSelectionRange(newBefore.length, newBefore.length);
+        el.focus();
+      }
+    }, 0);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !showPopup) {
       e.preventDefault();
@@ -70,25 +97,6 @@ const VarInput: React.FC<VarInputProps> = ({
     } else if (e.key === "Escape") {
       setShowPopup(false);
     }
-  };
-
-  const insertVar = (varKey: string) => {
-    const el = inputRef.current;
-    if (!el) return;
-    const cursor = el.selectionStart ?? el.value.length;
-    const before = el.value.slice(0, cursor);
-    const after = el.value.slice(cursor);
-    // Replace the trailing `{{partial` with `{{varKey}}`
-    const newBefore = before.replace(/\{\{(\w*)$/, `{{${varKey}}}`);
-    const newValue = newBefore + after;
-    onChange(newValue);
-    setShowPopup(false);
-    setTimeout(() => {
-      if (el) {
-        el.setSelectionRange(newBefore.length, newBefore.length);
-        el.focus();
-      }
-    }, 0);
   };
 
   const filtered = getFiltered();
@@ -128,4 +136,4 @@ const VarInput: React.FC<VarInputProps> = ({
   );
 };
 
-export default VarInput;
+export default EnvVarInput;

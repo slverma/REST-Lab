@@ -15,7 +15,40 @@ export const generateCurlCommand = (
   const rawUrl = folderConfig.baseUrl
     ? `${folderConfig.baseUrl}${config.url}`
     : config.url;
-  const fullUrl = interpolateVariables(rawUrl, envVariables);
+
+  // Build effective params: folder params excluding disabled overrides + request-only params
+  const inheritedParamKeys = new Set(
+    (folderConfig.params || []).map((p) => p.key.toLowerCase()),
+  );
+  const disabledParamKeys = new Set(
+    (config.params || [])
+      .filter(
+        (p) =>
+          inheritedParamKeys.has(p.key.toLowerCase()) && p.enabled === false,
+      )
+      .map((p) => p.key.toLowerCase()),
+  );
+  const allParams = [
+    ...(folderConfig.params || []).filter(
+      (p) => !disabledParamKeys.has(p.key.toLowerCase()),
+    ),
+    ...(config.params || []).filter(
+      (p) => !inheritedParamKeys.has(p.key.toLowerCase()),
+    ),
+  ].filter((p) => p.key && p.enabled !== false);
+  const rawUrlWithParams =
+    allParams.length > 0
+      ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}${allParams
+          .map(
+            (p) =>
+              `${encodeURIComponent(p.key)}=${encodeURIComponent(
+                interpolateVariables(p.value, envVariables),
+              )}`,
+          )
+          .join("&")}`
+      : rawUrl;
+
+  const fullUrl = interpolateVariables(rawUrlWithParams, envVariables);
 
   // Start with curl command
   let curl = `curl -X ${config.method}`;
@@ -23,11 +56,26 @@ export const generateCurlCommand = (
   // Add URL (escaped)
   curl += ` '${fullUrl.replace(/'/g, "'\\''")}'`;
 
-  // Combine headers
+  // Build effective headers: folder headers excluding disabled overrides + request-only headers
+  const inheritedHeaderKeys = new Set(
+    (folderConfig.headers || []).map((h) => h.key.toLowerCase()),
+  );
+  const disabledHeaderKeys = new Set(
+    (config.headers || [])
+      .filter(
+        (h) =>
+          inheritedHeaderKeys.has(h.key.toLowerCase()) && h.enabled === false,
+      )
+      .map((h) => h.key.toLowerCase()),
+  );
   let allHeaders = [
-    ...(folderConfig.headers || []),
-    ...(config.headers || []),
-  ].filter((h) => h.key && h.value);
+    ...(folderConfig.headers || []).filter(
+      (h) => !disabledHeaderKeys.has(h.key.toLowerCase()),
+    ),
+    ...(config.headers || []).filter(
+      (h) => !inheritedHeaderKeys.has(h.key.toLowerCase()),
+    ),
+  ].filter((h) => h.key && h.value && h.enabled !== false);
 
   // Add Content-Type if set
   if (config.contentType) {
