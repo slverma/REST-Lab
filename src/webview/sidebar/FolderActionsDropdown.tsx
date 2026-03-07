@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Folder } from "../types/internal.types";
+import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
-import ThunderClientIcon from "../components/icons/ThunderClientIcon";
-import PostmanIcon from "../components/icons/PostmanIcon";
-import RESTLabIcon from "../components/icons/RestLabIcon";
-import TrashIcon from "../components/icons/TrashIcon";
+import ChevronIcon from "../components/icons/ChevronIcon";
+import CodeIcon from "../components/icons/CodeIcon";
 import CopyIcon from "../components/icons/CopyIcon";
-import MoreActionIcon from "../components/icons/MoreActionIcon";
-import PencilIcon from "../components/icons/PencilIcon";
+import ExportIcon from "../components/icons/ExportIcon";
 import FolderAddIcon from "../components/icons/FolderAddIcon";
 import GearIcon from "../components/icons/GearIcon";
-import ExportIcon from "../components/icons/ExportIcon";
-import ChevronIcon from "../components/icons/ChevronIcon";
+import MoreActionIcon from "../components/icons/MoreActionIcon";
+import PencilIcon from "../components/icons/PencilIcon";
+import PostmanIcon from "../components/icons/PostmanIcon";
+import RESTLabIcon from "../components/icons/RestLabIcon";
+import ThunderClientIcon from "../components/icons/ThunderClientIcon";
+import TrashIcon from "../components/icons/TrashIcon";
+import { Folder } from "../types/internal.types";
 
 // Export formats for extensibility
 export const EXPORT_FORMATS = [
@@ -36,6 +37,7 @@ export const EXPORT_FORMATS = [
 const FolderActionsDropdown: React.FC<{
   folder: Folder;
   onAddSubfolder: (e: React.MouseEvent, folderId: string) => void;
+  onAddRequestFromCurl: (e: React.MouseEvent, folderId: string) => void;
   onOpenFolder: (e: React.MouseEvent, folder: Folder) => void;
   onExport: (folderId: string, format: string) => void;
   onDuplicate: (e: React.MouseEvent, folderId: string) => void;
@@ -44,6 +46,7 @@ const FolderActionsDropdown: React.FC<{
 }> = ({
   folder,
   onAddSubfolder,
+  onAddRequestFromCurl,
   onOpenFolder,
   onExport,
   onDuplicate,
@@ -97,6 +100,16 @@ const FolderActionsDropdown: React.FC<{
           >
             <FolderAddIcon />
             <span>Add Subfolder</span>
+          </button>
+          <button
+            className="dropdown-item"
+            onClick={(e) => {
+              onAddRequestFromCurl(e, folder.id);
+              setIsOpen(false);
+            }}
+          >
+            <CodeIcon />
+            <span>New Request from cURL</span>
           </button>
           <button
             className="dropdown-item"

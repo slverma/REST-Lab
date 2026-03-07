@@ -67,6 +67,7 @@ interface FolderItemProps {
   onDragLeave: (e: React.DragEvent, folderId: string) => void;
   onDrop: (e: React.DragEvent, targetFolderId: string) => void;
   onAddRequest: (e: React.MouseEvent, folderId: string) => void;
+  onAddRequestFromCurl: (e: React.MouseEvent, folderId: string) => void;
   onAddSubfolder: (e: React.MouseEvent, parentFolderId: string) => void;
   onOpenFolder: (e: React.MouseEvent, folder: Folder) => void;
   onExportCollection: (folderId: string, format: string) => void;
@@ -105,6 +106,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
   onDragLeave,
   onDrop,
   onAddRequest,
+  onAddRequestFromCurl,
   onAddSubfolder,
   onOpenFolder,
   onExportCollection,
@@ -157,6 +159,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           <FolderActionsDropdown
             folder={folder}
             onAddSubfolder={onAddSubfolder}
+            onAddRequestFromCurl={onAddRequestFromCurl}
             onOpenFolder={onOpenFolder}
             onExport={onExportCollection}
             onDuplicate={onDuplicateFolder}
@@ -186,6 +189,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
                 onAddRequest={onAddRequest}
+                onAddRequestFromCurl={onAddRequestFromCurl}
                 onAddSubfolder={onAddSubfolder}
                 onOpenFolder={onOpenFolder}
                 onExportCollection={onExportCollection}
@@ -355,6 +359,12 @@ export const Sidebar: React.FC = () => {
   const handleAddRequest = (e: React.MouseEvent, folderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createRequest", folderId });
+    setExpandedFolders((prev) => new Set(prev).add(folderId));
+  };
+
+  const handleAddRequestFromCurl = (e: React.MouseEvent, folderId: string) => {
+    e.stopPropagation();
+    vscode.postMessage({ type: "createRequestFromCurl", folderId });
     setExpandedFolders((prev) => new Set(prev).add(folderId));
   };
 
@@ -584,6 +594,7 @@ export const Sidebar: React.FC = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onAddRequest={handleAddRequest}
+                onAddRequestFromCurl={handleAddRequestFromCurl}
                 onAddSubfolder={handleAddSubfolder}
                 onOpenFolder={handleOpenFolder}
                 onExportCollection={handleExportCollection}
