@@ -17,7 +17,7 @@ import {
   getStatusColor,
   interpolateVariables,
 } from "../helpers/helper";
-import { RequestEditorProps } from "../types/internal.types";
+import { RequestConfig, RequestEditorProps } from "../types/internal.types";
 import BodyEditor from "./BodyEditor";
 import BodyTab from "./BodyTab";
 import HeaderTab from "./HeaderTab";
@@ -79,13 +79,16 @@ const RequestEditorContent: React.FC = () => {
         <select
           value={config.method}
           onChange={(e) => {
-            handleConfigChange({ method: e.target.value });
+            const reqConfig: Partial<RequestConfig> = {
+              method: e.target.value,
+            };
             // Switch to headers tab if body tab is active and new method doesn't support body
             if (
               !METHODS_WITH_BODY.includes(e.target.value) &&
               activeTab === "body"
             ) {
               setActiveTab("headers");
+              reqConfig.body = undefined; // Clear body when switching to a method that doesn't support body
             }
             // Switch to body tab when changing to a method that supports body
             if (
@@ -94,6 +97,7 @@ const RequestEditorContent: React.FC = () => {
             ) {
               setActiveTab("body");
             }
+            handleConfigChange(reqConfig);
           }}
           className={`method-select method-${config.method.toLowerCase()}`}
         >

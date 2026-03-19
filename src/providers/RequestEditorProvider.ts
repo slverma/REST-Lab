@@ -336,6 +336,10 @@ export class RequestEditorProvider {
           headerObj[h.key] = h.value;
         }
       });
+      console.log("---------------------Request headers:", headers);
+      console.log("---------------------Request Headers:", headerObj);
+      console.log("---------------------request body:", body);
+      console.log("---------------------form data:", formData);
 
       let requestData: any = body;
       let formHeaders: Record<string, string> = {};
