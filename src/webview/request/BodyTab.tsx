@@ -32,7 +32,16 @@ const BodyTab = ({
         <label>Content Type:</label>
         <select
           value={config.contentType || ""}
-          onChange={(e) => handleConfigChange({ contentType: e.target.value })}
+          onChange={(e) => {
+            const configUpdate: Partial<RequestConfig> = {
+              contentType: e.target.value,
+            };
+            // Clear body if switching to a content type that doesn't support the current body format
+            if (e.target.value === "") {
+              configUpdate.body = undefined;
+            }
+            handleConfigChange(configUpdate);
+          }}
           className="content-type-select"
         >
           {CONTENT_TYPES.map((ct) => (

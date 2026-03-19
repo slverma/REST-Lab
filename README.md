@@ -39,6 +39,32 @@ Set base URLs and default headers at the folder level. All requests within a fol
 
 ---
 
+### 🌍 Environment Support
+
+Create multiple environments per collection (for example: Local, Staging, Production), mark one as active, and use variables across requests.
+
+- Collection-scoped environments with fast switching
+- Enable/disable individual variables
+- Variable autocomplete when typing `{{` in supported fields
+- Real-time interpolation preview in the request URL
+
+Use variable syntax:
+
+- `{{baseUrl}}`
+- `{{token}}`
+- `{{userId}}`
+
+Variables are applied in:
+
+- Request URL and query params
+- Request headers
+- Request body
+- Folder settings such as base URL, header values, and query params
+
+![Environment Support Demo](resources/demo/env-support.gif)
+
+---
+
 ### 📝 Modern Request Editor
 
 Clean, intuitive interface for crafting requests with editable names, organized tabs, and easy-to-use editors.
@@ -155,8 +181,26 @@ All your requests, folders, and configurations are automatically saved and persi
 1. **Open REST Lab**: Click the REST Lab icon in the Activity Bar (left sidebar)
 2. **Create a Folder**: Click the folder icon (📁) to create your first collection
 3. **Configure Folder** (Optional): Click the ⚙️ icon to set base URL and default headers
-4. **Add Request**: Click the ➕ icon to create a new request
-5. **Send Request**: Configure your request and click the Send button!
+4. **Add Environment** (Optional): In collection settings, open the Environments tab and add env variables
+5. **Add Request**: Click the ➕ icon to create a new request
+6. **Send Request**: Configure your request and click the Send button!
+
+### Environment Quick Start
+
+1. Open a collection and go to the **Environments** tab
+2. Create environments like `Local`, `Staging`, and `Production`
+3. Add variables such as `baseUrl`, `token`, `userId`
+4. Mark one environment as active
+5. Use variables in requests with `{{variableName}}`
+6. Switch the active environment from the request editor dropdown when needed
+
+### Environment Behavior
+
+- Environments are stored at the root collection level
+- Nested folders and requests use the active environment from their root collection
+- Only enabled variables are applied
+- If a variable does not exist, the placeholder is left unchanged
+- In folder settings, local active-environment variables override inherited environment variables with the same key
 
 ---
 
@@ -165,6 +209,8 @@ All your requests, folders, and configurations are automatically saved and persi
 - **Organize by Project**: Create separate folders for different APIs or projects
 - **Use Base URLs**: Set base URLs at the folder level to avoid repetition
 - **Default Headers**: Configure common headers (like Authorization) at folder level
+- **Use Environments**: Keep separate values for local, staging, and production
+- **Use Variables Everywhere**: Reuse `{{variables}}` in URLs, headers, params, and body
 - **Quick Testing**: Press Send button or use keyboard shortcuts for faster testing
 - **Import Existing**: Migrate from Postman or Thunder Client using the import feature
 
