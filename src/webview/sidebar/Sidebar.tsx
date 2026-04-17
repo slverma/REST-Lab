@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
 import ChevronIcon from "../components/icons/ChevronIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
@@ -277,6 +277,8 @@ export const Sidebar: React.FC = () => {
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const initialLoadDone = useRef(false);
+
   useEffect(() => {
     vscode.postMessage({ type: "getFolders" });
 
@@ -284,6 +286,12 @@ export const Sidebar: React.FC = () => {
       const message = event.data;
       if (message.type === "foldersUpdated") {
         setFolders(message.folders);
+        if (!initialLoadDone.current) {
+          initialLoadDone.current = true;
+          if (message.expandedFolderIds && message.expandedFolderIds.length > 0) {
+            setExpandedFolders(new Set<string>(message.expandedFolderIds));
+          }
+        }
       } else if (message.type === "activeRequestChanged") {
         setActiveRequestId(message.requestId ?? null);
       }
@@ -317,6 +325,10 @@ export const Sidebar: React.FC = () => {
       setExpandedFolders((prev) => {
         const next = new Set(prev);
         path.forEach((fid) => next.add(fid));
+        vscode.postMessage({
+          type: "saveExpandedFolders",
+          expandedFolderIds: [...next],
+        });
         return next;
       });
     }
@@ -338,6 +350,10 @@ export const Sidebar: React.FC = () => {
       } else {
         next.add(folderId);
       }
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
       return next;
     });
   };
@@ -359,19 +375,40 @@ export const Sidebar: React.FC = () => {
   const handleAddRequest = (e: React.MouseEvent, folderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createRequest", folderId });
-    setExpandedFolders((prev) => new Set(prev).add(folderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(folderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleAddRequestFromCurl = (e: React.MouseEvent, folderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createRequestFromCurl", folderId });
-    setExpandedFolders((prev) => new Set(prev).add(folderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(folderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleAddSubfolder = (e: React.MouseEvent, parentFolderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createSubfolder", parentFolderId });
-    setExpandedFolders((prev) => new Set(prev).add(parentFolderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(parentFolderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleOpenRequest = (request: Request) => {
@@ -500,7 +537,14 @@ export const Sidebar: React.FC = () => {
           targetFolderId,
         });
         // Expand target folder to show the moved request
-        setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
+        setExpandedFolders((prev) => {
+          const next = new Set(prev).add(targetFolderId);
+          vscode.postMessage({
+            type: "saveExpandedFolders",
+            expandedFolderIds: [...next],
+          });
+          return next;
+        });
       }
       return;
     }
@@ -517,7 +561,14 @@ export const Sidebar: React.FC = () => {
           targetFolderId,
         });
         // Expand target folder to show the moved folder
-        setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
+        setExpandedFolders((prev) => {
+          const next = new Set(prev).add(targetFolderId);
+          vscode.postMessage({
+            type: "saveExpandedFolders",
+            expandedFolderIds: [...next],
+          });
+          return next;
+        });
       }
     }
   };
