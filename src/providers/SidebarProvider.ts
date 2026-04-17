@@ -216,7 +216,13 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     this._sendFoldersToWebview();
   }
 
-  public deleteFolder(folderId: string) {
+  public async deleteFolder(folderId: string) {
+    // Collect all IDs being deleted (folder + all descendants)
+    const folderToDelete = this._findFolder(folderId);
+    const deletedIds = folderToDelete
+      ? this._collectFolderIds(folderToDelete)
+      : [folderId];
+
     // Delete from top-level folders
     const topLevelIndex = this._folders.findIndex((f) => f.id === folderId);
     if (topLevelIndex >= 0) {
@@ -240,6 +246,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       };
       deleteFromSubfolders(this._folders);
     }
+
+    // Prune deleted IDs from stored expanded state
+    const expandedIds = this._context.globalState.get<string[]>(
+      "restlab.expandedFolders",
+      [],
+    );
+    const pruned = expandedIds.filter((id) => !deletedIds.includes(id));
+    await this._context.globalState.update("restlab.expandedFolders", pruned);
+
     this._saveFolders();
     this._sendFoldersToWebview();
   }
@@ -830,6 +845,17 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     };
 
     return removeFromSubfolders(this._folders);
+  }
+
+  // Collect all folder IDs in a folder subtree (including the folder itself)
+  private _collectFolderIds(folder: Folder): string[] {
+    const ids = [folder.id];
+    if (folder.subfolders) {
+      for (const sub of folder.subfolders) {
+        ids.push(...this._collectFolderIds(sub));
+      }
+    }
+    return ids;
   }
 
   // Update folderId for all requests in a folder tree
