@@ -93,7 +93,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           );
           break;
         case "deleteFolder":
-          this.deleteFolder(message.folderId);
+          await this.deleteFolder(message.folderId);
           break;
         case "getFolders":
           this._sendFoldersToWebview();
