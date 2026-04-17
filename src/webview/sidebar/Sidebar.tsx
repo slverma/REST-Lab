@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
 import ChevronIcon from "../components/icons/ChevronIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
@@ -277,6 +277,8 @@ export const Sidebar: React.FC = () => {
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
+  const initialLoadDone = useRef(false);
+
   useEffect(() => {
     vscode.postMessage({ type: "getFolders" });
 
@@ -284,6 +286,12 @@ export const Sidebar: React.FC = () => {
       const message = event.data;
       if (message.type === "foldersUpdated") {
         setFolders(message.folders);
+        if (!initialLoadDone.current) {
+          initialLoadDone.current = true;
+          if (message.expandedFolderIds && message.expandedFolderIds.length > 0) {
+            setExpandedFolders(new Set<string>(message.expandedFolderIds));
+          }
+        }
       } else if (message.type === "activeRequestChanged") {
         setActiveRequestId(message.requestId ?? null);
       }
