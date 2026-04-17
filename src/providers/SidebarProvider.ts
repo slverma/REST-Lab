@@ -158,6 +158,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case "renameRequest":
           await this.renameRequest(message.requestId, message.folderId);
           break;
+        case "saveExpandedFolders":
+          await this._context.globalState.update(
+            "restlab.expandedFolders",
+            message.expandedFolderIds,
+          );
+          break;
       }
     });
 
