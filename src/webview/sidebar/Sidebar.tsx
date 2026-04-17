@@ -325,6 +325,10 @@ export const Sidebar: React.FC = () => {
       setExpandedFolders((prev) => {
         const next = new Set(prev);
         path.forEach((fid) => next.add(fid));
+        vscode.postMessage({
+          type: "saveExpandedFolders",
+          expandedFolderIds: [...next],
+        });
         return next;
       });
     }
@@ -346,6 +350,10 @@ export const Sidebar: React.FC = () => {
       } else {
         next.add(folderId);
       }
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
       return next;
     });
   };
