@@ -375,19 +375,40 @@ export const Sidebar: React.FC = () => {
   const handleAddRequest = (e: React.MouseEvent, folderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createRequest", folderId });
-    setExpandedFolders((prev) => new Set(prev).add(folderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(folderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleAddRequestFromCurl = (e: React.MouseEvent, folderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createRequestFromCurl", folderId });
-    setExpandedFolders((prev) => new Set(prev).add(folderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(folderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleAddSubfolder = (e: React.MouseEvent, parentFolderId: string) => {
     e.stopPropagation();
     vscode.postMessage({ type: "createSubfolder", parentFolderId });
-    setExpandedFolders((prev) => new Set(prev).add(parentFolderId));
+    setExpandedFolders((prev) => {
+      const next = new Set(prev).add(parentFolderId);
+      vscode.postMessage({
+        type: "saveExpandedFolders",
+        expandedFolderIds: [...next],
+      });
+      return next;
+    });
   };
 
   const handleOpenRequest = (request: Request) => {
@@ -516,7 +537,14 @@ export const Sidebar: React.FC = () => {
           targetFolderId,
         });
         // Expand target folder to show the moved request
-        setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
+        setExpandedFolders((prev) => {
+          const next = new Set(prev).add(targetFolderId);
+          vscode.postMessage({
+            type: "saveExpandedFolders",
+            expandedFolderIds: [...next],
+          });
+          return next;
+        });
       }
       return;
     }
@@ -533,7 +561,14 @@ export const Sidebar: React.FC = () => {
           targetFolderId,
         });
         // Expand target folder to show the moved folder
-        setExpandedFolders((prev) => new Set(prev).add(targetFolderId));
+        setExpandedFolders((prev) => {
+          const next = new Set(prev).add(targetFolderId);
+          vscode.postMessage({
+            type: "saveExpandedFolders",
+            expandedFolderIds: [...next],
+          });
+          return next;
+        });
       }
     }
   };
