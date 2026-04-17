@@ -1093,9 +1093,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
   private _sendFoldersToWebview() {
     if (this._view) {
+      const expandedFolderIds = this._context.globalState.get<string[]>(
+        "restlab.expandedFolders",
+        [],
+      );
       this._view.webview.postMessage({
         type: "foldersUpdated",
         folders: this._folders,
+        expandedFolderIds,
       });
     }
   }
