@@ -18,7 +18,7 @@ import {
   hasFileFields,
   interpolateVariables,
   isFormContentType,
-  resolveAuthToken,
+  resolveAuth,
   stripJsonComments,
 } from "../helpers/helper";
 import {
@@ -421,7 +421,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
         )
         .map((p) => p.key.toLowerCase()),
     );
-    const allParams = [
+    const regularParams = [
       ...(folderConfig.params || []).filter(
         (p) => !disabledParamKeys.has(p.key.toLowerCase()),
       ),
@@ -429,6 +429,9 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
         (p) => !inheritedParamKeys.has(p.key.toLowerCase()),
       ),
     ].filter((p) => p.key && p.enabled !== false);
+
+    const resolvedAuth = resolveAuth(config.auth, folderConfig.auth, envVariables);
+    const allParams = [...regularParams, ...resolvedAuth.params];
     const rawUrlWithParams =
       allParams.length > 0
         ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}${allParams
@@ -448,12 +451,14 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       value: interpolateVariables(h.value, envVariables),
     }));
 
-    const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
-    if (bearerToken !== null) {
+    if (resolvedAuth.headers.length > 0) {
+      const authHeaderKeys = new Set(
+        resolvedAuth.headers.map((h) => h.key.toLowerCase()),
+      );
       interpolatedHeaders = [
-        { key: "Authorization", value: `Bearer ${bearerToken}` },
+        ...resolvedAuth.headers,
         ...interpolatedHeaders.filter(
-          (h) => h.key.toLowerCase() !== "authorization",
+          (h) => !authHeaderKeys.has(h.key.toLowerCase()),
         ),
       ];
     }

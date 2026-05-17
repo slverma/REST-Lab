@@ -1,5 +1,7 @@
 export type AuthConfig =
   | { type: 'bearer'; token: string }
+  | { type: 'basic'; username: string; password: string }
+  | { type: 'apikey'; key: string; value: string; addTo: 'header' | 'query' }
   | { type: 'none' };
 
 export interface Header {

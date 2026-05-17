@@ -149,17 +149,50 @@ export const buildEnvVariables = (
   return vars;
 };
 
+export interface ResolvedAuth {
+  headers: { key: string; value: string }[];
+  params: { key: string; value: string }[];
+}
+
 /**
- * Returns the Bearer token to inject as Authorization header, or null if no auth applies.
+ * Returns headers and query params to inject based on effective auth config.
  * Request-level auth takes priority over folder-level auth.
- * Variable interpolation is applied to the token string.
+ * All string values go through variable interpolation.
  */
-export function resolveAuthToken(
+export function resolveAuth(
   requestAuth: AuthConfig | undefined,
   folderAuth: AuthConfig | undefined,
   envVariables: Record<string, string>,
-): string | null {
+): ResolvedAuth {
   const auth = requestAuth !== undefined ? requestAuth : folderAuth;
-  if (!auth || auth.type === 'none') return null;
-  return interpolateVariables(auth.token, envVariables);
+  if (!auth || auth.type === 'none') return { headers: [], params: [] };
+
+  if (auth.type === 'bearer') {
+    const token = interpolateVariables(auth.token, envVariables);
+    return {
+      headers: [{ key: 'Authorization', value: `Bearer ${token}` }],
+      params: [],
+    };
+  }
+
+  if (auth.type === 'basic') {
+    const username = interpolateVariables(auth.username, envVariables);
+    const password = interpolateVariables(auth.password, envVariables);
+    const encoded = btoa(unescape(encodeURIComponent(`${username}:${password}`)));
+    return {
+      headers: [{ key: 'Authorization', value: `Basic ${encoded}` }],
+      params: [],
+    };
+  }
+
+  if (auth.type === 'apikey') {
+    const key = interpolateVariables(auth.key, envVariables);
+    if (auth.addTo === 'query') {
+      return { headers: [], params: [{ key, value: auth.value }] };
+    }
+    const value = interpolateVariables(auth.value, envVariables);
+    return { headers: [{ key, value }], params: [] };
+  }
+
+  return { headers: [], params: [] };
 }

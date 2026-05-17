@@ -87,6 +87,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
 }) => {
   const envVars = buildEnvVars(config, inheritedConfig);
   const entityLabel = isCollection ? "collection" : "folder";
+  const basicAuth = config.auth?.type === "basic" ? config.auth : null;
+  const apikeyAuth = config.auth?.type === "apikey" ? config.auth : null;
 
   return (
     <>
@@ -257,33 +259,123 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             onChange={(e) => {
               const val = e.target.value;
               if (val === "none") {
-                onChangeAuth(undefined);
+                onChangeAuth({ type: "none" });
               } else if (val === "bearer") {
                 onChangeAuth({ type: "bearer", token: "" });
+              } else if (val === "basic") {
+                onChangeAuth({ type: "basic", username: "", password: "" });
+              } else if (val === "apikey") {
+                onChangeAuth({ type: "apikey", key: "", value: "", addTo: "header" });
               }
             }}
           >
             <option value="none">None</option>
             <option value="bearer">Bearer Token</option>
+            <option value="basic">Basic Auth</option>
+            <option value="apikey">API Key</option>
           </select>
         </div>
+
         {config.auth?.type === "bearer" && (
           <div className="form-group">
             <label className="field-label">Token</label>
             <EnvVarInput
               value={config.auth.token}
-              onChange={(val) =>
-                onChangeAuth({ type: "bearer", token: val })
-              }
+              onChange={(val) => onChangeAuth({ type: "bearer", token: val })}
               placeholder="{{token}} or paste token"
               envVariables={envVars}
             />
           </div>
         )}
+
+        {basicAuth && (
+          <>
+            <div className="form-group">
+              <label className="field-label">Username</label>
+              <EnvVarInput
+                value={basicAuth.username}
+                onChange={(val) =>
+                  onChangeAuth({ type: "basic", username: val, password: basicAuth.password })
+                }
+                placeholder="{{username}} or enter username"
+                envVariables={envVars}
+              />
+            </div>
+            <div className="form-group">
+              <label className="field-label">Password</label>
+              <EnvVarInput
+                value={basicAuth.password}
+                onChange={(val) =>
+                  onChangeAuth({ type: "basic", username: basicAuth.username, password: val })
+                }
+                placeholder="{{password}} or enter password"
+                envVariables={envVars}
+              />
+            </div>
+          </>
+        )}
+
+        {apikeyAuth && (
+          <>
+            <div className="form-group">
+              <label className="field-label">Key</label>
+              <EnvVarInput
+                value={apikeyAuth.key}
+                onChange={(val) =>
+                  onChangeAuth({ type: "apikey", key: val, value: apikeyAuth.value, addTo: apikeyAuth.addTo })
+                }
+                placeholder="X-API-Key"
+                envVariables={envVars}
+              />
+            </div>
+            <div className="form-group">
+              <label className="field-label">Value</label>
+              <EnvVarInput
+                value={apikeyAuth.value}
+                onChange={(val) =>
+                  onChangeAuth({ type: "apikey", key: apikeyAuth.key, value: val, addTo: apikeyAuth.addTo })
+                }
+                placeholder="{{api_key}} or enter value"
+                envVariables={envVars}
+              />
+            </div>
+            <div className="form-group">
+              <label className="field-label">Add to</label>
+              <select
+                className="method-select"
+                value={apikeyAuth.addTo}
+                onChange={(e) =>
+                  onChangeAuth({
+                    type: "apikey",
+                    key: apikeyAuth.key,
+                    value: apikeyAuth.value,
+                    addTo: e.target.value as "header" | "query",
+                  })
+                }
+              >
+                <option value="header">Header</option>
+                <option value="query">Query Param</option>
+              </select>
+            </div>
+          </>
+        )}
+
         {inheritedConfig.auth?.type === "bearer" && !config.auth && (
           <p className="field-hint inherited-hint">
             <ArrowUpIcon />
             Bearer token inherited from parent folder
+          </p>
+        )}
+        {inheritedConfig.auth?.type === "basic" && !config.auth && (
+          <p className="field-hint inherited-hint">
+            <ArrowUpIcon />
+            Basic Auth inherited from parent folder
+          </p>
+        )}
+        {inheritedConfig.auth?.type === "apikey" && !config.auth && (
+          <p className="field-hint inherited-hint">
+            <ArrowUpIcon />
+            API Key inherited from parent folder
           </p>
         )}
       </div>

@@ -4,6 +4,40 @@ All notable changes to the REST Lab extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## Future Roadmap
+
+The following features are being considered for future releases:
+
+- [ ] Request history
+- [ ] Pre-request scripts
+- [ ] Test scripts / assertions
+- [ ] Code generation (JS fetch, Python requests, curl, etc.)
+- [ ] OAuth 2.0 (Client Credentials, Authorization Code + PKCE)
+- [ ] WebSocket support
+- [ ] GraphQL support
+- [ ] Response diff / compare
+- [ ] Mock server / request stubs
+- [ ] Team sync / shared collections
+
+---
+
+## [Unreleased]
+
+### Added
+
+#### Authentication — Basic Auth & API Key
+
+- **Basic Auth** — Username and password encoded as `Authorization: Basic base64(username:password)`
+  - Supports `{{variable}}` interpolation for both username and password
+  - Available on requests and folder/collection settings
+  - Inherits from parent folders like Bearer Token
+- **API Key** — Custom key/value pair injected into a header or query param
+  - "Add to" selector: Header (injects `Key: Value` header) or Query Param (appends `key=value` to URL)
+  - Supports `{{variable}}` interpolation for key and value
+  - Available on requests and folder/collection settings
+  - Inherits from parent folders
+- cURL export updated to include Basic Auth and API Key in generated commands
+
 ---
 
 ## [0.2.0] - 2026-03-07
@@ -325,22 +359,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Persistent storage using VS Code globalState
 - esbuild for fast compilation
 - Modular component architecture
-
----
-
-## Future Roadmap
-
-The following features are being considered for future releases:
-
-- [ ] Environment variables support
-- [ ] Request history
-- [ ] Authentication helpers (Bearer, Basic, OAuth)
-- [ ] Pre-request scripts
-- [ ] Test scripts
-- [ ] Drag and drop reordering
-- [ ] Code generation (multiple languages)
-- [ ] WebSocket support
-- [ ] GraphQL support
 
 ---
 
