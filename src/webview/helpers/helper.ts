@@ -178,7 +178,7 @@ export function resolveAuth(
   if (auth.type === 'basic') {
     const username = interpolateVariables(auth.username, envVariables);
     const password = interpolateVariables(auth.password, envVariables);
-    const encoded = btoa(`${username}:${password}`);
+    const encoded = btoa(unescape(encodeURIComponent(`${username}:${password}`)));
     return {
       headers: [{ key: 'Authorization', value: `Basic ${encoded}` }],
       params: [],
@@ -187,10 +187,10 @@ export function resolveAuth(
 
   if (auth.type === 'apikey') {
     const key = interpolateVariables(auth.key, envVariables);
-    const value = interpolateVariables(auth.value, envVariables);
     if (auth.addTo === 'query') {
-      return { headers: [], params: [{ key, value }] };
+      return { headers: [], params: [{ key, value: auth.value }] };
     }
+    const value = interpolateVariables(auth.value, envVariables);
     return { headers: [{ key, value }], params: [] };
   }
 
