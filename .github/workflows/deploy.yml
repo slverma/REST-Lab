@@ -1,36 +1,8 @@
-name: Deploy to VS Code Marketplace
-
-on:
-  push:
-    tags:
-      - "v*.*.*"
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install vsce
-        run: npm install -g @vscode/vsce
-
-      - name: Publish to VS Code Marketplace
-        run: vsce publish -p ${{ secrets.VSCE_PAT }}
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-
-# commands to create a new release and publish to marketplace
-# 1. Update version in package.json (e.g., npm version patch)
-# 2. Create a new git tag (e.g., git tag v1.2.3)
-# 3. Push the tag to GitHub (e.g., git push origin v1.2.3)
+# This workflow has been superseded by release.yml.
+#
+# Previously: triggered on manual tag pushes (v*.*.*) to run vsce publish.
+# Now: semantic-release (release.yml) handles versioning, tagging, GitHub
+# Release creation, and vsce publish automatically after every merge to main.
+#
+# This file is kept as a historical record and has no active triggers.
+# It can be deleted once the team is comfortable with the new workflow.
