@@ -3,6 +3,7 @@ import {
   formDataToBody,
   interpolateVariables,
   isFormContentType,
+  resolveAuthToken,
   stripJsonComments,
 } from "./helper";
 
@@ -85,6 +86,19 @@ export const generateCurlCommand = (
     if (!hasContentType) {
       allHeaders = [
         { key: "Content-Type", value: config.contentType },
+        ...allHeaders,
+      ];
+    }
+  }
+
+  const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
+  if (bearerToken !== null) {
+    const hasAuthHeader = allHeaders.some(
+      (h) => h.key.toLowerCase() === "authorization",
+    );
+    if (!hasAuthHeader) {
+      allHeaders = [
+        { key: "Authorization", value: `Bearer ${bearerToken}` },
         ...allHeaders,
       ];
     }

@@ -18,6 +18,7 @@ import {
   hasFileFields,
   interpolateVariables,
   isFormContentType,
+  resolveAuthToken,
   stripJsonComments,
 } from "../helpers/helper";
 import {
@@ -442,10 +443,23 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
 
     // Interpolate {{variables}} in URL, header values, and body
     const fullUrl = interpolateVariables(rawUrlWithParams, envVariables);
-    const interpolatedHeaders = allHeaders.map((h) => ({
+    let interpolatedHeaders = allHeaders.map((h) => ({
       key: h.key,
       value: interpolateVariables(h.value, envVariables),
     }));
+
+    const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
+    if (bearerToken !== null) {
+      const hasAuthHeader = interpolatedHeaders.some(
+        (h) => h.key.toLowerCase() === "authorization",
+      );
+      if (!hasAuthHeader) {
+        interpolatedHeaders = [
+          { key: "Authorization", value: `Bearer ${bearerToken}` },
+          ...interpolatedHeaders,
+        ];
+      }
+    }
 
     let requestBody: string | undefined = config.body;
     let formDataWithFiles: FormDataItem[] | undefined;
