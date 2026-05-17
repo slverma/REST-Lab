@@ -4,8 +4,8 @@ type EyeIconProps = { hidden?: boolean };
 
 const EyeIcon = ({ hidden = false }: EyeIconProps) => (
   <svg
-    width="14"
-    height="14"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
