@@ -186,7 +186,7 @@ const RequestEditorContent: React.FC = () => {
 
       <div
         className={`split-container ${splitLayout} ${
-          response || isLoading ? "has-response" : ""
+          (response || isLoading) && !isResponseHidden ? "has-response" : ""
         }`}
         ref={splitContainerRef}
       >

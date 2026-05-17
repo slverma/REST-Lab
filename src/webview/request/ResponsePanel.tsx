@@ -34,15 +34,13 @@ const ResponsePanel: React.FC = () => {
     vscode,
   } = useRequestContext();
 
-  if (!response && !isLoading) return null;
+  if ((!response && !isLoading) || isResponseHidden) return null;
 
-  const sizeStyle: React.CSSProperties = isResponseHidden
-    ? {}
-    : {
-        [splitLayout === "horizontal" ? "height" : "width"]: `${
-          100 - requestSize
-        }%`,
-      };
+  const sizeStyle: React.CSSProperties = {
+    [splitLayout === "horizontal" ? "height" : "width"]: `${
+      100 - requestSize
+    }%`,
+  };
 
   const getResponseContent = () =>
     responseTab === "body"
@@ -65,20 +63,13 @@ const ResponsePanel: React.FC = () => {
   return (
     <>
       <div
-        className={`resize-handle ${splitLayout} ${
-          isResizing ? "active" : ""
-        } ${isResponseHidden ? "hidden" : ""}`}
+        className={`resize-handle ${splitLayout} ${isResizing ? "active" : ""}`}
         onMouseDown={handleResizeStart}
       >
         <div className="resize-handle-bar" />
       </div>
 
-      <div
-        className={`response-panel ${
-          isResponseHidden ? "response-panel--hidden" : ""
-        }`}
-        style={sizeStyle}
-      >
+      <div className="response-panel" style={sizeStyle}>
         <div className="response-section">
           <div className="response-header">
             <h2>Response</h2>
@@ -121,23 +112,19 @@ const ResponsePanel: React.FC = () => {
                     </button>
                   </Tooltip>
                 )}
-                <Tooltip
-                  text={isResponseHidden ? "Show response" : "Hide response"}
-                >
+                <Tooltip text="Hide response">
                   <button
                     className="response-hide-btn"
                     onClick={toggleResponseHidden}
                   >
-                    <EyeIcon hidden={isResponseHidden} />
+                    <EyeIcon />
                   </button>
                 </Tooltip>
               </div>
             </div>
           </div>
 
-          {!isResponseHidden && (
-            <>
-              {isLoading ? (
+          {isLoading ? (
                 <div className="loading-state">
                   <span className="loading-spinner large"></span>
                   <p>Sending request...</p>
@@ -252,8 +239,6 @@ const ResponsePanel: React.FC = () => {
                     </div>
                   </>
                 )
-              )}
-            </>
           )}
         </div>
       </div>

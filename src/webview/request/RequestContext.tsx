@@ -367,6 +367,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   const handleSendRequest = useCallback(() => {
     setIsLoading(true);
     setResponse(null);
+    setIsResponseHidden(false);
 
     // Build effective headers: folder headers excluding disabled overrides + request-only headers
     const inheritedHeaderKeys = new Set(
