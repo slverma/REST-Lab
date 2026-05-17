@@ -7,6 +7,7 @@ import {
 } from "../utils/exportParser";
 import { getNonce } from "../utils/getNonce";
 import { ImportResult, parseImportedFile } from "../utils/importParser";
+import { AuthConfig } from "../webview/types/internal.types";
 import { FolderEditorProvider } from "./FolderEditorProvider";
 import { RequestEditorProvider } from "./RequestEditorProvider";
 
@@ -30,6 +31,7 @@ export interface FolderConfig {
   baseUrl?: string;
   headers?: { key: string; value: string }[];
   params?: { key: string; value: string }[];
+  auth?: AuthConfig;
 }
 
 export interface EnvVariable {

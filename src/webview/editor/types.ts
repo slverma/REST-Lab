@@ -1,3 +1,7 @@
+export type AuthConfig =
+  | { type: 'bearer'; token: string }
+  | { type: 'none' };
+
 export interface Header {
   key: string;
   value: string;
@@ -24,6 +28,7 @@ export interface FolderConfig {
   params?: Header[];
   environments?: Environment[];
   activeEnvironmentId?: string | null;
+  auth?: AuthConfig;
 }
 
 export interface FolderEditorProps {
@@ -37,4 +42,5 @@ export interface InheritedConfig {
   headers?: Header[];
   params?: Header[];
   envVariables?: Record<string, string>;
+  auth?: AuthConfig;
 }

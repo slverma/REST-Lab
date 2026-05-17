@@ -34,6 +34,10 @@ export interface FormDataItem {
   fileData?: string; // base64 encoded
 }
 
+export type AuthConfig =
+  | { type: 'bearer'; token: string }
+  | { type: 'none' };
+
 export interface RequestConfig {
   id: string;
   name: string;
@@ -45,6 +49,7 @@ export interface RequestConfig {
   body?: string;
   contentType?: string;
   formData?: FormDataItem[];
+  auth?: AuthConfig;
 }
 
 export interface FolderConfig {
@@ -53,6 +58,7 @@ export interface FolderConfig {
   params?: Header[];
   environments?: Environment[];
   activeEnvironmentId?: string | null;
+  auth?: AuthConfig;
 }
 
 export interface EnvVariable {
