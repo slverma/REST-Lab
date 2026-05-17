@@ -44,6 +44,24 @@ const ResponsePanel: React.FC = () => {
         }%`,
       };
 
+  const getResponseContent = () =>
+    responseTab === "body"
+      ? formatJson(response!.data)
+      : Object.entries(response!.headers)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("\n");
+
+  const getResponseFileInfo = () => ({
+    extension:
+      responseTab === "body"
+        ? getFileExtension(response!.headers)
+        : "txt",
+    mimeType:
+      responseTab === "body"
+        ? response!.headers["content-type"] || "text/plain"
+        : "text/plain",
+  });
+
   return (
     <>
       <div
@@ -154,17 +172,8 @@ const ResponsePanel: React.FC = () => {
                           <button
                             className="action-btn"
                             onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              navigator.clipboard.writeText(content);
-                              vscode.postMessage({
-                                type: "showInfo",
-                                message: "Copied to clipboard!",
-                              });
+                              navigator.clipboard.writeText(getResponseContent());
+                              vscode.postMessage({ type: "showInfo", message: "Copied to clipboard!" });
                             }}
                           >
                             <CopyIcon />
@@ -174,26 +183,12 @@ const ResponsePanel: React.FC = () => {
                           <button
                             className="action-btn"
                             onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              const extension =
-                                responseTab === "body"
-                                  ? getFileExtension(response.headers)
-                                  : "txt";
-                              const filename = `response-${Date.now()}.${extension}`;
+                              const { extension, mimeType } = getResponseFileInfo();
                               vscode.postMessage({
                                 type: "downloadResponse",
-                                content,
-                                filename,
-                                mimeType:
-                                  responseTab === "body"
-                                    ? response.headers["content-type"] ||
-                                      "text/plain"
-                                    : "text/plain",
+                                content: getResponseContent(),
+                                filename: `response-${Date.now()}.${extension}`,
+                                mimeType,
                               });
                             }}
                           >
@@ -204,25 +199,12 @@ const ResponsePanel: React.FC = () => {
                           <button
                             className="action-btn"
                             onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              const extension =
-                                responseTab === "body"
-                                  ? getFileExtension(response.headers)
-                                  : "txt";
+                              const { extension, mimeType } = getResponseFileInfo();
                               vscode.postMessage({
                                 type: "openResponseInEditor",
-                                content,
+                                content: getResponseContent(),
                                 extension,
-                                mimeType:
-                                  responseTab === "body"
-                                    ? response.headers["content-type"] ||
-                                      "text/plain"
-                                    : "text/plain",
+                                mimeType,
                               });
                             }}
                           >
