@@ -738,6 +738,22 @@ body {
   min-width: 300px;
 }
 
+.response-panel--hidden {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+}
+
+.response-panel--hidden .response-section {
+  min-height: 0;
+}
+
+.resize-handle.hidden {
+  display: none;
+}
+
 /* Request Content */
 .request-content {
   flex: 1;
@@ -1293,6 +1309,42 @@ body {
 .response-meta {
   display: flex;
   gap: 8px;
+}
+
+.response-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.response-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+.response-hide-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: var(--glass-bg);
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  flex-shrink: 0;
+}
+
+.response-hide-btn:hover {
+  background: var(--restlab-accent-subtle);
+  border-color: var(--restlab-accent);
+  color: var(--restlab-accent);
 }
 
 .response-toolbar {
