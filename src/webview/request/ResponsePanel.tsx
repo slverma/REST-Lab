@@ -1,7 +1,7 @@
 import React from "react";
 import CopyIcon from "../components/icons/CopyIcon";
 import DownloadIcon from "../components/icons/DownloadIcon";
-import EyeIcon from "../components/icons/EyeIcon";
+import CloseIcon from "../components/icons/CloseIcon";
 import PencilIcon from "../components/icons/PencilIcon";
 import SplitIcon from "../components/icons/SplitIcon";
 import WarningIcon from "../components/icons/WarningIcon";
@@ -117,7 +117,7 @@ const ResponsePanel: React.FC = () => {
                     className="response-hide-btn"
                     onClick={toggleResponseHidden}
                   >
-                    <EyeIcon />
+                    <CloseIcon />
                   </button>
                 </Tooltip>
               </div>
