@@ -55,6 +55,9 @@ interface RequestContextValue {
   splitLayout: SplitLayout;
   requestSize: number;
   isResizing: boolean;
+  isSmallScreen: boolean;
+  isResponseHidden: boolean;
+  toggleResponseHidden: () => void;
 
   // Refs
   bodyEditorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
@@ -172,6 +175,8 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   const [splitLayout, setSplitLayout] = useState<SplitLayout>("vertical");
   const [requestSize, setRequestSize] = useState(50);
   const [isResizing, setIsResizing] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isResponseHidden, setIsResponseHidden] = useState(false);
 
   // Refs
   const bodyEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(
@@ -242,6 +247,27 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [isResizing, splitLayout]);
+
+  const SMALL_BREAKPOINT = 680;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const small = entry.contentRect.width < SMALL_BREAKPOINT;
+        setIsSmallScreen((prev) => {
+          if (prev !== small) {
+            setSplitLayout(small ? "horizontal" : "vertical");
+            setRequestSize(50);
+          }
+          return small;
+        });
+      }
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Message handling effect
   useEffect(() => {
@@ -324,6 +350,10 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     setRequestSize(50);
   }, []);
 
+  const toggleResponseHidden = useCallback(() => {
+    setIsResponseHidden((prev) => !prev);
+  }, []);
+
   const handleConfigChange = useCallback((updates: Partial<RequestConfig>) => {
     setConfig((prev) => ({ ...prev, ...updates }));
     setIsSaved(false);
@@ -337,6 +367,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   const handleSendRequest = useCallback(() => {
     setIsLoading(true);
     setResponse(null);
+    setIsResponseHidden(false);
 
     // Build effective headers: folder headers excluding disabled overrides + request-only headers
     const inheritedHeaderKeys = new Set(
@@ -744,6 +775,9 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     splitLayout,
     requestSize,
     isResizing,
+    isSmallScreen,
+    isResponseHidden,
+    toggleResponseHidden,
 
     // Refs
     bodyEditorRef,
