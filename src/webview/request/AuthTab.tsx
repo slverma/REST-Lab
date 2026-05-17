@@ -42,7 +42,7 @@ const AuthTab: React.FC<AuthTabProps> = ({
           value={mode}
           onChange={(e) => handleModeChange(e.target.value as AuthMode)}
         >
-          <option value="inherit">Inherit from folder</option>
+          <option value="inherit">inherit from parent</option>
           <option value="bearer">Bearer Token</option>
           <option value="none">No Auth</option>
         </select>
