@@ -34,6 +34,23 @@ export interface FormDataItem {
   fileData?: string; // base64 encoded
 }
 
+export interface Cookie {
+  name: string;
+  value: string;
+  enabled?: boolean;
+}
+
+export interface ResponseCookie {
+  name: string;
+  value: string;
+  domain?: string;
+  path?: string;
+  expires?: string;
+  httpOnly: boolean;
+  secure: boolean;
+  sameSite?: string;
+}
+
 export type AuthConfig =
   | { type: 'bearer'; token: string }
   | { type: 'basic'; username: string; password: string }
@@ -52,6 +69,7 @@ export interface RequestConfig {
   contentType?: string;
   formData?: FormDataItem[];
   auth?: AuthConfig;
+  cookies?: Cookie[];
 }
 
 export interface FolderConfig {
@@ -82,6 +100,7 @@ export interface ResponseData {
   data: string;
   time: number;
   size: number;
+  cookies?: ResponseCookie[];
 }
 
 export interface RequestEditorProps {
