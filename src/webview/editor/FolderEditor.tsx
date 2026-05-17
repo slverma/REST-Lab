@@ -5,6 +5,7 @@ import SaveIcon from "../components/icons/SaveIcon";
 import EnvironmentsTab from "./EnvironmentsTab";
 import SettingsTab from "./SettingsTab";
 import {
+  AuthConfig,
   Environment,
   FolderConfig,
   FolderEditorProps,
@@ -126,6 +127,11 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
 
   const handleRemoveParam = (index: number) => {
     setConfig((prev) => ({ ...prev, params: (prev.params || []).filter((_, i) => i !== index) }));
+    mark();
+  };
+
+  const handleChangeAuth = (auth: AuthConfig | undefined) => {
+    setConfig((prev) => ({ ...prev, auth }));
     mark();
   };
 
@@ -301,6 +307,7 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
             onUpdateParam={handleUpdateParam}
             onRemoveParam={handleRemoveParam}
             onToggleParam={handleToggleParam}
+            onChangeAuth={handleChangeAuth}
           />
         )}
 

@@ -7,7 +7,7 @@ import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { COMMON_HEADERS } from "../config";
 import EnvVarInput from "./EnvVarInput";
-import { FolderConfig, Header, InheritedConfig } from "./types";
+import { AuthConfig, FolderConfig, Header, InheritedConfig } from "./types";
 
 interface SettingsTabProps {
   config: FolderConfig;
@@ -27,6 +27,7 @@ interface SettingsTabProps {
   onUpdateParam: (index: number, field: "key" | "value", value: string) => void;
   onRemoveParam: (index: number) => void;
   onToggleParam: (index: number) => void;
+  onChangeAuth: (auth: AuthConfig | undefined) => void;
 }
 
 /** Builds the env-variable map for the active local environment merged with inherited vars. */
@@ -82,6 +83,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
   onUpdateParam,
   onRemoveParam,
   onToggleParam,
+  onChangeAuth,
 }) => {
   const envVars = buildEnvVars(config, inheritedConfig);
   const entityLabel = isCollection ? "collection" : "folder";
@@ -242,6 +244,48 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             ))
           )}
         </div>
+      </div>
+
+      {/* ── Authentication ── */}
+      <div className="form-section">
+        <h2>Authentication</h2>
+        <div className="form-group" style={{ marginBottom: "12px" }}>
+          <label className="field-label">Auth Type</label>
+          <select
+            className="method-select"
+            value={config.auth === undefined ? "none" : config.auth.type}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "none") {
+                onChangeAuth(undefined);
+              } else if (val === "bearer") {
+                onChangeAuth({ type: "bearer", token: "" });
+              }
+            }}
+          >
+            <option value="none">None</option>
+            <option value="bearer">Bearer Token</option>
+          </select>
+        </div>
+        {config.auth?.type === "bearer" && (
+          <div className="form-group">
+            <label className="field-label">Token</label>
+            <EnvVarInput
+              value={config.auth.token}
+              onChange={(val) =>
+                onChangeAuth({ type: "bearer", token: val })
+              }
+              placeholder="{{token}} or paste token"
+              envVariables={envVars}
+            />
+          </div>
+        )}
+        {inheritedConfig.auth?.type === "bearer" && !config.auth && (
+          <p className="field-hint inherited-hint">
+            <ArrowUpIcon />
+            Bearer token inherited from parent folder
+          </p>
+        )}
       </div>
     </>
   );
