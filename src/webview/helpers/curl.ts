@@ -93,15 +93,10 @@ export const generateCurlCommand = (
 
   const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
   if (bearerToken !== null) {
-    const hasAuthHeader = allHeaders.some(
-      (h) => h.key.toLowerCase() === "authorization",
-    );
-    if (!hasAuthHeader) {
-      allHeaders = [
-        { key: "Authorization", value: `Bearer ${bearerToken}` },
-        ...allHeaders,
-      ];
-    }
+    allHeaders = [
+      { key: "Authorization", value: `Bearer ${bearerToken}` },
+      ...allHeaders.filter((h) => h.key.toLowerCase() !== "authorization"),
+    ];
   }
 
   // Add headers

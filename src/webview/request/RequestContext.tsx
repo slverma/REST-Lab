@@ -450,15 +450,12 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
 
     const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
     if (bearerToken !== null) {
-      const hasAuthHeader = interpolatedHeaders.some(
-        (h) => h.key.toLowerCase() === "authorization",
-      );
-      if (!hasAuthHeader) {
-        interpolatedHeaders = [
-          { key: "Authorization", value: `Bearer ${bearerToken}` },
-          ...interpolatedHeaders,
-        ];
-      }
+      interpolatedHeaders = [
+        { key: "Authorization", value: `Bearer ${bearerToken}` },
+        ...interpolatedHeaders.filter(
+          (h) => h.key.toLowerCase() !== "authorization",
+        ),
+      ];
     }
 
     let requestBody: string | undefined = config.body;
