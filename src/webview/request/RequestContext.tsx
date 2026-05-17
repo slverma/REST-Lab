@@ -21,6 +21,7 @@ import {
   stripJsonComments,
 } from "../helpers/helper";
 import {
+  AuthConfig,
   FolderConfig,
   FormDataItem,
   RequestConfig,
@@ -37,7 +38,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 
 type SplitLayout = "horizontal" | "vertical";
-type ActiveTab = "headers" | "body" | "params";
+type ActiveTab = "headers" | "body" | "params" | "auth";
 type ResponseTab = "body" | "headers";
 
 interface RequestContextValue {
@@ -79,6 +80,7 @@ interface RequestContextValue {
   handleSaveConfig: () => void;
   handleCopyCurl: () => void;
   handleBeautifyJson: () => void;
+  handleAuthChange: (auth: AuthConfig | undefined) => void;
   toggleLayout: () => void;
   handleResizeStart: (e: React.MouseEvent) => void;
   handleSetActiveEnvironment: (envId: string | null) => void;
@@ -490,6 +492,11 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     vscode.postMessage({ type: "setActiveEnvironment", envId });
   }, []);
 
+  const handleAuthChange = useCallback((auth: AuthConfig | undefined) => {
+    setConfig((prev) => ({ ...prev, auth }));
+    setIsSaved(false);
+  }, []);
+
   const handleBeautifyJson = useCallback(async () => {
     if (!config.body) return;
 
@@ -799,6 +806,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     handleSaveConfig,
     handleCopyCurl,
     handleBeautifyJson,
+    handleAuthChange,
     toggleLayout,
     handleResizeStart,
     handleSetActiveEnvironment,
