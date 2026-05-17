@@ -8,6 +8,7 @@ import { interpolateVariables } from "../helpers/helper";
 import { RequestConfig, RequestEditorProps } from "../types/internal.types";
 import AuthTab from "./AuthTab";
 import BodyTab from "./BodyTab";
+import CookieTab from "./CookieTab";
 import HeaderTab from "./HeaderTab";
 import ParamsTab from "./ParamsTab";
 import { RequestContextProvider, useRequestContext } from "./RequestContext";
@@ -240,6 +241,17 @@ const RequestEditorContent: React.FC = () => {
                   <span className="badge">•</span>
                 )}
               </button>
+              <button
+                className={`tab ${activeTab === "cookies" ? "active" : ""}`}
+                onClick={() => setActiveTab("cookies")}
+              >
+                Cookies
+                {(config.cookies?.filter((c) => c.enabled !== false && c.name.trim() !== "").length || 0) > 0 && (
+                  <span className="badge">
+                    {config.cookies!.filter((c) => c.enabled !== false && c.name.trim() !== "").length}
+                  </span>
+                )}
+              </button>
             </div>
 
             <div className="tab-content">
@@ -262,6 +274,7 @@ const RequestEditorContent: React.FC = () => {
                   onAuthChange={handleAuthChange}
                 />
               )}
+              {activeTab === "cookies" && <CookieTab />}
             </div>
           </div>
         </div>

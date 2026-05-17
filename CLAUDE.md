@@ -64,7 +64,7 @@ Three independent React apps are built separately by Vite as IIFE bundles and lo
 
 Each webview communicates with the extension host exclusively via `vscode.postMessage` / `webview.onDidReceiveMessage`. There is no shared module between the extension host and webview code at runtime — types in `src/webview/types/internal.types.ts` are shared at the TypeScript level only.
 
-The webview alias `@` maps to `src/` (configured in `scripts/build.ts`).
+The webview alias `@` maps to `src/` (configured in `scripts/build.mts`).
 
 ### Request webview state
 
@@ -76,7 +76,31 @@ The webview alias `@` maps to `src/` (configured in `scripts/build.ts`).
 
 ### Build system
 
-`scripts/build.ts` runs four parallel Vite builds: one CJS build for the extension host and three IIFE builds for the webviews. The `@vitejs/plugin-react` uses the classic JSX runtime (`React.createElement`). Node built-ins and `vscode` are externalized from the extension build.
+`scripts/build.mts` runs four parallel Vite builds: one CJS build for the extension host and three IIFE builds for the webviews. The `@vitejs/plugin-react` uses the classic JSX runtime (`React.createElement`). Node built-ins and `vscode` are externalized from the extension build.
+
+## CHANGELOG.md Maintenance
+
+The `CHANGELOG.md` file has a fixed structure that must be preserved:
+
+```
+## Future Roadmap        ← always the very first section
+- [ ] pending item
+- [x] completed item     ← mark done when implemented, never remove
+
+---                      ← separator
+
+## x.y.z (date)         ← newest release entry goes here, just below the separator
+...
+
+## older releases
+...
+```
+
+Rules:
+- **Future Roadmap is always first** — it must remain at the top of the file above all release entries.
+- **Mark items done, never delete them** — when a roadmap item is implemented, change `- [ ]` to `- [x]`. Do not remove the line.
+- **New release entries go just below the roadmap** — insert a new `## x.y.z` section immediately after the `---` separator, above previous releases.
+- **Adding new roadmap items** — append to the `## Future Roadmap` list as `- [ ] description`.
 
 ## Publishing
 

@@ -23,6 +23,7 @@ import {
 } from "../helpers/helper";
 import {
   AuthConfig,
+  Cookie,
   FolderConfig,
   FormDataItem,
   RequestConfig,
@@ -39,8 +40,8 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 
 type SplitLayout = "horizontal" | "vertical";
-type ActiveTab = "headers" | "body" | "params" | "auth";
-type ResponseTab = "body" | "headers";
+type ActiveTab = "headers" | "body" | "params" | "auth" | "cookies";
+type ResponseTab = "body" | "headers" | "cookies";
 
 interface RequestContextValue {
   // State
@@ -119,6 +120,12 @@ interface RequestContextValue {
   handleToggleFormDataType: (index: number) => void;
   handleFileSelect: (index: number, file: File | null) => void;
 
+  // Cookie handlers
+  handleAddCookie: () => void;
+  handleUpdateCookie: (index: number, field: "name" | "value", value: string) => void;
+  handleRemoveCookie: (index: number) => void;
+  handleToggleCookie: (index: number) => void;
+
   // vscode
   vscode: typeof vscode;
 }
@@ -157,6 +164,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     body: "",
     contentType: "",
     formData: [],
+    cookies: [],
   });
 
   const [folderConfig, setFolderConfig] = useState<FolderConfig>({});
@@ -482,6 +490,13 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       requestBody = interpolateVariables(requestBody, envVariables);
     }
 
+    const enabledCookies = (config.cookies || [])
+      .filter((c) => c.enabled !== false && c.name.trim() !== "")
+      .map((c) => ({
+        name: interpolateVariables(c.name, envVariables),
+        value: interpolateVariables(c.value, envVariables),
+      }));
+
     vscode.postMessage({
       type: "sendRequest",
       method: config.method,
@@ -489,6 +504,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       headers: interpolatedHeaders,
       body: requestBody,
       formData: formDataWithFiles,
+      cookies: enabledCookies,
     });
 
     vscode.postMessage({ type: "saveConfig", config });
@@ -783,6 +799,46 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     reader.readAsDataURL(file);
   }, []);
 
+  const handleAddCookie = useCallback(() => {
+    setConfig((prev) => ({
+      ...prev,
+      cookies: [...(prev.cookies || []), { name: "", value: "" }],
+    }));
+    setIsSaved(false);
+  }, []);
+
+  const handleUpdateCookie = useCallback(
+    (index: number, field: "name" | "value", value: string) => {
+      setConfig((prev) => {
+        const newCookies = [...(prev.cookies || [])];
+        newCookies[index] = { ...newCookies[index], [field]: value };
+        return { ...prev, cookies: newCookies };
+      });
+      setIsSaved(false);
+    },
+    [],
+  );
+
+  const handleRemoveCookie = useCallback((index: number) => {
+    setConfig((prev) => ({
+      ...prev,
+      cookies: (prev.cookies || []).filter((_, i) => i !== index),
+    }));
+    setIsSaved(false);
+  }, []);
+
+  const handleToggleCookie = useCallback((index: number) => {
+    setConfig((prev) => {
+      const newCookies = [...(prev.cookies || [])];
+      newCookies[index] = {
+        ...newCookies[index],
+        enabled: newCookies[index].enabled !== false ? false : true,
+      };
+      return { ...prev, cookies: newCookies };
+    });
+    setIsSaved(false);
+  }, []);
+
   const value: RequestContextValue = {
     // State
     config,
@@ -847,6 +903,12 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     handleRemoveFormData,
     handleToggleFormDataType,
     handleFileSelect,
+
+    // Cookie handlers
+    handleAddCookie,
+    handleUpdateCookie,
+    handleRemoveCookie,
+    handleToggleCookie,
 
     // vscode
     vscode,

@@ -153,6 +153,17 @@ const ResponsePanel: React.FC = () => {
                             {Object.keys(response.headers).length}
                           </span>
                         </button>
+                        <button
+                          className={`tab ${
+                            responseTab === "cookies" ? "active" : ""
+                          }`}
+                          onClick={() => setResponseTab("cookies")}
+                        >
+                          Cookies
+                          {(response.cookies?.length || 0) > 0 && (
+                            <span className="badge">{response.cookies!.length}</span>
+                          )}
+                        </button>
                       </div>
                       <div className="response-actions">
                         <Tooltip text="Copy response to clipboard">
@@ -233,6 +244,33 @@ const ResponsePanel: React.FC = () => {
                                 </div>
                               ),
                             )
+                          )}
+                        </div>
+                      )}
+                      {responseTab === "cookies" && (
+                        <div className="response-headers">
+                          {!response.cookies || response.cookies.length === 0 ? (
+                            <p className="empty-hint">No cookies in response</p>
+                          ) : (
+                            response.cookies.map((cookie, i) => (
+                              <div key={i} className="response-header-row">
+                                <span className="header-name">{cookie.name}</span>
+                                <span className="header-value">
+                                  {cookie.value}
+                                  {cookie.path && (
+                                    <span style={{ opacity: 0.5, marginLeft: "8px" }}>
+                                      Path: {cookie.path}
+                                    </span>
+                                  )}
+                                  {cookie.httpOnly && (
+                                    <span style={{ opacity: 0.5, marginLeft: "8px" }}>HttpOnly</span>
+                                  )}
+                                  {cookie.secure && (
+                                    <span style={{ opacity: 0.5, marginLeft: "8px" }}>Secure</span>
+                                  )}
+                                </span>
+                              </div>
+                            ))
                           )}
                         </div>
                       )}

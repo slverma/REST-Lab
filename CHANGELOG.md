@@ -56,6 +56,7 @@ The following features are being considered for future releases:
 - [ ] Response diff / compare
 - [ ] Mock server / request stubs
 - [ ] Team sync / shared collections
+- [x] Cookie support — send cookies with requests, view Set-Cookie response cookies
 
 ---
 
@@ -75,6 +76,17 @@ The following features are being considered for future releases:
   - Available on requests and folder/collection settings
   - Inherits from parent folders
 - cURL export updated to include Basic Auth and API Key in generated commands
+
+#### Cookie Support
+
+- **Request Cookies** — Add name/value cookie pairs in the new "Cookies" tab on any request
+  - Cookies are serialized as `Cookie: name=value; name2=value2` header when sending
+  - Supports `{{variable}}` interpolation for cookie names and values
+  - Enable/disable individual cookies with checkboxes
+  - Saved with the request, so cookies persist between sessions
+- **Response Cookies** — Set-Cookie headers from responses are parsed and displayed in a "Cookies" tab on the response panel
+  - Shows name, value, Path, HttpOnly, and Secure attributes
+  - Badge on the Cookies tab shows the number of cookies received
 
 ---
 
