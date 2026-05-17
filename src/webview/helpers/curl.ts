@@ -3,7 +3,7 @@ import {
   formDataToBody,
   interpolateVariables,
   isFormContentType,
-  resolveAuthToken,
+  resolveAuth,
   stripJsonComments,
 } from "./helper";
 
@@ -29,7 +29,7 @@ export const generateCurlCommand = (
       )
       .map((p) => p.key.toLowerCase()),
   );
-  const allParams = [
+  const regularParams = [
     ...(folderConfig.params || []).filter(
       (p) => !disabledParamKeys.has(p.key.toLowerCase()),
     ),
@@ -37,6 +37,9 @@ export const generateCurlCommand = (
       (p) => !inheritedParamKeys.has(p.key.toLowerCase()),
     ),
   ].filter((p) => p.key && p.enabled !== false);
+
+  const resolvedAuth = resolveAuth(config.auth, folderConfig.auth, envVariables);
+  const allParams = [...regularParams, ...resolvedAuth.params];
   const rawUrlWithParams =
     allParams.length > 0
       ? `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}${allParams
@@ -91,11 +94,13 @@ export const generateCurlCommand = (
     }
   }
 
-  const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
-  if (bearerToken !== null) {
+  if (resolvedAuth.headers.length > 0) {
+    const authHeaderKeys = new Set(
+      resolvedAuth.headers.map((h) => h.key.toLowerCase()),
+    );
     allHeaders = [
-      { key: "Authorization", value: `Bearer ${bearerToken}` },
-      ...allHeaders.filter((h) => h.key.toLowerCase() !== "authorization"),
+      ...resolvedAuth.headers,
+      ...allHeaders.filter((h) => !authHeaderKeys.has(h.key.toLowerCase())),
     ];
   }
 
