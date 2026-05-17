@@ -97,9 +97,9 @@
   "scripts": {
     "vscode:prepublish": "npm run build:prod",
     "compile": "npm run build",
-    "build": "tsx scripts/build.ts",
-    "build:prod": "NODE_ENV=production tsx scripts/build.ts",
-    "watch": "tsx scripts/build.ts --watch"
+    "build": "tsx scripts/build.mts",
+    "build:prod": "NODE_ENV=production tsx scripts/build.mts",
+    "watch": "tsx scripts/build.mts --watch"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.3",
