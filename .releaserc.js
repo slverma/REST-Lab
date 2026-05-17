@@ -109,7 +109,7 @@ module.exports = {
       "@semantic-release/exec",
       {
         publishCmd:
-          "npm install -g @vscode/vsce && vsce publish -p ${VSCE_PAT}",
+          "npm install -g @vscode/vsce && vsce publish -p $VSCE_PAT",
       },
     ],
 
