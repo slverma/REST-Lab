@@ -1,0 +1,282 @@
+import React from "react";
+import CopyIcon from "../components/icons/CopyIcon";
+import DownloadIcon from "../components/icons/DownloadIcon";
+import EyeIcon from "../components/icons/EyeIcon";
+import PencilIcon from "../components/icons/PencilIcon";
+import SplitIcon from "../components/icons/SplitIcon";
+import WarningIcon from "../components/icons/WarningIcon";
+import Tooltip from "../components/Tooltip";
+import {
+  formatJson,
+  formatSize,
+  getFileExtension,
+  getStatusColor,
+} from "../helpers/helper";
+import BodyEditor from "./BodyEditor";
+import { useRequestContext } from "./RequestContext";
+
+const ResponsePanel: React.FC = () => {
+  const {
+    response,
+    isLoading,
+    responseTab,
+    splitLayout,
+    requestSize,
+    isResizing,
+    isSmallScreen,
+    isResponseHidden,
+    responseEditorLanguage,
+    responseBodyValue,
+    setResponseTab,
+    toggleLayout,
+    toggleResponseHidden,
+    handleResizeStart,
+    vscode,
+  } = useRequestContext();
+
+  if (!response && !isLoading) return null;
+
+  const sizeStyle: React.CSSProperties = isResponseHidden
+    ? {}
+    : {
+        [splitLayout === "horizontal" ? "height" : "width"]: `${
+          100 - requestSize
+        }%`,
+      };
+
+  return (
+    <>
+      <div
+        className={`resize-handle ${splitLayout} ${
+          isResizing ? "active" : ""
+        } ${isResponseHidden ? "hidden" : ""}`}
+        onMouseDown={handleResizeStart}
+      >
+        <div className="resize-handle-bar" />
+      </div>
+
+      <div
+        className={`response-panel ${
+          isResponseHidden ? "response-panel--hidden" : ""
+        }`}
+        style={sizeStyle}
+      >
+        <div className="response-section">
+          <div className="response-header">
+            <h2>Response</h2>
+            <div className="response-header-right">
+              {response && (
+                <div className="response-meta">
+                  <span
+                    className={`status-badge ${getStatusColor(
+                      response.status,
+                    )}`}
+                  >
+                    {response.status === 0
+                      ? "Network Error"
+                      : `${response.status} ${response.statusText}`}
+                  </span>
+                  {response.status !== 0 && (
+                    <>
+                      <span className="time-badge">{response.time}ms</span>
+                      <span className="size-badge">
+                        {formatSize(response.size)}
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
+              <div className="response-header-actions">
+                {!isSmallScreen && (
+                  <Tooltip
+                    text={
+                      splitLayout === "horizontal"
+                        ? "Switch to side-by-side view"
+                        : "Switch to stacked view"
+                    }
+                  >
+                    <button
+                      className="layout-toggle-btn"
+                      onClick={toggleLayout}
+                    >
+                      <SplitIcon splitLayout={splitLayout} />
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip
+                  text={isResponseHidden ? "Show response" : "Hide response"}
+                >
+                  <button
+                    className="response-hide-btn"
+                    onClick={toggleResponseHidden}
+                  >
+                    <EyeIcon hidden={isResponseHidden} />
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+
+          {!isResponseHidden && (
+            <>
+              {isLoading ? (
+                <div className="loading-state">
+                  <span className="loading-spinner large"></span>
+                  <p>Sending request...</p>
+                </div>
+              ) : (
+                response && (
+                  <>
+                    <div className="response-toolbar">
+                      <div className="tabs">
+                        <button
+                          className={`tab ${
+                            responseTab === "body" ? "active" : ""
+                          }`}
+                          onClick={() => setResponseTab("body")}
+                        >
+                          Body
+                        </button>
+                        <button
+                          className={`tab ${
+                            responseTab === "headers" ? "active" : ""
+                          }`}
+                          onClick={() => setResponseTab("headers")}
+                        >
+                          Headers
+                          <span className="badge">
+                            {Object.keys(response.headers).length}
+                          </span>
+                        </button>
+                      </div>
+                      <div className="response-actions">
+                        <Tooltip text="Copy response to clipboard">
+                          <button
+                            className="action-btn"
+                            onClick={() => {
+                              const content =
+                                responseTab === "body"
+                                  ? formatJson(response.data)
+                                  : Object.entries(response.headers)
+                                      .map(([k, v]) => `${k}: ${v}`)
+                                      .join("\n");
+                              navigator.clipboard.writeText(content);
+                              vscode.postMessage({
+                                type: "showInfo",
+                                message: "Copied to clipboard!",
+                              });
+                            }}
+                          >
+                            <CopyIcon />
+                          </button>
+                        </Tooltip>
+                        <Tooltip text="Download response">
+                          <button
+                            className="action-btn"
+                            onClick={() => {
+                              const content =
+                                responseTab === "body"
+                                  ? formatJson(response.data)
+                                  : Object.entries(response.headers)
+                                      .map(([k, v]) => `${k}: ${v}`)
+                                      .join("\n");
+                              const extension =
+                                responseTab === "body"
+                                  ? getFileExtension(response.headers)
+                                  : "txt";
+                              const filename = `response-${Date.now()}.${extension}`;
+                              vscode.postMessage({
+                                type: "downloadResponse",
+                                content,
+                                filename,
+                                mimeType:
+                                  responseTab === "body"
+                                    ? response.headers["content-type"] ||
+                                      "text/plain"
+                                    : "text/plain",
+                              });
+                            }}
+                          >
+                            <DownloadIcon />
+                          </button>
+                        </Tooltip>
+                        <Tooltip text="Open response in VS Code editor">
+                          <button
+                            className="action-btn"
+                            onClick={() => {
+                              const content =
+                                responseTab === "body"
+                                  ? formatJson(response.data)
+                                  : Object.entries(response.headers)
+                                      .map(([k, v]) => `${k}: ${v}`)
+                                      .join("\n");
+                              const extension =
+                                responseTab === "body"
+                                  ? getFileExtension(response.headers)
+                                  : "txt";
+                              vscode.postMessage({
+                                type: "openResponseInEditor",
+                                content,
+                                extension,
+                                mimeType:
+                                  responseTab === "body"
+                                    ? response.headers["content-type"] ||
+                                      "text/plain"
+                                    : "text/plain",
+                              });
+                            }}
+                          >
+                            <PencilIcon />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </div>
+
+                    <div className="response-content">
+                      {responseTab === "body" &&
+                        (response.status === 0 ? (
+                          <div className="error-display">
+                            <div className="error-icon">
+                              <WarningIcon />
+                            </div>
+                            <h3 className="error-title">Request Failed</h3>
+                            <p className="error-message">{response.data}</p>
+                          </div>
+                        ) : (
+                          <BodyEditor
+                            value={responseBodyValue}
+                            language={responseEditorLanguage}
+                            readOnly
+                            className="response-editor"
+                            showHint="Ctrl+F search"
+                          />
+                        ))}
+                      {responseTab === "headers" && (
+                        <div className="response-headers">
+                          {Object.entries(response.headers).length === 0 ? (
+                            <p className="empty-hint">No headers available</p>
+                          ) : (
+                            Object.entries(response.headers).map(
+                              ([key, value]) => (
+                                <div key={key} className="response-header-row">
+                                  <span className="header-name">{key}</span>
+                                  <span className="header-value">{value}</span>
+                                </div>
+                              ),
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default ResponsePanel;
