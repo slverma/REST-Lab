@@ -1,0 +1,57 @@
+name: Release
+
+# Triggers on every push to main — which happens when a PR is merged.
+# semantic-release internally checks if any new commits since the last tag
+# match release-triggering types (feat/fix/perf). If none match, it exits
+# cleanly without creating a release. chore/docs commits merge fine but
+# produce no release.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Required to push the release commit and tag back to main,
+      # and to create the GitHub Release.
+      contents: write
+      # Required for semantic-release to comment on resolved issues/PRs.
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history is required — semantic-release needs to walk back
+          # to the previous tag to find all commits in this release.
+          fetch-depth: 0
+          # Do NOT persist the default Actions credential. semantic-release
+          # injects the GITHUB_TOKEN itself so git pushes use the correct
+          # identity (github-actions[bot]) that is allowed to bypass the
+          # main branch protection rule.
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Release
+        run: npx semantic-release
+        env:
+          # GH_TOKEN is a fine-grained PAT belonging to the repo owner (repository admin).
+          # It bypasses the main branch ruleset so @semantic-release/git can push
+          # the release commit directly. GITHUB_TOKEN cannot bypass rulesets on its own.
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          # Your VS Code Marketplace Personal Access Token.
+          # Add this in: GitHub repo → Settings → Secrets → Actions → New secret
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}

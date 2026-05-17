@@ -1,0 +1,63 @@
+name: Validate PR Title
+
+# Re-runs whenever the PR is opened, the title is edited, or new commits
+# are pushed (synchronize). This ensures the title is always valid at merge time.
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+jobs:
+  validate:
+    name: Conventional Commit title
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Read-only is sufficient — the action only reads the PR title.
+      pull-requests: read
+
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Allowed commit types — must match the types in .releaserc.js.
+          # Any PR title that does not start with one of these will fail the check.
+          types: |
+            feat
+            fix
+            perf
+            revert
+            docs
+            style
+            chore
+            refactor
+            test
+            build
+            ci
+
+          # Optional scopes (remove the block to allow any scope or no scope):
+          # scopes: |
+          #   core
+          #   ui
+          #   api
+
+          # Require a scope? (default false — leave unscoped titles valid)
+          requireScope: false
+
+          # Subjects (the part after "type: ") must be at least 1 character.
+          subjectPattern: ^.+$
+          subjectPatternError: |
+            The PR title "{title}" has an empty subject.
+            Example of a valid title: "feat: add request timeout setting"
+
+          # Reject "feat: Foo" — subjects must start with a lowercase letter
+          # to match the Conventional Commits convention.
+          # Remove this block if you prefer not to enforce case.
+          # subjectPattern: ^[a-z].+$
+          # subjectPatternError: |
+          #   The subject "{title}" must start with a lowercase letter.
