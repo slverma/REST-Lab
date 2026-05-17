@@ -32,10 +32,24 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
   // Keep a ref in sync so the completion provider always reads fresh vars
   const envVarsRef = useRef<Record<string, string>>(envVariables);
   const completionDisposableRef = useRef<Monaco.IDisposable | null>(null);
+  const findWidgetListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
 
   useEffect(() => {
     envVarsRef.current = envVariables;
   }, [envVariables]);
+
+  useEffect(() => {
+    return () => {
+      if (findWidgetListenerRef.current && editorRef.current) {
+        const container = editorRef.current.getContainerDomNode();
+        container.removeEventListener(
+          "keydown",
+          findWidgetListenerRef.current,
+          true,
+        );
+      }
+    };
+  }, []);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -73,29 +87,35 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
 
     // Fix paste (Ctrl+V / Cmd+V) inside Monaco's built-in find widget
     const container = editor.getContainerDomNode();
-    container.addEventListener(
-      "keydown",
-      (e: KeyboardEvent) => {
-        const target = e.target as HTMLElement;
-        const inFindWidget =
-          (target.tagName === "INPUT" || target.tagName === "TEXTAREA") &&
-          !!target.closest(".find-widget");
-        if (!inFindWidget) return;
-        if ((e.ctrlKey || e.metaKey) && e.key === "v") {
-          e.preventDefault();
-          e.stopPropagation();
-          navigator.clipboard
-            .readText()
-            .then((text) => {
-              if (text) {
-                document.execCommand("insertText", false, text);
-              }
-            })
-            .catch(() => {});
-        }
-      },
-      true,
-    );
+    findWidgetListenerRef.current = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const inFindWidget =
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA") &&
+        !!target.closest(".find-widget");
+      if (!inFindWidget) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        e.preventDefault();
+        e.stopPropagation();
+        navigator.clipboard
+          .readText()
+          .then((text) => {
+            if (!text) return;
+            const inputEl = e.target as HTMLInputElement | HTMLTextAreaElement;
+            const start = inputEl.selectionStart ?? inputEl.value.length;
+            const end = inputEl.selectionEnd ?? inputEl.value.length;
+            inputEl.value =
+              inputEl.value.substring(0, start) +
+              text +
+              inputEl.value.substring(end);
+            inputEl.selectionStart = inputEl.selectionEnd = start + text.length;
+            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+          })
+          .catch((err) => {
+            console.debug("Clipboard read failed in find widget:", err);
+          });
+      }
+    };
+    container.addEventListener("keydown", findWidgetListenerRef.current, true);
 
     // Store ref if provided
     if (editorInstanceRef) {
