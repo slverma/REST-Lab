@@ -336,6 +336,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       baseUrl: currentConfig.baseUrl || parentConfig.baseUrl,
       headers: mergedHeaders.length > 0 ? mergedHeaders : undefined,
       params: mergedParams.length > 0 ? mergedParams : undefined,
+      auth: currentConfig.auth !== undefined ? currentConfig.auth : parentConfig.auth,
     };
   }
 
