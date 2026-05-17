@@ -18,9 +18,11 @@ import {
   hasFileFields,
   interpolateVariables,
   isFormContentType,
+  resolveAuthToken,
   stripJsonComments,
 } from "../helpers/helper";
 import {
+  AuthConfig,
   FolderConfig,
   FormDataItem,
   RequestConfig,
@@ -37,7 +39,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 
 type SplitLayout = "horizontal" | "vertical";
-type ActiveTab = "headers" | "body" | "params";
+type ActiveTab = "headers" | "body" | "params" | "auth";
 type ResponseTab = "body" | "headers";
 
 interface RequestContextValue {
@@ -79,6 +81,7 @@ interface RequestContextValue {
   handleSaveConfig: () => void;
   handleCopyCurl: () => void;
   handleBeautifyJson: () => void;
+  handleAuthChange: (auth: AuthConfig | undefined) => void;
   toggleLayout: () => void;
   handleResizeStart: (e: React.MouseEvent) => void;
   handleSetActiveEnvironment: (envId: string | null) => void;
@@ -440,10 +443,20 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
 
     // Interpolate {{variables}} in URL, header values, and body
     const fullUrl = interpolateVariables(rawUrlWithParams, envVariables);
-    const interpolatedHeaders = allHeaders.map((h) => ({
+    let interpolatedHeaders = allHeaders.map((h) => ({
       key: h.key,
       value: interpolateVariables(h.value, envVariables),
     }));
+
+    const bearerToken = resolveAuthToken(config.auth, folderConfig.auth, envVariables);
+    if (bearerToken !== null) {
+      interpolatedHeaders = [
+        { key: "Authorization", value: `Bearer ${bearerToken}` },
+        ...interpolatedHeaders.filter(
+          (h) => h.key.toLowerCase() !== "authorization",
+        ),
+      ];
+    }
 
     let requestBody: string | undefined = config.body;
     let formDataWithFiles: FormDataItem[] | undefined;
@@ -488,6 +501,11 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
 
   const handleSetActiveEnvironment = useCallback((envId: string | null) => {
     vscode.postMessage({ type: "setActiveEnvironment", envId });
+  }, []);
+
+  const handleAuthChange = useCallback((auth: AuthConfig | undefined) => {
+    setConfig((prev) => ({ ...prev, auth }));
+    setIsSaved(false);
   }, []);
 
   const handleBeautifyJson = useCallback(async () => {
@@ -799,6 +817,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     handleSaveConfig,
     handleCopyCurl,
     handleBeautifyJson,
+    handleAuthChange,
     toggleLayout,
     handleResizeStart,
     handleSetActiveEnvironment,

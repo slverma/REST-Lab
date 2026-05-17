@@ -1,4 +1,4 @@
-import { Environment, FormDataItem } from "../types/internal.types";
+import { AuthConfig, Environment, FormDataItem } from "../types/internal.types";
 
 // Get editor language based on content type
 export const getEditorLanguageFromContentType = (
@@ -148,3 +148,18 @@ export const buildEnvVariables = (
   }
   return vars;
 };
+
+/**
+ * Returns the Bearer token to inject as Authorization header, or null if no auth applies.
+ * Request-level auth takes priority over folder-level auth.
+ * Variable interpolation is applied to the token string.
+ */
+export function resolveAuthToken(
+  requestAuth: AuthConfig | undefined,
+  folderAuth: AuthConfig | undefined,
+  envVariables: Record<string, string>,
+): string | null {
+  const auth = requestAuth !== undefined ? requestAuth : folderAuth;
+  if (!auth || auth.type === 'none') return null;
+  return interpolateVariables(auth.token, envVariables);
+}

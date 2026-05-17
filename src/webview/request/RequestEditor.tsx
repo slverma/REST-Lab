@@ -6,6 +6,7 @@ import SendIcon from "../components/icons/SendIcon";
 import { HTTP_METHODS, METHODS_WITH_BODY } from "../config";
 import { interpolateVariables } from "../helpers/helper";
 import { RequestConfig, RequestEditorProps } from "../types/internal.types";
+import AuthTab from "./AuthTab";
 import BodyTab from "./BodyTab";
 import HeaderTab from "./HeaderTab";
 import ParamsTab from "./ParamsTab";
@@ -51,6 +52,7 @@ const RequestEditorContent: React.FC = () => {
     handleSaveConfig,
     handleCopyCurl,
     handleBeautifyJson,
+    handleAuthChange,
     handleSetActiveEnvironment,
   } = useRequestContext();
 
@@ -229,6 +231,15 @@ const RequestEditorContent: React.FC = () => {
                   <span className="badge">{config.headers?.length}</span>
                 )}
               </button>
+              <button
+                className={`tab ${activeTab === "auth" ? "active" : ""}`}
+                onClick={() => setActiveTab("auth")}
+              >
+                Auth
+                {config.auth !== undefined && (
+                  <span className="badge">•</span>
+                )}
+              </button>
             </div>
 
             <div className="tab-content">
@@ -244,6 +255,13 @@ const RequestEditorContent: React.FC = () => {
               )}
               {activeTab === "params" && <ParamsTab />}
               {activeTab === "headers" && <HeaderTab />}
+              {activeTab === "auth" && (
+                <AuthTab
+                  auth={config.auth}
+                  inheritedAuth={folderConfig.auth}
+                  onAuthChange={handleAuthChange}
+                />
+              )}
             </div>
           </div>
         </div>
