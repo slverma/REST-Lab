@@ -1,3 +1,7 @@
+## 1.4.0 (2026-05-17)
+
+* feat: add Basic Auth and API Key authentication types and fix action pipeline (#12) ([228bc6c](https://github.com/slverma/REST-Lab/commit/228bc6c)), closes [#12](https://github.com/slverma/REST-Lab/issues/12)
+
 ## 1.3.0 (2026-05-17)
 
 * feat: add Auth tab to request editor with inherit/bearer/none modes ([b546036](https://github.com/slverma/REST-Lab/commit/b546036))
