@@ -71,6 +71,32 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
       },
     });
 
+    // Fix paste (Ctrl+V / Cmd+V) inside Monaco's built-in find widget
+    const container = editor.getContainerDomNode();
+    container.addEventListener(
+      "keydown",
+      (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+        const inFindWidget =
+          (target.tagName === "INPUT" || target.tagName === "TEXTAREA") &&
+          !!target.closest(".find-widget");
+        if (!inFindWidget) return;
+        if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+          e.preventDefault();
+          e.stopPropagation();
+          navigator.clipboard
+            .readText()
+            .then((text) => {
+              if (text) {
+                document.execCommand("insertText", false, text);
+              }
+            })
+            .catch(() => {});
+        }
+      },
+      true,
+    );
+
     // Store ref if provided
     if (editorInstanceRef) {
       editorInstanceRef.current = editor;
