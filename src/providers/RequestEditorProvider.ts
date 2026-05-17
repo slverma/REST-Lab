@@ -170,6 +170,7 @@ export class RequestEditorProvider {
               body: savedRequest?.body || "",
               contentType: savedRequest?.contentType || "",
               formData: savedRequest?.formData || [],
+              auth: savedRequest?.auth,
             },
             folderConfig: folderConfig,
             envVariables: envVariables,
