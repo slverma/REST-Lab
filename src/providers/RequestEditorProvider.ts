@@ -2,8 +2,34 @@ import axios, { AxiosRequestConfig } from "axios";
 import FormData from "form-data";
 import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
-import { RequestConfig } from "../webview/types/internal.types";
+import { RequestConfig, ResponseCookie } from "../webview/types/internal.types";
 import { SidebarProvider } from "./SidebarProvider";
+
+function parseSetCookie(raw: string): ResponseCookie {
+  const parts = raw.split(';').map((p) => p.trim());
+  const nameValuePart = parts[0] ?? '';
+  const eqIdx = nameValuePart.indexOf('=');
+  const name = eqIdx >= 0 ? nameValuePart.slice(0, eqIdx) : nameValuePart;
+  const value = eqIdx >= 0 ? nameValuePart.slice(eqIdx + 1) : '';
+
+  const cookie: ResponseCookie = { name, value, httpOnly: false, secure: false };
+
+  for (const attr of parts.slice(1)) {
+    const lower = attr.toLowerCase();
+    if (lower === 'httponly') { cookie.httpOnly = true; continue; }
+    if (lower === 'secure') { cookie.secure = true; continue; }
+    const eqI = attr.indexOf('=');
+    if (eqI < 0) continue;
+    const attrName = attr.slice(0, eqI).trim().toLowerCase();
+    const attrVal = attr.slice(eqI + 1).trim();
+    if (attrName === 'domain') { cookie.domain = attrVal; }
+    else if (attrName === 'path') { cookie.path = attrVal; }
+    else if (attrName === 'expires') { cookie.expires = attrVal; }
+    else if (attrName === 'samesite') { cookie.sameSite = attrVal; }
+  }
+
+  return cookie;
+}
 
 export class RequestEditorProvider {
   // Track open panels by request ID
@@ -171,6 +197,7 @@ export class RequestEditorProvider {
               contentType: savedRequest?.contentType || "",
               formData: savedRequest?.formData || [],
               auth: savedRequest?.auth,
+              cookies: savedRequest?.cookies || [],
             },
             folderConfig: folderConfig,
             envVariables: envVariables,
@@ -229,6 +256,7 @@ export class RequestEditorProvider {
               message.headers,
               message.body,
               message.formData,
+              message.cookies,
             );
             panel.webview.postMessage({
               type: "responseReceived",
@@ -311,6 +339,7 @@ export class RequestEditorProvider {
       fileName?: string;
       fileData?: string;
     }[],
+    cookies?: { name: string; value: string }[],
   ): Promise<{
     status: number;
     statusText: string;
@@ -318,6 +347,7 @@ export class RequestEditorProvider {
     data: string;
     time: number;
     size: number;
+    cookies: ResponseCookie[];
   }> {
     const startTime = Date.now();
 
@@ -337,6 +367,16 @@ export class RequestEditorProvider {
           headerObj[h.key] = h.value;
         }
       });
+
+      // Merge request cookies into Cookie header if no explicit Cookie header exists
+      if (cookies && cookies.length > 0) {
+        const hasCookieHeader = Object.keys(headerObj).some(
+          (k) => k.toLowerCase() === 'cookie',
+        );
+        if (!hasCookieHeader) {
+          headerObj['Cookie'] = cookies.map((c) => `${c.name}=${c.value}`).join('; ');
+        }
+      }
 
       let requestData: any = body;
       let formHeaders: Record<string, string> = {};
@@ -382,12 +422,18 @@ export class RequestEditorProvider {
       const response = await axios(config);
       const endTime = Date.now();
 
+      // Extract Set-Cookie before collapsing headers (axios returns it as string[])
+      const rawSetCookies: string[] = Array.isArray(response.headers['set-cookie'])
+        ? (response.headers['set-cookie'] as string[])
+        : [];
+      const parsedCookies: ResponseCookie[] = rawSetCookies.map(parseSetCookie);
+
       // Convert headers to Record<string, string>
       const responseHeaders: Record<string, string> = {};
       Object.entries(response.headers).forEach(([key, value]) => {
         responseHeaders[key] = Array.isArray(value)
-          ? value.join(", ")
-          : String(value || "");
+          ? value.join(', ')
+          : String(value || '');
       });
 
       // Calculate response size
@@ -404,6 +450,7 @@ export class RequestEditorProvider {
         data: responseData,
         time: endTime - startTime,
         size,
+        cookies: parsedCookies,
       };
     } catch (error: any) {
       // Provide more descriptive error messages for common network errors
