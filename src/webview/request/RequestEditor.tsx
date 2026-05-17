@@ -1,28 +1,16 @@
 import React, { useRef, useState } from "react";
 import CodeIcon from "../components/icons/CodeIcon";
-import CopyIcon from "../components/icons/CopyIcon";
-import DownloadIcon from "../components/icons/DownloadIcon";
 import MoreActionIcon from "../components/icons/MoreActionIcon";
-import PencilIcon from "../components/icons/PencilIcon";
 import SaveIcon from "../components/icons/SaveIcon";
 import SendIcon from "../components/icons/SendIcon";
-import SplitIcon from "../components/icons/SplitIcon";
-import WarningIcon from "../components/icons/WarningIcon";
-import Tooltip from "../components/Tooltip";
 import { HTTP_METHODS, METHODS_WITH_BODY } from "../config";
-import {
-  formatJson,
-  formatSize,
-  getFileExtension,
-  getStatusColor,
-  interpolateVariables,
-} from "../helpers/helper";
+import { interpolateVariables } from "../helpers/helper";
 import { RequestConfig, RequestEditorProps } from "../types/internal.types";
-import BodyEditor from "./BodyEditor";
 import BodyTab from "./BodyTab";
 import HeaderTab from "./HeaderTab";
 import ParamsTab from "./ParamsTab";
 import { RequestContextProvider, useRequestContext } from "./RequestContext";
+import ResponsePanel from "./ResponsePanel";
 import VarInput from "./VarInput";
 
 const RequestEditorContent: React.FC = () => {
@@ -49,28 +37,21 @@ const RequestEditorContent: React.FC = () => {
     response,
     isLoading,
     activeTab,
-    responseTab,
     isSaved,
     splitLayout,
     requestSize,
-    isResizing,
+    isResponseHidden,
     bodyEditorRef,
     containerRef,
     splitContainerRef,
     requestEditorLanguage,
-    responseEditorLanguage,
-    responseBodyValue,
     setActiveTab,
-    setResponseTab,
     handleConfigChange,
     handleSendRequest,
     handleSaveConfig,
     handleCopyCurl,
     handleBeautifyJson,
-    toggleLayout,
-    handleResizeStart,
     handleSetActiveEnvironment,
-    vscode,
   } = useRequestContext();
 
   return (
@@ -172,19 +153,6 @@ const RequestEditorContent: React.FC = () => {
             </div>
           )}
         </div>
-        {(response || isLoading) && (
-          <button
-            className="layout-toggle-btn"
-            onClick={toggleLayout}
-            title={
-              splitLayout === "horizontal"
-                ? "Switch to side-by-side view"
-                : "Switch to stacked view"
-            }
-          >
-            <SplitIcon splitLayout={splitLayout} />
-          </button>
-        )}
       </div>
 
       {(() => {
@@ -225,7 +193,7 @@ const RequestEditorContent: React.FC = () => {
         <div
           className="request-panel"
           style={
-            response || isLoading
+            (response || isLoading) && !isResponseHidden
               ? {
                   [splitLayout === "horizontal" ? "height" : "width"]:
                     `${requestSize}%`,
@@ -280,208 +248,7 @@ const RequestEditorContent: React.FC = () => {
           </div>
         </div>
 
-        {(response || isLoading) && (
-          <div
-            className={`resize-handle ${splitLayout} ${
-              isResizing ? "active" : ""
-            }`}
-            onMouseDown={handleResizeStart}
-          >
-            <div className="resize-handle-bar" />
-          </div>
-        )}
-
-        {(response || isLoading) && (
-          <div
-            className="response-panel"
-            style={{
-              [splitLayout === "horizontal" ? "height" : "width"]: `${
-                100 - requestSize
-              }%`,
-            }}
-          >
-            <div className="response-section">
-              <div className="response-header">
-                <h2>Response</h2>
-                {response && (
-                  <div className="response-meta">
-                    <span
-                      className={`status-badge ${getStatusColor(
-                        response.status,
-                      )}`}
-                    >
-                      {response.status === 0
-                        ? "Network Error"
-                        : `${response.status} ${response.statusText}`}
-                    </span>
-                    {response.status !== 0 && (
-                      <>
-                        <span className="time-badge">{response.time}ms</span>
-                        <span className="size-badge">
-                          {formatSize(response.size)}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {isLoading ? (
-                <div className="loading-state">
-                  <span className="loading-spinner large"></span>
-                  <p>Sending request...</p>
-                </div>
-              ) : (
-                response && (
-                  <>
-                    <div className="response-toolbar">
-                      <div className="tabs">
-                        <button
-                          className={`tab ${
-                            responseTab === "body" ? "active" : ""
-                          }`}
-                          onClick={() => setResponseTab("body")}
-                        >
-                          Body
-                        </button>
-                        <button
-                          className={`tab ${
-                            responseTab === "headers" ? "active" : ""
-                          }`}
-                          onClick={() => setResponseTab("headers")}
-                        >
-                          Headers
-                          <span className="badge">
-                            {Object.keys(response.headers).length}
-                          </span>
-                        </button>
-                      </div>
-                      <div className="response-actions">
-                        <Tooltip text="Copy response to clipboard">
-                          <button
-                            className="action-btn"
-                            onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              navigator.clipboard.writeText(content);
-                              vscode.postMessage({
-                                type: "showInfo",
-                                message: "Copied to clipboard!",
-                              });
-                            }}
-                          >
-                            <CopyIcon />
-                          </button>
-                        </Tooltip>
-                        <Tooltip text="Download response">
-                          <button
-                            className="action-btn"
-                            onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              const extension =
-                                responseTab === "body"
-                                  ? getFileExtension(response.headers)
-                                  : "txt";
-                              const filename = `response-${Date.now()}.${extension}`;
-                              vscode.postMessage({
-                                type: "downloadResponse",
-                                content,
-                                filename,
-                                mimeType:
-                                  responseTab === "body"
-                                    ? response.headers["content-type"] ||
-                                      "text/plain"
-                                    : "text/plain",
-                              });
-                            }}
-                          >
-                            <DownloadIcon />
-                          </button>
-                        </Tooltip>
-                        <Tooltip text="Open response in VS Code editor">
-                          <button
-                            className="action-btn"
-                            title="Open response in VS Code editor"
-                            onClick={() => {
-                              const content =
-                                responseTab === "body"
-                                  ? formatJson(response.data)
-                                  : Object.entries(response.headers)
-                                      .map(([k, v]) => `${k}: ${v}`)
-                                      .join("\n");
-                              const extension =
-                                responseTab === "body"
-                                  ? getFileExtension(response.headers)
-                                  : "txt";
-                              vscode.postMessage({
-                                type: "openResponseInEditor",
-                                content,
-                                extension,
-                                mimeType:
-                                  responseTab === "body"
-                                    ? response.headers["content-type"] ||
-                                      "text/plain"
-                                    : "text/plain",
-                              });
-                            }}
-                          >
-                            <PencilIcon />
-                          </button>
-                        </Tooltip>
-                      </div>
-                    </div>
-
-                    <div className="response-content">
-                      {responseTab === "body" &&
-                        (response.status === 0 ? (
-                          <div className="error-display">
-                            <div className="error-icon">
-                              <WarningIcon />
-                            </div>
-                            <h3 className="error-title">Request Failed</h3>
-                            <p className="error-message">{response.data}</p>
-                          </div>
-                        ) : (
-                          <BodyEditor
-                            value={responseBodyValue}
-                            language={responseEditorLanguage}
-                            readOnly
-                            className="response-editor"
-                            showHint="Ctrl+F search"
-                          />
-                        ))}
-                      {responseTab === "headers" && (
-                        <div className="response-headers">
-                          {Object.entries(response.headers).length === 0 ? (
-                            <p className="empty-hint">No headers available</p>
-                          ) : (
-                            Object.entries(response.headers).map(
-                              ([key, value]) => (
-                                <div key={key} className="response-header-row">
-                                  <span className="header-name">{key}</span>
-                                  <span className="header-value">{value}</span>
-                                </div>
-                              ),
-                            )
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )
-              )}
-            </div>
-          </div>
-        )}
+        <ResponsePanel />
       </div>
     </div>
   );
