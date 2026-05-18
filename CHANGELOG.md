@@ -1,3 +1,7 @@
+## <small>1.5.1 (2026-05-18)</small>
+
+* fix: include dist/ in vsix package by overriding .gitignore (#14) ([86f765e](https://github.com/slverma/REST-Lab/commit/86f765e)), closes [#14](https://github.com/slverma/REST-Lab/issues/14)
+
 ## 1.5.0 (2026-05-17)
 
 * feat: add cookie support for requests and responses (#13) ([8486f6b](https://github.com/slverma/REST-Lab/commit/8486f6b)), closes [#13](https://github.com/slverma/REST-Lab/issues/13)
