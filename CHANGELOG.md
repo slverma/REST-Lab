@@ -1,3 +1,7 @@
+## <small>1.5.2 (2026-05-18)</small>
+
+* fix: deployment issue (#15) ([1138d19](https://github.com/slverma/REST-Lab/commit/1138d19)), closes [#15](https://github.com/slverma/REST-Lab/issues/15)
+
 ## <small>1.5.1 (2026-05-18)</small>
 
 * fix: include dist/ in vsix package by overriding .gitignore (#14) ([86f765e](https://github.com/slverma/REST-Lab/commit/86f765e)), closes [#14](https://github.com/slverma/REST-Lab/issues/14)
