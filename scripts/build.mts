@@ -12,6 +12,10 @@ const isProd = process.env.NODE_ENV === "production";
 const extensionConfig: InlineConfig = {
   configFile: false,
   root: rootDir,
+  // node_modules/ is excluded from the vsix; these must be bundled into extension.js
+  ssr: {
+    noExternal: ["axios", "form-data"],
+  },
   build: {
     lib: {
       entry: resolve(rootDir, "src/extension.ts"),
@@ -19,7 +23,7 @@ const extensionConfig: InlineConfig = {
       fileName: () => "extension.js",
     },
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: !isProd,
     ssr: true,
     rollupOptions: {
       external: [
@@ -79,7 +83,7 @@ const createWebviewConfig = (
       name: name.charAt(0).toUpperCase() + name.slice(1),
     },
     outDir: `dist/${name}`,
-    sourcemap: true,
+    sourcemap: !isProd,
     minify: isProd ? "esbuild" : false,
     emptyOutDir: true,
     cssCodeSplit: false,
