@@ -23,7 +23,7 @@ const extensionConfig: InlineConfig = {
       fileName: () => "extension.js",
     },
     outDir: "dist",
-    sourcemap: true,
+    sourcemap: !isProd,
     ssr: true,
     rollupOptions: {
       external: [
@@ -83,7 +83,7 @@ const createWebviewConfig = (
       name: name.charAt(0).toUpperCase() + name.slice(1),
     },
     outDir: `dist/${name}`,
-    sourcemap: true,
+    sourcemap: !isProd,
     minify: isProd ? "esbuild" : false,
     emptyOutDir: true,
     cssCodeSplit: false,
