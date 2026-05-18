@@ -1,3 +1,7 @@
+## <small>1.5.4 (2026-05-18)</small>
+
+* fix: remove vscode ignore (#18) ([d537771](https://github.com/slverma/REST-Lab/commit/d537771)), closes [#18](https://github.com/slverma/REST-Lab/issues/18)
+
 ## <small>1.5.3 (2026-05-18)</small>
 
 * fix: build issue (#17) ([05bfe40](https://github.com/slverma/REST-Lab/commit/05bfe40)), closes [#17](https://github.com/slverma/REST-Lab/issues/17)
