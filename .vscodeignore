@@ -1,3 +1,6 @@
+# dist/ is in .gitignore but must be in the package — vsce respects .gitignore when .vscodeignore is present
+!dist
+
 # Source files
 src/
 scripts/
