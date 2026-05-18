@@ -1,3 +1,7 @@
+## <small>1.5.3 (2026-05-18)</small>
+
+* fix: build issue (#17) ([05bfe40](https://github.com/slverma/REST-Lab/commit/05bfe40)), closes [#17](https://github.com/slverma/REST-Lab/issues/17)
+
 ## <small>1.5.2 (2026-05-18)</small>
 
 * fix: deployment issue (#15) ([1138d19](https://github.com/slverma/REST-Lab/commit/1138d19)), closes [#15](https://github.com/slverma/REST-Lab/issues/15)
