@@ -1,7 +1,7 @@
 {
   "name": "restlab",
   "displayName": "REST Lab",
-  "description": "A modern REST API client for VS Code - Test, debug, and manage your APIs with a beautiful interface",
+  "description": "A modern REST API client for Visual Studio Code — compatible with all VS Code-supported platforms and extension hosts. Test, debug, and manage your APIs with a beautiful interface",
   "publisher": "slverma",
   "version": "1.5.5",
   "icon": "resources/restlab-icon.png",
@@ -10,6 +10,7 @@
     "url": "https://github.com/slverma/REST-Lab"
   },
   "license": "MIT",
+  "pricing": "Free",
   "keywords": [
     "rest",
     "api",
