@@ -43,17 +43,17 @@ const RequestActionsDropdown: React.FC<{
   };
 
   return (
-    <div className="relative inline-flex" ref={dropdownRef}>
+    <div className="dropdown-wrap" ref={dropdownRef}>
       <Tooltip text="More Actions" position="left">
         <button
-          className="action-btn w-5 h-5 group-hover:opacity-60 hover:!opacity-100 hover:bg-slate-500/10 hover:text-slate-400"
+          className="action-btn"
           onClick={handleClick}
         >
           <MoreActionIcon />
         </button>
       </Tooltip>
       {isOpen && (
-        <div className="dropdown-menu min-w-[160px]">
+        <div className="dropdown-menu">
           <button
             className="dropdown-item"
             onClick={(e) => {
@@ -76,7 +76,7 @@ const RequestActionsDropdown: React.FC<{
           </button>
           <div className="dropdown-divider" />
           <button
-            className="dropdown-item text-red-500"
+            className="dropdown-item danger"
             onClick={(e) => {
               onDelete(e, request.id, folderId);
               setIsOpen(false);

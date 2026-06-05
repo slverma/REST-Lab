@@ -47,7 +47,7 @@ const ImportDropdown: React.FC<{
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="dropdown-wrap" ref={dropdownRef}>
       <button
         className="header-action-btn"
         onClick={() => setIsOpen(!isOpen)}
@@ -67,7 +67,7 @@ const ImportDropdown: React.FC<{
                 setIsOpen(false);
               }}
             >
-              <span className="flex items-center justify-center w-5 h-5 opacity-80">
+              <span className="dropdown-item-icon">
                 {provider.icon}
               </span>
               <span>{provider.name}</span>
