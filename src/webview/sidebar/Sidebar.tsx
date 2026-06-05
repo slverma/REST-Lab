@@ -150,7 +150,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
         <div className="tree-actions">
           <Tooltip text="Add Request">
             <button
-              className="action-btn group-hover:opacity-60 hover:!opacity-100 hover:bg-sky-500/10 hover:text-sky-400 hover:shadow-glow"
+              className="action-btn"
               onClick={(e) => onAddRequest(e, folder.id)}
             >
               <PlusIcon />
