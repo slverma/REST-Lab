@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CodeIcon from "../components/icons/CodeIcon";
 import MoreActionIcon from "../components/icons/MoreActionIcon";
 import SaveIcon from "../components/icons/SaveIcon";
@@ -18,6 +18,18 @@ import VarInput from "./VarInput";
 const RequestEditorContent: React.FC = () => {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [edge, setEdge] = useState("");
+
+  const onScroll = () => {
+    const el = stripRef.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    if (max < 2) return setEdge("");
+    if (el.scrollLeft < 4) setEdge("scroll-start");
+    else if (el.scrollLeft > max - 4) setEdge("scroll-end");
+    else setEdge("scroll-mid");
+  };
 
   React.useEffect(() => {
     if (!moreOpen) return;
@@ -56,6 +68,8 @@ const RequestEditorContent: React.FC = () => {
     handleAuthChange,
     handleSetActiveEnvironment,
   } = useRequestContext();
+
+  useEffect(onScroll, [config.method]);
 
   return (
     <div className="request-editor" ref={containerRef}>
@@ -205,7 +219,8 @@ const RequestEditorContent: React.FC = () => {
           }
         >
           <div className="request-content">
-            <div className="tabs">
+            <div className={`tabstrip-wrap ${edge}`}>
+            <div className="tabs" ref={stripRef} onScroll={onScroll}>
               {METHODS_WITH_BODY.includes(config.method) && (
                 <button
                   className={`tab ${activeTab === "body" ? "active" : ""}`}
@@ -252,6 +267,7 @@ const RequestEditorContent: React.FC = () => {
                   </span>
                 )}
               </button>
+            </div>
             </div>
 
             <div className="tab-content">
