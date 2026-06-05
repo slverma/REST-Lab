@@ -1,3 +1,7 @@
+## <small>1.5.5 (2026-06-05)</small>
+
+* fix: bundle issue (#16) ([488bfd1](https://github.com/slverma/REST-Lab/commit/488bfd1)), closes [#16](https://github.com/slverma/REST-Lab/issues/16)
+
 ## <small>1.5.4 (2026-05-18)</small>
 
 * fix: remove vscode ignore (#18) ([d537771](https://github.com/slverma/REST-Lab/commit/d537771)), closes [#18](https://github.com/slverma/REST-Lab/issues/18)
