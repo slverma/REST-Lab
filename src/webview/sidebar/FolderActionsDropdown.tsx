@@ -83,7 +83,7 @@ const FolderActionsDropdown: React.FC<{
     <div className="dropdown-wrap" ref={dropdownRef}>
       <Tooltip text="More Actions" position="left">
         <button
-          className="action-btn group-hover:opacity-60 hover:!opacity-100 hover:bg-slate-500/10 hover:text-slate-400"
+          className="action-btn"
           onClick={handleClick}
         >
           <MoreActionIcon />
