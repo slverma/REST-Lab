@@ -52,6 +52,18 @@
   /* Glass effect */
   --glass-bg: rgba(255, 255, 255, 0.03);
   --glass-border: rgba(255, 255, 255, 0.08);
+
+  /* Fluid spacing tokens — all em, scale with --vscode-font-size */
+  --rl-sp1: 0.30em;
+  --rl-sp2: 0.46em;
+  --rl-sp3: 0.62em;
+  --rl-sp4: 0.92em;
+  --rl-sp5: 1.23em;
+  --rl-ctrl: 2.35em;
+  --rl-icon: 1.25em;
+  --rl-r1: 0.35em;
+  --rl-r2: 0.50em;
+  --rl-r3: 0.65em;
 }
 
 * {
@@ -75,7 +87,7 @@ body {
   height: 100vh;
   /* max-width: 1200px; */
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--rl-sp5);
   position: relative;
   overflow: hidden;
 }
@@ -169,25 +181,28 @@ body {
 /* Request Bar */
 .request-bar {
   display: flex;
-  gap: 6px;
-  padding: 4px 0;
+  gap: var(--rl-sp3);
+  padding: var(--rl-sp4) 0 var(--rl-sp3);
   align-items: center;
+  flex-wrap: wrap;
 }
+.request-bar > * { min-height: var(--rl-ctrl); }
 
 .method-select {
-  padding: 5px 10px;
+  height: var(--rl-ctrl);
+  padding: 0 0.7em;
   border: 2px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 0.92em;
   font-weight: 700;
   cursor: pointer;
-  min-width: 96px;
+  min-width: 6.2em;
   transition: all 0.2s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
 }
 
 .method-select:focus {
@@ -236,18 +251,17 @@ body {
 }
 
 .url-input {
-  flex: 1;
+  flex: 1 1 16em;
   min-width: 0;
-  padding: 6px 12px;
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
   border: 1px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: "SF Mono", "Fira Code", "Consolas", monospace;
-  font-size: 13px;
+  font-size: 0.92em;
   transition: all 0.2s ease;
-  word-break: break-all;
-  overflow-wrap: anywhere;
 }
 
 .url-input:focus {
@@ -261,13 +275,14 @@ body {
 .send-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 10px;
+  gap: var(--rl-sp2);
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
   border: none;
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background: var(--restlab-gradient);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 0.92em;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -275,6 +290,7 @@ body {
   position: relative;
   overflow: hidden;
 }
+.send-btn svg { width: var(--rl-icon); height: var(--rl-icon); }
 
 .send-btn::before {
   content: "";
@@ -315,18 +331,20 @@ body {
 .save-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--rl-sp2);
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
   border: 1px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background: var(--glass-bg);
   color: var(--vscode-foreground);
-  font-size: 13px;
+  font-size: 0.92em;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(8px);
 }
+.save-btn svg { width: var(--rl-icon); height: var(--rl-icon); }
 
 .save-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.06);
@@ -377,11 +395,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: var(--rl-ctrl);
+  height: var(--rl-ctrl);
   padding: 0;
   border: 1px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   cursor: pointer;
@@ -478,11 +496,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: var(--rl-ctrl);
+  height: var(--rl-ctrl);
   padding: 0;
   border: 1px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background: var(--glass-bg);
   color: var(--vscode-foreground);
   cursor: pointer;
@@ -506,9 +524,9 @@ body {
 }
 
 .base-url-hint {
-  font-size: 12px;
+  font-size: 0.92em;
   color: var(--vscode-descriptionForeground);
-  padding-bottom: 6px;
+  padding-bottom: var(--rl-sp3);
 }
 
 .base-url-hint code {
@@ -520,18 +538,19 @@ body {
 
 /* ── Inline Environment Selector (inside request-bar) ──────────────── */
 .request-env-select {
-  padding: 6px 8px;
+  height: var(--rl-ctrl);
+  padding: 0 0.6em;
   border: 1px solid var(--glass-border);
-  border-radius: 7px;
+  border-radius: var(--rl-r3);
   background: var(--vscode-input-background);
   color: var(--vscode-descriptionForeground);
-  font-size: 11px;
+  font-size: 0.82em;
   font-weight: 600;
   cursor: pointer;
   transition:
     border-color 0.15s,
     color 0.15s;
-  max-width: 130px;
+  max-width: 9em;
   flex-shrink: 0;
 }
 
