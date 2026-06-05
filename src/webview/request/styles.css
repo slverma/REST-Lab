@@ -1741,88 +1741,7 @@ body {
   display: inline;
 }
 
-/* Responsive Styles */
-@media (max-width: 700px) {
-  .request-editor {
-    padding: 0 16px;
-  }
-
-  .request-bar {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .method-select {
-    min-width: 90px;
-    padding: 10px 10px;
-    font-size: 12px;
-  }
-
-  .url-input {
-    flex: 1 1 100%;
-    order: -1;
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .send-btn,
-  .save-btn {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .send-btn .btn-text,
-  .save-btn .btn-text,
-  .beautify-btn .btn-text {
-    display: none;
-  }
-
-  .send-btn,
-  .save-btn,
-  .beautify-btn {
-    gap: 0;
-  }
-}
-
 @media (max-width: 500px) {
-  .request-editor {
-    padding: 0 12px;
-  }
-
-  .request-header {
-    padding: 12px 0;
-  }
-
-  .request-name-input {
-    font-size: 16px;
-    max-width: 100%;
-  }
-
-  .request-bar {
-    padding: 12px 0;
-    gap: 6px;
-  }
-
-  .method-select {
-    min-width: 80px;
-    padding: 8px 8px;
-  }
-
-  .url-input {
-    padding: 8px 10px;
-  }
-
-  .send-btn,
-  .beautify-btn,
-  .save-btn {
-    padding: 8px 10px;
-  }
-
-  .layout-toggle-btn {
-    width: 32px;
-    height: 32px;
-  }
-
   /* Force horizontal layout on very small screens */
   .split-container.vertical {
     flex-direction: column;
@@ -1853,41 +1772,5 @@ body {
   .split-container.vertical .resize-handle-bar {
     width: 48px;
     height: 4px;
-  }
-
-  .response-meta {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .status-badge,
-  .time-badge,
-  .size-badge {
-    font-size: 10px;
-    padding: 4px 8px;
-  }
-
-  .response-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  .response-actions {
-    justify-content: flex-end;
-  }
-
-  .response-actions .action-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-
-  .error-display {
-    padding: 20px 12px;
-  }
-
-  .error-message {
-    padding: 12px 14px;
-    font-size: 12px;
   }
 }
