@@ -1,4 +1,5 @@
 import React from "react";
+import Tooltip from "../components/Tooltip";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import FileIcon from "../components/icons/FileIcon";
 import PlusIcon from "../components/icons/PlusIcon";
@@ -45,17 +46,18 @@ const FormFieldEditor = () => {
             />
 
             {config.contentType === "multipart/form-data" && (
-              <button
-                className={`type-toggle ${
-                  item.type === "file" ? "file-type" : "text-type"
-                }`}
-                onClick={() => handleToggleFormDataType(index)}
-                title={
-                  item.type === "file" ? "Switch to text" : "Switch to file"
-                }
+              <Tooltip
+                text={item.type === "file" ? "Switch to text" : "Switch to file"}
               >
-                {item.type === "file" ? <FileIcon /> : <TextIcon />}
-              </button>
+                <button
+                  className={`type-toggle ${
+                    item.type === "file" ? "file-type" : "text-type"
+                  }`}
+                  onClick={() => handleToggleFormDataType(index)}
+                >
+                  {item.type === "file" ? <FileIcon /> : <TextIcon />}
+                </button>
+              </Tooltip>
             )}
 
             {item.type === "file" ? (
@@ -87,12 +89,14 @@ const FormFieldEditor = () => {
               />
             )}
 
-            <button
-              className="remove-btn"
-              onClick={() => handleRemoveFormData(index)}
-            >
-              <TrashIcon />
-            </button>
+            <Tooltip text="Remove field">
+              <button
+                className="remove-btn"
+                onClick={() => handleRemoveFormData(index)}
+              >
+                <TrashIcon />
+              </button>
+            </Tooltip>
           </div>
         ))
       )}

@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
+import Tooltip from "../components/Tooltip";
 import { ImportProvider } from "../types/internal.types";
 import RESTLabIcon from "../components/icons/RestLabIcon";
 import PostmanIcon from "../components/icons/PostmanIcon";
 import ThunderClientIcon from "../components/icons/ThunderClientIcon";
-import ImportIcon from "../components/icons/ImportIcon";
+import FolderImportIcon from "../components/icons/FolderImportIcon";
 
 const IMPORT_PROVIDERS: ImportProvider[] = [
   {
@@ -47,14 +48,15 @@ const ImportDropdown: React.FC<{
   }, [isOpen]);
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        className="header-action-btn"
-        onClick={() => setIsOpen(!isOpen)}
-        title="Import Collection"
-      >
-        <ImportIcon />
-      </button>
+    <div className="dropdown-wrap" ref={dropdownRef}>
+      <Tooltip text="Import Collection" position="bottom">
+        <button
+          className="header-action-btn"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <FolderImportIcon />
+        </button>
+      </Tooltip>
       {isOpen && (
         <div className="dropdown-menu">
           <div className="dropdown-header">Import from</div>
@@ -67,7 +69,7 @@ const ImportDropdown: React.FC<{
                 setIsOpen(false);
               }}
             >
-              <span className="flex items-center justify-center w-5 h-5 opacity-80">
+              <span className="dropdown-item-icon">
                 {provider.icon}
               </span>
               <span>{provider.name}</span>

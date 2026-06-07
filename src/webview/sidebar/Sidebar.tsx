@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
 import ChevronIcon from "../components/icons/ChevronIcon";
+import CollectionAddIcon from "../components/icons/CollectionAddIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
-import EmptyGlassIcon from "../components/icons/EmptyGlassIcon";
 import FolderIcon from "../components/icons/FolderIcon";
 import NoItemsIcon from "../components/icons/NoItemsIcon";
 import PlusIcon from "../components/icons/PlusIcon";
@@ -121,9 +121,9 @@ const FolderItem: React.FC<FolderItemProps> = ({
   const isDropTarget = dragOverFolderId === folder.id;
 
   return (
-    <div key={folder.id} className="mb-0.5" data-folder-id={folder.id}>
+    <div key={folder.id} className="folder-item" data-folder-id={folder.id}>
       <div
-        className={`group flex items-center gap-2.5 py-2.5 px-3 mb-1 cursor-pointer rounded-lg transition-all duration-200 border border-transparent hover:bg-glass hover:border-glass relative before:content-[''] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-0 before:bg-restlab-gradient before:rounded-r before:transition-all before:duration-200 hover:before:h-[60%] focus:outline-none focus:border-sky-400 focus:bg-sky-500/10 focus:before:h-[80%] ${isDropTarget ? "drop-target-active" : ""} ${isDragging ? "dragging-active" : ""}`}
+        className={`tree-row${isDropTarget ? " drop-target-active" : ""}${isDragging ? " dragging-active" : ""}`}
         onClick={() => onToggleFolder(folder.id)}
         role="button"
         tabIndex={0}
@@ -136,21 +136,21 @@ const FolderItem: React.FC<FolderItemProps> = ({
         onDrop={(e) => onDrop(e, folder.id)}
       >
         <ChevronIcon
-          className={expandedFolders.has(folder.id) ? "rotate-90" : ""}
+          className={`tree-icon${expandedFolders.has(folder.id) ? " rotate-90" : ""}`}
         />
 
         {depth === 0 ? (
-          <CollectionIcon className="flex-shrink-0 text-vscode transition-colors duration-150 group-hover:text-sky-400 group-hover:drop-shadow-[0_0_4px_rgba(56,189,248,0.4)]" />
+          <CollectionIcon className="tree-icon" />
         ) : (
-          <FolderIcon className="flex-shrink-0 text-vscode transition-colors duration-150 group-hover:text-sky-400 group-hover:drop-shadow-[0_0_4px_rgba(56,189,248,0.4)]" />
+          <FolderIcon className="tree-icon" />
         )}
-        <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium">
+        <span className="tree-label">
           {folder.name}
         </span>
-        <div className="flex items-center gap-1 ml-auto">
+        <div className="tree-actions">
           <Tooltip text="Add Request">
             <button
-              className="action-btn group-hover:opacity-60 hover:!opacity-100 hover:bg-sky-500/10 hover:text-sky-400 hover:shadow-glow"
+              className="action-btn"
               onClick={(e) => onAddRequest(e, folder.id)}
             >
               <PlusIcon />
@@ -170,7 +170,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
       </div>
 
       {expandedFolders.has(folder.id) && (
-        <div className="relative before:content-[''] before:absolute before:left-5 before:top-0 before:bottom-2 before:w-px before:bg-gradient-to-b before:from-white/10 before:to-transparent">
+        <div className="tree-children">
           {/* Render subfolders first */}
           {folder.subfolders &&
             folder.subfolders.map((subfolder) => (
@@ -205,7 +205,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
 
           {/* Render requests */}
           <div
-            className={`pl-5 ${isDropTarget ? "drop-zone-highlight" : ""}`}
+            className={`req-zone${isDropTarget ? " drop-zone-highlight" : ""}`}
             style={{ paddingLeft: `${20 + depth * 16}px` }}
             onDragOver={(e) => onDragOver(e, folder.id)}
             onDrop={(e) => onDrop(e, folder.id)}
@@ -213,7 +213,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
             {(!folder.requests || folder.requests.length === 0) &&
             (!folder.subfolders || folder.subfolders.length === 0) ? (
               <div
-                className={`py-2 px-3 text-xs text-vscode-muted opacity-70 italic ${isDropTarget ? "drop-hint-visible" : ""}`}
+                className={`req-empty-hint${isDropTarget ? " drop-hint-visible" : ""}`}
               >
                 <span>
                   {isDropTarget ? "Drop here to add" : "No items yet"}
@@ -223,11 +223,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
               folder.requests?.map((request) => (
                 <div
                   key={request.id}
-                  className={`group flex items-center gap-2 py-2 px-2.5 mb-0.5 cursor-pointer rounded-md transition-all duration-200 border ml-2.5 relative before:content-[''] before:absolute before:-left-2 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:rounded-sm before:transition-all before:duration-200 hover:bg-glass hover:border-glass hover:before:h-1/2 ${isDragging ? "dragging-active" : ""} ${
-                    request.id === activeRequestId
-                      ? "bg-sky-500/15 border-sky-500/30 before:h-1/2 before:bg-restlab-gradient"
-                      : "border-transparent before:h-0 before:bg-restlab-gradient"
-                  }`}
+                  className={`req-row${isDragging ? " dragging-active" : ""}${request.id === activeRequestId ? " active" : ""}`}
                   onClick={() => onOpenRequest(request)}
                   role="button"
                   tabIndex={0}
@@ -248,7 +244,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
                   >
                     {request.method}
                   </span>
-                  <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+                  <span className="req-label">
                     {request.name}
                   </span>
                   <RequestActionsDropdown
@@ -591,18 +587,18 @@ export const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="p-4 border-b border-glass bg-gradient-to-b from-sky-500/5 to-transparent relative after:content-[''] after:absolute after:-bottom-px after:left-4 after:right-4 after:h-px after:bg-restlab-gradient after:opacity-30">
-        <h2 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-widest text-gradient mb-4 before:content-[''] before:inline-block before:w-2 before:h-2 before:bg-restlab-gradient before:rounded-sm before:shadow-glow">
+    <div className="sb">
+      <div className="sb-head">
+        <h2 className="sb-title">
           REST Lab
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="sb-head-actions">
           <button
             className="btn-primary"
             onClick={handleCreateFolder}
             title="Create Collection"
           >
-            <EmptyGlassIcon />
+            <CollectionAddIcon />
             <span>New Collection</span>
           </button>
           <ImportDropdown onSelect={handleImportCollection} />
@@ -610,7 +606,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       <div
-        className={`flex-1 overflow-y-auto py-3 px-2 scrollbar-thin ${isDragging ? "root-drop-zone" : ""}`}
+        className={`sb-tree${isDragging ? " root-drop-zone" : ""}`}
         onDragOver={(e) => {
           if (e.dataTransfer.types.includes(DRAG_TYPE_FOLDER)) {
             e.preventDefault();
@@ -620,10 +616,10 @@ export const Sidebar: React.FC = () => {
         onDrop={handleDropOnRoot}
       >
         {folders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+          <div className="empty-state">
             <NoItemsIcon />
-            <p className="mb-1 text-vscode font-medium">No collections yet</p>
-            <p className="text-xs text-vscode-muted opacity-80">
+            <p className="empty-state-title">No collections yet</p>
+            <p className="empty-state-hint">
               Create your first collection to get started
             </p>
           </div>

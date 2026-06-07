@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useAutoGrow } from "../helpers/useAutoGrow";
+
 const AutocompleteInput: React.FC<{
   value: string;
   onChange: (value: string) => void;
@@ -10,8 +12,10 @@ const AutocompleteInput: React.FC<{
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   useAutoGrow(inputRef, value);
 
   useEffect(() => {
@@ -41,6 +45,19 @@ const AutocompleteInput: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (showSuggestions && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setDropdownStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: 99999,
+      });
+    }
+  }, [showSuggestions]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !showSuggestions) {
       e.preventDefault();
@@ -64,8 +81,36 @@ const AutocompleteInput: React.FC<{
     }
   };
 
+  const dropdown =
+    showSuggestions && filteredSuggestions.length > 0
+      ? ReactDOM.createPortal(
+          <div
+            ref={suggestionsRef}
+            className="autocomplete-dropdown"
+            style={dropdownStyle}
+          >
+            {filteredSuggestions.map((suggestion, index) => (
+              <div
+                key={suggestion}
+                className={`autocomplete-item ${
+                  index === activeSuggestionIndex ? "active" : ""
+                }`}
+                onClick={() => {
+                  onChange(suggestion);
+                  setShowSuggestions(false);
+                }}
+                onMouseEnter={() => setActiveSuggestionIndex(index)}
+              >
+                {suggestion}
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )
+      : null;
+
   return (
-    <div className="autocomplete-container">
+    <div ref={containerRef} className="autocomplete-container">
       <textarea
         ref={inputRef}
         rows={1}
@@ -77,25 +122,7 @@ const AutocompleteInput: React.FC<{
         className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
-      {showSuggestions && filteredSuggestions.length > 0 && (
-        <div ref={suggestionsRef} className="autocomplete-dropdown">
-          {filteredSuggestions.map((suggestion, index) => (
-            <div
-              key={suggestion}
-              className={`autocomplete-item ${
-                index === activeSuggestionIndex ? "active" : ""
-              }`}
-              onClick={() => {
-                onChange(suggestion);
-                setShowSuggestions(false);
-              }}
-              onMouseEnter={() => setActiveSuggestionIndex(index)}
-            >
-              {suggestion}
-            </div>
-          ))}
-        </div>
-      )}
+      {dropdown}
     </div>
   );
 };

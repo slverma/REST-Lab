@@ -79,18 +79,21 @@ const FolderActionsDropdown: React.FC<{
     setIsOpen(!isOpen);
   };
 
+  const isCollection = !folder.parentId;
+  const label = isCollection ? "Collection" : "Folder";
+
   return (
-    <div className="relative inline-flex" ref={dropdownRef}>
+    <div className="dropdown-wrap" ref={dropdownRef}>
       <Tooltip text="More Actions" position="left">
         <button
-          className="action-btn group-hover:opacity-60 hover:!opacity-100 hover:bg-slate-500/10 hover:text-slate-400"
+          className="action-btn"
           onClick={handleClick}
         >
           <MoreActionIcon />
         </button>
       </Tooltip>
       {isOpen && !showExport && (
-        <div className="dropdown-menu min-w-[180px]">
+        <div className="dropdown-menu">
           <button
             className="dropdown-item"
             onClick={(e) => {
@@ -99,7 +102,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <FolderAddIcon />
-            <span>Add Subfolder</span>
+            <span>{isCollection ? "Add Folder" : "Add Subfolder"}</span>
           </button>
           <button
             className="dropdown-item"
@@ -119,7 +122,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <GearIcon />
-            <span>Collection Settings</span>
+            <span>{label} Settings</span>
           </button>
           <button
             className="dropdown-item"
@@ -129,7 +132,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <ExportIcon />
-            <span>Export Collection</span>
+            <span>Export {label}</span>
             <ChevronIcon />
           </button>
           <button
@@ -140,7 +143,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <CopyIcon />
-            <span>Duplicate Collection</span>
+            <span>Duplicate {label}</span>
           </button>
           <button
             className="dropdown-item"
@@ -150,23 +153,23 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <PencilIcon />
-            <span>Rename Collection</span>
+            <span>Rename {label}</span>
           </button>
           <div className="dropdown-divider" />
           <button
-            className="dropdown-item text-red-500"
+            className="dropdown-item danger"
             onClick={(e) => {
               onDelete(e, folder.id);
               setIsOpen(false);
             }}
           >
             <TrashIcon />
-            <span>Delete Collection</span>
+            <span>Delete {label}</span>
           </button>
         </div>
       )}
       {isOpen && showExport && (
-        <div className="dropdown-menu min-w-[180px]">
+        <div className="dropdown-menu">
           <button
             className="dropdown-item"
             onClick={(e) => {
@@ -190,7 +193,7 @@ const FolderActionsDropdown: React.FC<{
                 setShowExport(false);
               }}
             >
-              <span className="flex items-center justify-center w-5 h-5 opacity-80">
+              <span className="dropdown-item-icon">
                 {format.icon}
               </span>
               <span>{format.name}</span>

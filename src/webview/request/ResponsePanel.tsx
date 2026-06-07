@@ -23,7 +23,6 @@ const ResponsePanel: React.FC = () => {
     splitLayout,
     requestSize,
     isResizing,
-    isSmallScreen,
     isResponseHidden,
     responseEditorLanguage,
     responseBodyValue,
@@ -96,22 +95,20 @@ const ResponsePanel: React.FC = () => {
                 </div>
               )}
               <div className="response-header-actions">
-                {!isSmallScreen && (
-                  <Tooltip
-                    text={
-                      splitLayout === "horizontal"
-                        ? "Switch to side-by-side view"
-                        : "Switch to stacked view"
-                    }
+                <Tooltip
+                  text={
+                    splitLayout === "horizontal"
+                      ? "Switch to side-by-side view"
+                      : "Switch to stacked view"
+                  }
+                >
+                  <button
+                    className="layout-toggle-btn"
+                    onClick={toggleLayout}
                   >
-                    <button
-                      className="layout-toggle-btn"
-                      onClick={toggleLayout}
-                    >
-                      <SplitIcon splitLayout={splitLayout} />
-                    </button>
-                  </Tooltip>
-                )}
+                    <SplitIcon splitLayout={splitLayout} />
+                  </button>
+                </Tooltip>
                 <Tooltip text="Hide response">
                   <button
                     className="response-hide-btn"

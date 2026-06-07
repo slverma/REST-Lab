@@ -5,7 +5,7 @@
 //   2. release-notes-generator — builds changelog text in memory
 //   3. changelog          — writes changelog text to CHANGELOG.md
 //   4. npm (no publish)   — writes new version into package.json + package-lock.json
-//   5. exec               — runs `vsce publish` to push to VS Code Marketplace
+//   5. exec               — packages to .vsix, publishes to VS Code Marketplace + Open VSX
 //   6. github             — creates the GitHub Release with the generated notes
 //   7. git                — commits package.json + package-lock.json + CHANGELOG.md
 //                           back to main with "[skip ci]" to prevent an infinite loop
@@ -102,14 +102,17 @@ module.exports = {
       },
     ],
 
-    // ── 5. Publish to VS Code Marketplace ────────────────────────────────────
-    // Runs only when there is an actual release (commit-analyzer returned a
-    // version bump). VSCE_PAT is injected from the GitHub Actions secret.
+    // ── 5. Publish to VS Code Marketplace and Open VSX ───────────────────────
+    // Packages once to a .vsix, then publishes the same artifact to both
+    // registries. VSCE_PAT and OVSX_PAT are injected from GitHub Actions secrets.
     [
       "@semantic-release/exec",
       {
         publishCmd:
-          "npm install -g @vscode/vsce && vsce publish -p $VSCE_PAT",
+          "npm install -g @vscode/vsce ovsx && " +
+          "vsce package && " +
+          "vsce publish --packagePath restlab-${nextRelease.version}.vsix -p $VSCE_PAT && " +
+          "ovsx publish restlab-${nextRelease.version}.vsix -p $OVSX_PAT",
       },
     ],
 

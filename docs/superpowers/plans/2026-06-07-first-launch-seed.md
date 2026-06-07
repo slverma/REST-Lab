@@ -1,3 +1,40 @@
+# First-Launch Seed Data Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Seed a ready-to-use JSONPlaceholder example collection on first extension activation so new users immediately understand the tool.
+
+**Architecture:** A single `seedDefaultData(context)` async function is added to `src/extension.ts` and called as the first line of `activate()`. It checks if `restlab.folders` is empty in globalState; if so, it writes the full folder tree, folder config (base URL, environments, shared header), six request configs, and pre-expanded folder state. `SidebarProvider` picks up the seeded data transparently since it reads `restlab.folders` in its constructor.
+
+**Tech Stack:** TypeScript (strict), VS Code extension API (`vscode.ExtensionContext.globalState`), existing type interfaces in `src/providers/SidebarProvider.ts` and `src/webview/types/internal.types.ts`.
+
+---
+
+### Task 1: Add `seedDefaultData` to `extension.ts`
+
+**Files:**
+- Modify: `src/extension.ts`
+
+The only file that changes. All seed data is defined inline in the function.
+
+**Type notes:**
+- `Folder` and `Request` are imported from `./providers/SidebarProvider` (already exported from there — they define the folder tree shape used by globalState).
+- `FolderConfig`, `RequestConfig`, `Environment`, `EnvVariable` are imported from `./webview/types/internal.types` — the webview-side `FolderConfig` includes `environments` and `activeEnvironmentId` which the extension-host-side one omits, but globalState must carry the full shape so the FolderEditor webview can read it.
+
+- [ ] **Step 1: Add new imports to `extension.ts`**
+
+Open `src/extension.ts`. The current import block is:
+
+```typescript
+import * as vscode from "vscode";
+import { SidebarProvider } from "./providers/SidebarProvider";
+import { FolderEditorProvider } from "./providers/FolderEditorProvider";
+import { RequestEditorProvider } from "./providers/RequestEditorProvider";
+```
+
+Replace with:
+
+```typescript
 import * as vscode from "vscode";
 import { Folder, Request, SidebarProvider } from "./providers/SidebarProvider";
 import { FolderEditorProvider } from "./providers/FolderEditorProvider";
@@ -6,7 +43,13 @@ import {
   FolderConfig,
   RequestConfig,
 } from "./webview/types/internal.types";
+```
 
+- [ ] **Step 2: Add `seedDefaultData` function before `activate()`**
+
+Insert the following function immediately before the `export function activate(...)` line:
+
+```typescript
 async function seedDefaultData(
   context: vscode.ExtensionContext,
 ): Promise<void> {
@@ -133,107 +176,55 @@ async function seedDefaultData(
     },
   ];
 
-  try {
-    await Promise.all([
-      context.globalState.update("restlab.folders", folderTree),
-      context.globalState.update(`restlab.folder.${COLLECTION_ID}`, folderConfig),
-      ...requests.map((r) =>
-        context.globalState.update(`restlab.request.${r.id}`, r),
-      ),
-      context.globalState.update("restlab.expandedFolders", [
-        COLLECTION_ID,
-        POSTS_ID,
-      ]),
-    ]);
-  } catch (err) {
-    await context.globalState.update("restlab.folders", undefined);
-    console.error("REST Lab: failed to seed default data", err);
-  }
+  await Promise.all([
+    context.globalState.update("restlab.folders", folderTree),
+    context.globalState.update(`restlab.folder.${COLLECTION_ID}`, folderConfig),
+    ...requests.map((r) =>
+      context.globalState.update(`restlab.request.${r.id}`, r),
+    ),
+    context.globalState.update("restlab.expandedFolders", [
+      COLLECTION_ID,
+      POSTS_ID,
+    ]),
+  ]);
 }
+```
 
-export async function activate(context: vscode.ExtensionContext) {
+- [ ] **Step 3: Call `seedDefaultData` at the top of `activate()`**
+
+In `activate()`, find the first line:
+
+```typescript
+  console.log("REST Lab extension is now active!");
+```
+
+Add the seed call immediately after it:
+
+```typescript
   console.log("REST Lab extension is now active!");
   await seedDefaultData(context);
+```
 
-  // Initialize the sidebar provider
-  const sidebarProvider = new SidebarProvider(context.extensionUri, context);
+Also update the function signature to `async`:
 
-  // Register the sidebar webview provider
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      "restlab-sidebar-view",
-      sidebarProvider,
-    ),
-  );
+```typescript
+export async function activate(context: vscode.ExtensionContext) {
+```
 
-  // Register the folder editor provider
-  const folderEditorProvider = new FolderEditorProvider(context);
-  context.subscriptions.push(
-    vscode.window.registerCustomEditorProvider(
-      "restlab.folderEditor",
-      folderEditorProvider,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
-      },
-    ),
-  );
+- [ ] **Step 4: Run type check**
 
-  // Register the request editor provider
-  const requestEditorProvider = new RequestEditorProvider(context);
+```bash
+npx tsc --noEmit
+```
 
-  // Register command to create folder
-  context.subscriptions.push(
-    vscode.commands.registerCommand("restlab.createFolder", async () => {
-      const folderName = await vscode.window.showInputBox({
-        prompt: "Enter folder name",
-        placeHolder: "New Folder",
-      });
+Expected: no errors. If you see errors, the most likely causes are:
+- `Request` not exported from `SidebarProvider.ts` — add `export` to the interface.
+- `FolderConfig.environments` type mismatch — `Environment` from `internal.types.ts` expects `{ id: string; name: string; variables: EnvVariable[] }` — verify the shape matches what you wrote.
+- `header.enabled` field — the `SidebarProvider.ts` `FolderConfig` uses `{ key, value }` without `enabled`, but `internal.types.ts` uses `Header = { key, value, enabled? }`. Since we import `FolderConfig` from `internal.types.ts`, `enabled` is valid.
 
-      if (folderName) {
-        sidebarProvider.addFolder(folderName);
-      }
-    }),
-  );
+- [ ] **Step 5: Commit**
 
-  // Register command to open folder configuration
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "restlab.openFolderConfig",
-      (folderId: string, folderName: string) => {
-        FolderEditorProvider.openFolderEditor(
-          context,
-          folderId,
-          folderName,
-          sidebarProvider,
-        );
-      },
-    ),
-  );
-
-  // Register command to open request editor
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "restlab.openRequest",
-      (requestId: string, requestName: string, folderId: string) => {
-        RequestEditorProvider.openRequestEditor(
-          context,
-          requestId,
-          requestName,
-          folderId,
-          sidebarProvider,
-        );
-      },
-    ),
-  );
-
-  // Register command to import collection
-  context.subscriptions.push(
-    vscode.commands.registerCommand("restlab.importCollection", async () => {
-      await sidebarProvider.importCollection();
-    }),
-  );
-}
-
-export function deactivate() {}
+```bash
+git add src/extension.ts
+git commit -m "feat: seed example JSONPlaceholder collection on first launch"
+```

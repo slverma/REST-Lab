@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import Tooltip from "../components/Tooltip";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
@@ -91,18 +92,17 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                   className={`env-item ${isSelected ? "selected" : ""}`}
                   onClick={() => onSelectEnv(env.id)}
                 >
-                  <button
-                    className={`env-active-btn ${isActive ? "active" : ""}`}
-                    title={
-                      isActive
-                        ? "Active (click to deactivate)"
-                        : "Set as active"
-                    }
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSetActive(env.id);
-                    }}
-                  />
+                  <Tooltip
+                    text={isActive ? "Active (click to deactivate)" : "Set as active"}
+                  >
+                    <button
+                      className={`env-active-btn ${isActive ? "active" : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSetActive(env.id);
+                      }}
+                    />
+                  </Tooltip>
                   {isRenaming ? (
                     <input
                       ref={renameInputRef}
@@ -128,16 +128,17 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                       {env.name}
                     </span>
                   )}
-                  <button
-                    className="env-delete-btn"
-                    title="Delete environment"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteEnvironment(env.id);
-                    }}
-                  >
-                    <TrashIcon />
-                  </button>
+                  <Tooltip text="Delete environment">
+                    <button
+                      className="env-delete-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteEnvironment(env.id);
+                      }}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </Tooltip>
                 </div>
               );
             })}
@@ -193,13 +194,14 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                 <div className="env-vars-list">
                   {selectedEnv.variables.map((v, idx) => (
                     <div key={idx} className="env-var-row">
-                      <button
-                        className={`env-var-toggle ${v.enabled ? "enabled" : ""}`}
-                        title={v.enabled ? "Disable" : "Enable"}
-                        onClick={() =>
-                          onUpdateVariable(idx, "enabled", !v.enabled)
-                        }
-                      />
+                      <Tooltip text={v.enabled ? "Disable" : "Enable"}>
+                        <button
+                          className={`env-var-toggle ${v.enabled ? "enabled" : ""}`}
+                          onClick={() =>
+                            onUpdateVariable(idx, "enabled", !v.enabled)
+                          }
+                        />
+                      </Tooltip>
                       <AutoGrowTextarea
                         className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
                         placeholder="key"
@@ -216,13 +218,14 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                           onUpdateVariable(idx, "value", e.target.value)
                         }
                       />
-                      <button
-                        className="remove-btn"
-                        title="Remove variable"
-                        onClick={() => onRemoveVariable(idx)}
-                      >
-                        <TrashIcon />
-                      </button>
+                      <Tooltip text="Remove variable">
+                        <button
+                          className="remove-btn"
+                          onClick={() => onRemoveVariable(idx)}
+                        >
+                          <TrashIcon />
+                        </button>
+                      </Tooltip>
                     </div>
                   ))}
                 </div>

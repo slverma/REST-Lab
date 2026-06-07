@@ -1,4 +1,5 @@
 import React from "react";
+import Tooltip from "../components/Tooltip";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { useRequestContext } from "./RequestContext";
@@ -90,13 +91,14 @@ const ParamsTab = () => {
                   placeholder="Value"
                   className="header-value"
                 />
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemoveParam(index)}
-                  title="Remove Parameter"
-                >
-                  <TrashIcon />
-                </button>
+                <Tooltip text="Remove Parameter">
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleRemoveParam(index)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
               </div>
             ))
         )}

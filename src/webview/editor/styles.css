@@ -49,7 +49,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 32px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--glass-border);
   background: linear-gradient(
     180deg,
@@ -66,8 +66,8 @@ body {
   content: "";
   position: absolute;
   bottom: -1px;
-  left: 32px;
-  right: 32px;
+  left: 20px;
+  right: 20px;
   height: 1px;
   background: var(--restlab-gradient);
   opacity: 0.3;
@@ -83,10 +83,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   background: var(--restlab-gradient);
-  border-radius: 12px;
+  border-radius: 8px;
   color: #ffffff;
   box-shadow: 0 4px 16px var(--restlab-accent-glow);
 }
@@ -96,13 +96,13 @@ body {
 }
 
 .header-info h1 {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
   background: var(--restlab-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .header-info .subtitle {
@@ -172,7 +172,7 @@ body {
 .editor-content {
   flex: 1;
   overflow-y: auto;
-  padding: 32px;
+  padding: 16px 20px;
 }
 
 .editor-content::-webkit-scrollbar {
@@ -192,68 +192,51 @@ body {
   background: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
-/* Form Sections */
-.form-section {
-  margin-bottom: 40px;
-  padding: 28px;
+/* Form Sections — fieldset/legend style */
+fieldset.form-section {
+  margin-bottom: 10px;
+  padding: 8px 12px 10px;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
+  border-radius: 8px;
   backdrop-filter: blur(8px);
   position: relative;
 }
 
-.form-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 28px;
-  right: 28px;
-  height: 1px;
-  background: var(--restlab-gradient);
-  opacity: 0.3;
-  border-radius: 1px;
-}
-
-.form-section h2 {
+.section-legend {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 8px;
+  width: 100%;
+  padding: 0 5px;
+  font-size: 10px;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  line-height: 1;
+  background: var(--vscode-editor-background);
+}
+
+.section-legend span {
   background: var(--restlab-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
-.form-section h2::before {
-  content: "";
-  display: inline-block;
-  width: 4px;
-  height: 16px;
-  background: var(--restlab-gradient);
-  border-radius: 2px;
-  box-shadow: 0 0 8px var(--restlab-accent-glow);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.section-header h2 {
-  margin-bottom: 0;
+/* Add button inside the legend — pushed to the right */
+.legend-add-btn {
+  margin-left: auto;
+  padding: 3px 8px;
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
 }
 
 /* Form Groups */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .form-group:last-child {
@@ -262,10 +245,10 @@ body {
 
 .form-group label {
   display: block;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--vscode-foreground);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -273,13 +256,13 @@ body {
 .form-group input,
 .form-group textarea {
   width: 100%;
-  padding: 12px 16px;
+  padding: 6px 10px;
   border: 1px solid var(--vscode-panel-border);
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: var(--vscode-editor-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.2s ease;
 }
 
@@ -354,7 +337,7 @@ body {
 .headers-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .empty-message {
@@ -369,12 +352,12 @@ body {
 
 .header-row {
   display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  padding: 12px;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
   background: var(--vscode-editor-background);
   border: 1px solid var(--vscode-panel-border);
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.15s ease;
 }
 
@@ -385,9 +368,9 @@ body {
 .header-key,
 .header-value {
   flex: 1;
-  padding: 10px 14px;
+  padding: 5px 8px;
   border: 1px solid var(--vscode-panel-border);
-  border-radius: 6px;
+  border-radius: 5px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
@@ -460,6 +443,38 @@ body {
   border-radius: 4px;
 }
 
+/* Explicit field label (mirrors .form-group label) */
+.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Generic form select — used for non-method selects (auth type, add-to, etc.) */
+.form-select {
+  width: 100%;
+  height: 2em;
+  padding: 0 10px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--restlab-accent);
+  box-shadow: 0 0 0 2px var(--restlab-accent-subtle);
+}
+
 /* Field hint */
 .field-hint {
   margin-top: 8px;
@@ -473,13 +488,13 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   color: var(--vscode-descriptionForeground);
-  padding: 32px;
+  padding: 16px;
   text-align: center;
   background-color: var(--vscode-editor-background);
   border: 1px dashed var(--vscode-panel-border);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .empty-message .empty-icon {
@@ -510,11 +525,6 @@ body {
 }
 
 .autocomplete-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  margin-top: 4px;
   max-height: 200px;
   overflow-y: auto;
   background: var(
@@ -524,7 +534,6 @@ body {
   border: 1px solid var(--vscode-dropdown-border, var(--vscode-panel-border));
   border-radius: 6px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
 }
 
 .autocomplete-dropdown::-webkit-scrollbar {
@@ -583,21 +592,21 @@ body {
 }
 
 .inherited-headers {
-  margin-bottom: 16px;
-  padding: 16px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
   background: var(--restlab-accent-subtle);
   border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .inherited-label {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--restlab-accent);
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 .inherited-label svg {
