@@ -1,3 +1,7 @@
+## <small>1.6.1 (2026-06-07)</small>
+
+* fix: release open vsx (#21) ([ba75890](https://github.com/slverma/REST-Lab/commit/ba75890)), closes [#21](https://github.com/slverma/REST-Lab/issues/21)
+
 # Changelog
 
 All notable changes to the REST Lab extension will be documented in this file.
