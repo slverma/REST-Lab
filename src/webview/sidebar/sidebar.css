@@ -72,7 +72,7 @@ body {
 
 /* ---- Header ---- */
 .sb-head {
-  padding: var(--rl-sp4);
+  padding: var(--rl-sp3) var(--rl-sp4);
   border-bottom: 1px solid var(--glass-border);
   background: linear-gradient(180deg, rgba(56, 189, 248, 0.05), transparent);
   position: relative;
@@ -101,7 +101,7 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: var(--rl-sp4);
+  margin-bottom: var(--rl-sp2);
 }
 .sb-title::before {
   content: "";
@@ -150,7 +150,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--rl-sp3);
-  padding: var(--rl-sp3);
+  padding: var(--rl-sp2) var(--rl-sp3);
   margin-bottom: var(--rl-sp1);
   cursor: pointer;
   border-radius: var(--rl-r2);
@@ -234,7 +234,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--rl-sp2);
-  padding: var(--rl-sp2) var(--rl-sp3);
+  padding: 3px var(--rl-sp3);
   margin-bottom: 1px;
   margin-left: 0.6em;
   cursor: pointer;

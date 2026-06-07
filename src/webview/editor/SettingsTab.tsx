@@ -1,4 +1,5 @@
 import React from "react";
+import Tooltip from "../components/Tooltip";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
 import AutocompleteInput from "../components/AutocompleteInput";
 import ArrowUpIcon from "../components/icons/ArrowIcon";
@@ -93,8 +94,8 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
   return (
     <>
       {/* ── Name ── */}
-      <div className="form-section">
-        <h2>{isCollection ? "Collection" : "Folder"} Name</h2>
+      <fieldset className="form-section">
+        <legend className="section-legend"><span>{isCollection ? "Collection" : "Folder"} Name</span></legend>
         <div className="form-group">
           <AutoGrowTextarea
             value={config.name}
@@ -102,11 +103,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             placeholder={`Enter ${entityLabel} name`}
           />
         </div>
-      </div>
+      </fieldset>
 
       {/* ── Base URL ── */}
-      <div className="form-section">
-        <h2>Base URL</h2>
+      <fieldset className="form-section">
+        <legend className="section-legend"><span>Base URL</span></legend>
         <div className="form-group">
           <EnvVarInput
             value={config.baseUrl || ""}
@@ -126,17 +127,14 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             All requests in this {entityLabel} will use this as the base URL
           </p>
         </div>
-      </div>
+      </fieldset>
 
       {/* ── Headers ── */}
-      <div className="form-section">
-        <div className="section-header">
-          <h2>Headers</h2>
-          <button className="add-btn" onClick={onAddHeader}>
-            <PlusIcon />
-            Add Header
-          </button>
-        </div>
+      <fieldset className="form-section">
+        <legend className="section-legend">
+          <span>Headers</span>
+          <button className="add-btn legend-add-btn" onClick={onAddHeader}><PlusIcon />Add Header</button>
+        </legend>
         {inheritedConfig.headers && inheritedConfig.headers.length > 0 && (
           <InheritedList
             items={inheritedConfig.headers}
@@ -174,29 +172,26 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                   className="header-value"
                   envVariables={envVars}
                 />
-                <button
-                  className="remove-btn"
-                  onClick={() => onRemoveHeader(index)}
-                  title="Remove header"
-                  aria-label="Remove header"
-                >
-                  <TrashIcon />
-                </button>
+                <Tooltip text="Remove header">
+                  <button
+                    className="remove-btn"
+                    onClick={() => onRemoveHeader(index)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
               </div>
             ))
           )}
         </div>
-      </div>
+      </fieldset>
 
       {/* ── Query Parameters ── */}
-      <div className="form-section">
-        <div className="section-header">
-          <h2>Query Parameters</h2>
-          <button className="add-btn" onClick={onAddParam}>
-            <PlusIcon />
-            Add Param
-          </button>
-        </div>
+      <fieldset className="form-section">
+        <legend className="section-legend">
+          <span>Query Parameters</span>
+          <button className="add-btn legend-add-btn" onClick={onAddParam}><PlusIcon />Add Param</button>
+        </legend>
         {inheritedConfig.params && inheritedConfig.params.length > 0 && (
           <InheritedList
             items={inheritedConfig.params}
@@ -234,31 +229,33 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                   className="header-value"
                   envVariables={envVars}
                 />
-                <button
-                  className="remove-btn"
-                  onClick={() => onRemoveParam(index)}
-                  title="Remove parameter"
-                  aria-label="Remove parameter"
-                >
-                  <TrashIcon />
-                </button>
+                <Tooltip text="Remove parameter">
+                  <button
+                    className="remove-btn"
+                    onClick={() => onRemoveParam(index)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
               </div>
             ))
           )}
         </div>
-      </div>
+      </fieldset>
 
       {/* ── Authentication ── */}
-      <div className="form-section">
-        <h2>Authentication</h2>
-        <div className="form-group" style={{ marginBottom: "12px" }}>
+      <fieldset className="form-section">
+        <legend className="section-legend"><span>Authentication</span></legend>
+        <div className="form-group">
           <label className="field-label">Auth Type</label>
           <select
-            className="method-select"
-            value={config.auth === undefined ? "none" : config.auth.type}
+            className="form-select"
+            value={config.auth === undefined ? (isCollection ? "none" : "inherit") : config.auth.type}
             onChange={(e) => {
               const val = e.target.value;
-              if (val === "none") {
+              if (val === "inherit") {
+                onChangeAuth(undefined);
+              } else if (val === "none") {
                 onChangeAuth({ type: "none" });
               } else if (val === "bearer") {
                 onChangeAuth({ type: "bearer", token: "" });
@@ -269,6 +266,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
               }
             }}
           >
+            {!isCollection && <option value="inherit">Inherit from parent</option>}
             <option value="none">None</option>
             <option value="bearer">Bearer Token</option>
             <option value="basic">Basic Auth</option>
@@ -342,7 +340,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             <div className="form-group">
               <label className="field-label">Add to</label>
               <select
-                className="method-select"
+                className="form-select"
                 value={apikeyAuth.addTo}
                 onChange={(e) =>
                   onChangeAuth({
@@ -378,7 +376,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             API Key inherited from parent folder
           </p>
         )}
-      </div>
+      </fieldset>
     </>
   );
 };

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
 import ChevronIcon from "../components/icons/ChevronIcon";
+import CollectionAddIcon from "../components/icons/CollectionAddIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
-import EmptyGlassIcon from "../components/icons/EmptyGlassIcon";
 import FolderIcon from "../components/icons/FolderIcon";
 import NoItemsIcon from "../components/icons/NoItemsIcon";
 import PlusIcon from "../components/icons/PlusIcon";
@@ -598,7 +598,7 @@ export const Sidebar: React.FC = () => {
             onClick={handleCreateFolder}
             title="Create Collection"
           >
-            <EmptyGlassIcon />
+            <CollectionAddIcon />
             <span>New Collection</span>
           </button>
           <ImportDropdown onSelect={handleImportCollection} />

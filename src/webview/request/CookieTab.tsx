@@ -1,4 +1,5 @@
 import React from "react";
+import Tooltip from "../components/Tooltip";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { useRequestContext } from "./RequestContext";
@@ -48,13 +49,14 @@ const CookieTab: React.FC = () => {
                 placeholder="value"
                 className="header-value"
               />
-              <button
-                className="remove-btn"
-                onClick={() => handleRemoveCookie(index)}
-                title="Remove Cookie"
-              >
-                <TrashIcon />
-              </button>
+              <Tooltip text="Remove Cookie">
+                <button
+                  className="remove-btn"
+                  onClick={() => handleRemoveCookie(index)}
+                >
+                  <TrashIcon />
+                </button>
+              </Tooltip>
             </div>
           ))
         )}

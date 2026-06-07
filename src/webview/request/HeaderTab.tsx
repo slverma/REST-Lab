@@ -1,4 +1,5 @@
 import React from "react";
+import Tooltip from "../components/Tooltip";
 import AutocompleteInput from "../components/AutocompleteInput";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
@@ -90,13 +91,14 @@ const HeaderTab = () => {
                   placeholder="Value"
                   className="header-value"
                 />
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemoveHeader(index)}
-                  title="Remove Header"
-                >
-                  <TrashIcon />
-                </button>
+                <Tooltip text="Remove Header">
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleRemoveHeader(index)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
               </div>
             ))
         )}

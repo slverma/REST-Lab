@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Tooltip from "../components/Tooltip";
 import CodeIcon from "../components/icons/CodeIcon";
 import MoreActionIcon from "../components/icons/MoreActionIcon";
 import SaveIcon from "../components/icons/SaveIcon";
@@ -148,13 +149,14 @@ const RequestEditorContent: React.FC = () => {
           <span className="btn-text">{isSaved ? "Saved" : "Save"}</span>
         </button>
         <div className="request-more-container" ref={moreRef}>
-          <button
-            className="request-more-btn"
-            title="More actions"
-            onClick={() => setMoreOpen((o) => !o)}
-          >
-            <MoreActionIcon />
-          </button>
+          <Tooltip text="More actions" position="bottom">
+            <button
+              className="request-more-btn"
+              onClick={() => setMoreOpen((o) => !o)}
+            >
+              <MoreActionIcon />
+            </button>
+          </Tooltip>
           {moreOpen && (
             <div className="request-more-dropdown">
               <button

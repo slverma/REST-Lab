@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 24 24" fill="none" stroke="#2F3542" stroke-width="1" stroke-linejoin="miter" stroke-linecap="butt">
+  <defs>
+    <!-- Clip = whole canvas MINUS a circle behind the badge (even-odd hole) -->
+    <clipPath id="badgeCut" clipPathUnits="userSpaceOnUse">
+      <path d="M0 0 H24 V24 H0 Z M6.3 11 a5.7 5.7 0 1 0 11.4 0 a5.7 5.7 0 1 0 -11.4 0 Z" clip-rule="evenodd"/>
+    </clipPath>
+  </defs>
+  <!-- Three sharp-corner parallelograms (open plates); clipped so nothing draws behind the badge -->
+  <g clip-path="url(#badgeCut)">
+    <path d="M4 5.8 L12 3.5 L20 5.8 L12 8.1 Z"/>
+    <path d="M4 11 L12 8.7 L20 11 L12 13.3 Z"/>
+    <path d="M4 16.2 L12 13.9 L20 16.2 L12 18.5 Z"/>
+  </g>
+  <!-- Circular plus badge (transparent interior) -->
+  <circle cx="12" cy="11" r="4.2"/>
+  <!-- Centered plus -->
+  <line x1="12" y1="9" x2="12" y2="13" stroke-linecap="round"/>
+  <line x1="10" y1="11" x2="14" y2="11" stroke-linecap="round"/>
+</svg>

@@ -79,6 +79,9 @@ const FolderActionsDropdown: React.FC<{
     setIsOpen(!isOpen);
   };
 
+  const isCollection = !folder.parentId;
+  const label = isCollection ? "Collection" : "Folder";
+
   return (
     <div className="dropdown-wrap" ref={dropdownRef}>
       <Tooltip text="More Actions" position="left">
@@ -99,7 +102,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <FolderAddIcon />
-            <span>Add Subfolder</span>
+            <span>{isCollection ? "Add Folder" : "Add Subfolder"}</span>
           </button>
           <button
             className="dropdown-item"
@@ -119,7 +122,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <GearIcon />
-            <span>Collection Settings</span>
+            <span>{label} Settings</span>
           </button>
           <button
             className="dropdown-item"
@@ -129,7 +132,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <ExportIcon />
-            <span>Export Collection</span>
+            <span>Export {label}</span>
             <ChevronIcon />
           </button>
           <button
@@ -140,7 +143,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <CopyIcon />
-            <span>Duplicate Collection</span>
+            <span>Duplicate {label}</span>
           </button>
           <button
             className="dropdown-item"
@@ -150,7 +153,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <PencilIcon />
-            <span>Rename Collection</span>
+            <span>Rename {label}</span>
           </button>
           <div className="dropdown-divider" />
           <button
@@ -161,7 +164,7 @@ const FolderActionsDropdown: React.FC<{
             }}
           >
             <TrashIcon />
-            <span>Delete Collection</span>
+            <span>Delete {label}</span>
           </button>
         </div>
       )}

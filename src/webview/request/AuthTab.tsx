@@ -1,6 +1,7 @@
 import React from "react";
 import { AuthConfig } from "../types/internal.types";
 import VarInput from "./VarInput";
+import ArrowUpIcon from "../components/icons/ArrowIcon";
 
 type AuthMode = "inherit" | "bearer" | "basic" | "apikey" | "none";
 
@@ -43,11 +44,13 @@ const AuthTab: React.FC<AuthTabProps> = ({
   const apikeyAuth = auth?.type === "apikey" ? auth : null;
 
   return (
-    <div className="tab-section">
-      <div className="form-group" style={{ marginBottom: "12px" }}>
+    <fieldset className="form-section">
+      <legend className="section-legend"><span>Authentication</span></legend>
+
+      <div className="form-group">
         <label className="field-label">Auth Type</label>
         <select
-          className="method-select"
+          className="form-select"
           value={mode}
           onChange={(e) => handleModeChange(e.target.value as AuthMode)}
         >
@@ -66,7 +69,6 @@ const AuthTab: React.FC<AuthTabProps> = ({
             value={auth.token}
             onChange={(val) => onAuthChange({ type: "bearer", token: val })}
             placeholder="{{token}} or paste token"
-            className="url-input"
           />
         </div>
       )}
@@ -81,7 +83,6 @@ const AuthTab: React.FC<AuthTabProps> = ({
                 onAuthChange({ type: "basic", username: val, password: basicAuth.password })
               }
               placeholder="{{username}} or enter username"
-              className="url-input"
             />
           </div>
           <div className="form-group">
@@ -92,7 +93,6 @@ const AuthTab: React.FC<AuthTabProps> = ({
                 onAuthChange({ type: "basic", username: basicAuth.username, password: val })
               }
               placeholder="{{password}} or enter password"
-              className="url-input"
             />
           </div>
         </>
@@ -108,7 +108,6 @@ const AuthTab: React.FC<AuthTabProps> = ({
                 onAuthChange({ type: "apikey", key: val, value: apikeyAuth.value, addTo: apikeyAuth.addTo })
               }
               placeholder="X-API-Key"
-              className="url-input"
             />
           </div>
           <div className="form-group">
@@ -119,13 +118,12 @@ const AuthTab: React.FC<AuthTabProps> = ({
                 onAuthChange({ type: "apikey", key: apikeyAuth.key, value: val, addTo: apikeyAuth.addTo })
               }
               placeholder="{{api_key}} or enter value"
-              className="url-input"
             />
           </div>
           <div className="form-group">
             <label className="field-label">Add to</label>
             <select
-              className="method-select"
+              className="form-select"
               value={apikeyAuth.addTo}
               onChange={(e) =>
                 onAuthChange({
@@ -144,26 +142,29 @@ const AuthTab: React.FC<AuthTabProps> = ({
       )}
 
       {mode === "inherit" && inheritedAuth?.type === "bearer" && (
-        <p className="field-hint inherited-hint" style={{ marginTop: "8px" }}>
-          Inherited: Bearer token is set on the parent folder
+        <p className="field-hint inherited-hint">
+          <ArrowUpIcon />
+          Bearer token inherited from parent folder
         </p>
       )}
       {mode === "inherit" && inheritedAuth?.type === "basic" && (
-        <p className="field-hint inherited-hint" style={{ marginTop: "8px" }}>
-          Inherited: Basic Auth is set on the parent folder
+        <p className="field-hint inherited-hint">
+          <ArrowUpIcon />
+          Basic Auth inherited from parent folder
         </p>
       )}
       {mode === "inherit" && inheritedAuth?.type === "apikey" && (
-        <p className="field-hint inherited-hint" style={{ marginTop: "8px" }}>
-          Inherited: API Key is set on the parent folder
+        <p className="field-hint inherited-hint">
+          <ArrowUpIcon />
+          API Key inherited from parent folder
         </p>
       )}
       {mode === "inherit" && (!inheritedAuth || inheritedAuth.type === "none") && (
-        <p className="field-hint" style={{ marginTop: "8px" }}>
+        <p className="field-hint">
           No auth configured on parent folders
         </p>
       )}
-    </div>
+    </fieldset>
   );
 };
 
