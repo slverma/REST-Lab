@@ -1,8 +1,3 @@
-## 1.6.0 (2026-06-07)
-
-* feat: design revamp — fluid layout, full Tailwind removal, first-launch seed (#20) ([87605b2](https://github.com/slverma/REST-Lab/commit/87605b2)), closes [#20](https://github.com/slverma/REST-Lab/issues/20)
-* ref: description (#19) ([33aefcd](https://github.com/slverma/REST-Lab/commit/33aefcd)), closes [#19](https://github.com/slverma/REST-Lab/issues/19)
-
 # Changelog
 
 All notable changes to the REST Lab extension will be documented in this file.
@@ -23,9 +18,12 @@ All notable changes to the REST Lab extension will be documented in this file.
 
 ---
 
-## [Unreleased]
-
 ### Added
+
+## 1.6.0 (2026-06-07)
+
+- feat: design revamp — fluid layout, full Tailwind removal, first-launch seed (#20) ([87605b2](https://github.com/slverma/REST-Lab/commit/87605b2)), closes [#20](https://github.com/slverma/REST-Lab/issues/20)
+- ref: description (#19) ([33aefcd](https://github.com/slverma/REST-Lab/commit/33aefcd)), closes [#19](https://github.com/slverma/REST-Lab/issues/19)
 
 #### First Launch Seed
 
