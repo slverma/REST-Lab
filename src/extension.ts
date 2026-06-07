@@ -133,17 +133,22 @@ async function seedDefaultData(
     },
   ];
 
-  await Promise.all([
-    context.globalState.update("restlab.folders", folderTree),
-    context.globalState.update(`restlab.folder.${COLLECTION_ID}`, folderConfig),
-    ...requests.map((r) =>
-      context.globalState.update(`restlab.request.${r.id}`, r),
-    ),
-    context.globalState.update("restlab.expandedFolders", [
-      COLLECTION_ID,
-      POSTS_ID,
-    ]),
-  ]);
+  try {
+    await Promise.all([
+      context.globalState.update("restlab.folders", folderTree),
+      context.globalState.update(`restlab.folder.${COLLECTION_ID}`, folderConfig),
+      ...requests.map((r) =>
+        context.globalState.update(`restlab.request.${r.id}`, r),
+      ),
+      context.globalState.update("restlab.expandedFolders", [
+        COLLECTION_ID,
+        POSTS_ID,
+      ]),
+    ]);
+  } catch (err) {
+    await context.globalState.update("restlab.folders", undefined);
+    console.error("REST Lab: failed to seed default data", err);
+  }
 }
 
 export async function activate(context: vscode.ExtensionContext) {
