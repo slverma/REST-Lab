@@ -55,3 +55,6 @@ jobs:
           # Your VS Code Marketplace Personal Access Token.
           # Add this in: GitHub repo → Settings → Secrets → Actions → New secret
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          # Your Open VSX Registry Personal Access Token.
+          # Create one at: https://open-vsx.org/ → User Settings → Access Tokens
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

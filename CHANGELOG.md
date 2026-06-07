@@ -1,74 +1,8 @@
-## <small>1.5.5 (2026-06-05)</small>
-
-* fix: bundle issue (#16) ([488bfd1](https://github.com/slverma/REST-Lab/commit/488bfd1)), closes [#16](https://github.com/slverma/REST-Lab/issues/16)
-
-## <small>1.5.4 (2026-05-18)</small>
-
-* fix: remove vscode ignore (#18) ([d537771](https://github.com/slverma/REST-Lab/commit/d537771)), closes [#18](https://github.com/slverma/REST-Lab/issues/18)
-
-## <small>1.5.3 (2026-05-18)</small>
-
-* fix: build issue (#17) ([05bfe40](https://github.com/slverma/REST-Lab/commit/05bfe40)), closes [#17](https://github.com/slverma/REST-Lab/issues/17)
-
-## <small>1.5.2 (2026-05-18)</small>
-
-* fix: deployment issue (#15) ([1138d19](https://github.com/slverma/REST-Lab/commit/1138d19)), closes [#15](https://github.com/slverma/REST-Lab/issues/15)
-
-## <small>1.5.1 (2026-05-18)</small>
-
-* fix: include dist/ in vsix package by overriding .gitignore (#14) ([86f765e](https://github.com/slverma/REST-Lab/commit/86f765e)), closes [#14](https://github.com/slverma/REST-Lab/issues/14)
-
-## 1.5.0 (2026-05-17)
-
-* feat: add cookie support for requests and responses (#13) ([8486f6b](https://github.com/slverma/REST-Lab/commit/8486f6b)), closes [#13](https://github.com/slverma/REST-Lab/issues/13)
-
-## 1.4.0 (2026-05-17)
-
-* feat: add Basic Auth and API Key authentication types and fix action pipeline (#12) ([228bc6c](https://github.com/slverma/REST-Lab/commit/228bc6c)), closes [#12](https://github.com/slverma/REST-Lab/issues/12)
-
-## 1.3.0 (2026-05-17)
-
-* feat: add Auth tab to request editor with inherit/bearer/none modes ([b546036](https://github.com/slverma/REST-Lab/commit/b546036))
-* feat: add AuthConfig type to RequestConfig, FolderConfig, and InheritedConfig ([0f09621](https://github.com/slverma/REST-Lab/commit/0f09621))
-* feat: add Authentication section to folder/collection editor ([cfcc9e0](https://github.com/slverma/REST-Lab/commit/cfcc9e0))
-* feat: add Basic Auth and API Key authentication types (#10) ([27328b7](https://github.com/slverma/REST-Lab/commit/27328b7)), closes [#10](https://github.com/slverma/REST-Lab/issues/10)
-* feat: add Basic Auth and API Key authentication types (#11) ([4b5a2d9](https://github.com/slverma/REST-Lab/commit/4b5a2d9)), closes [#11](https://github.com/slverma/REST-Lab/issues/11)
-* feat: add EyeIcon component for response hide/show toggle ([43e6cd3](https://github.com/slverma/REST-Lab/commit/43e6cd3))
-* feat: add isSmallScreen auto-layout and isResponseHidden state to context ([4cc0947](https://github.com/slverma/REST-Lab/commit/4cc0947))
-* feat: add resolveAuthToken helper ([dfbc491](https://github.com/slverma/REST-Lab/commit/dfbc491))
-* feat: add styles for response hide panel and response header actions ([ac2d1ef](https://github.com/slverma/REST-Lab/commit/ac2d1ef))
-* feat: create AuthTab component for request editor ([2bdab47](https://github.com/slverma/REST-Lab/commit/2bdab47))
-* feat: create ResponsePanel component with layout toggle and hide button ([119aef2](https://github.com/slverma/REST-Lab/commit/119aef2))
-* feat: include auth in configLoaded message from RequestEditorProvider ([af193b6](https://github.com/slverma/REST-Lab/commit/af193b6))
-* feat: inject resolved Bearer auth header into request execution and cURL export ([d18abd0](https://github.com/slverma/REST-Lab/commit/d18abd0))
-* feat: resolve auth in getInheritedConfig (child overrides parent) ([5991dc2](https://github.com/slverma/REST-Lab/commit/5991dc2))
-* feat: use close icon for hide response button ([957fa1d](https://github.com/slverma/REST-Lab/commit/957fa1d))
-* Chore/release v1.2.5 (#9) ([bd3bfae](https://github.com/slverma/REST-Lab/commit/bd3bfae)), closes [#9](https://github.com/slverma/REST-Lab/issues/9)
-* Merge pull request #7 from slverma/feat/response-panel-improvements ([c7e1920](https://github.com/slverma/REST-Lab/commit/c7e1920)), closes [#7](https://github.com/slverma/REST-Lab/issues/7)
-* Merge pull request #8 from slverma/feat/bearer-auth ([cccddac](https://github.com/slverma/REST-Lab/commit/cccddac)), closes [#8](https://github.com/slverma/REST-Lab/issues/8)
-* fix: auth config takes priority over manual Authorization header ([7165928](https://github.com/slverma/REST-Lab/commit/7165928))
-* fix: enable clipboard paste in Monaco find widget (Ctrl+F search) ([4e4701f](https://github.com/slverma/REST-Lab/commit/4e4701f))
-* fix: hide response closes the full panel (resets on next request) ([d33a1f5](https://github.com/slverma/REST-Lab/commit/d33a1f5))
-* fix: improve find widget paste - direct input manipulation, cleanup, debug logging ([5ee168a](https://github.com/slverma/REST-Lab/commit/5ee168a))
-* fix: rename auth option label to 'inherit from parent' ([2597abd](https://github.com/slverma/REST-Lab/commit/2597abd))
-* fix: standardize EyeIcon size to 16x16 ([2d5e351](https://github.com/slverma/REST-Lab/commit/2d5e351))
-* chore: exclude scripts from tsc, upgrade Node to 22, add deploy script and CLAUDE.md ([d78de43](https://github.com/slverma/REST-Lab/commit/d78de43))
-* docs: add bearer auth design spec ([2aa9aec](https://github.com/slverma/REST-Lab/commit/2aa9aec))
-* docs: add bearer auth implementation plan ([e5eea1b](https://github.com/slverma/REST-Lab/commit/e5eea1b))
-* docs: add implementation plan for response panel improvements ([8d4c121](https://github.com/slverma/REST-Lab/commit/8d4c121))
-* enh: add file ignore ([bcd2945](https://github.com/slverma/REST-Lab/commit/bcd2945))
-* refactor: extract response content helpers to remove duplication in ResponsePanel ([042a4ac](https://github.com/slverma/REST-Lab/commit/042a4ac))
-* refactor: use ResponsePanel component, remove layout toggle from request-bar ([c0f9642](https://github.com/slverma/REST-Lab/commit/c0f9642))
-
 # Changelog
 
 All notable changes to the REST Lab extension will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-
 ## Future Roadmap
-
-The following features are being considered for future releases:
 
 - [ ] Request history
 - [ ] Pre-request scripts
@@ -88,29 +22,67 @@ The following features are being considered for future releases:
 
 ### Added
 
-#### Authentication — Basic Auth & API Key
+#### First Launch Seed
 
-- **Basic Auth** — Username and password encoded as `Authorization: Basic base64(username:password)`
-  - Supports `{{variable}}` interpolation for both username and password
-  - Available on requests and folder/collection settings
-  - Inherits from parent folders like Bearer Token
-- **API Key** — Custom key/value pair injected into a header or query param
-  - "Add to" selector: Header (injects `Key: Value` header) or Query Param (appends `key=value` to URL)
-  - Supports `{{variable}}` interpolation for key and value
-  - Available on requests and folder/collection settings
-  - Inherits from parent folders
-- cURL export updated to include Basic Auth and API Key in generated commands
+- **Example collection on first install** — REST Lab now seeds a "JSONPlaceholder Examples" collection with pre-built requests on first launch
+  - Includes common endpoints: GET users, GET posts, POST post, PUT post, DELETE post
+  - Seed is transactional: automatically rolls back all `globalState` writes if any step fails
+  - Runs only once — skipped if any collections already exist
 
-#### Cookie Support
+### Changed
 
-- **Request Cookies** — Add name/value cookie pairs in the new "Cookies" tab on any request
-  - Cookies are serialized as `Cookie: name=value; name2=value2` header when sending
-  - Supports `{{variable}}` interpolation for cookie names and values
-  - Enable/disable individual cookies with checkboxes
-  - Saved with the request, so cookies persist between sessions
-- **Response Cookies** — Set-Cookie headers from responses are parsed and displayed in a "Cookies" tab on the response panel
-  - Shows name, value, Path, HttpOnly, and Secure attributes
-  - Badge on the Cookies tab shows the number of cookies received
+#### Fluid Layout
+
+- **Fluid spacing and typography tokens** — Added `--rl-*` CSS custom properties for viewport-responsive sizing throughout the request editor
+  - Replaced fixed `px`-based font-shrink media query overrides with continuous fluid scaling
+  - Applied to request bar controls, key-value rows, and the response section
+- **Scrollable tab strip with fade edges** — Tab strip now scrolls horizontally when tabs overflow, with fade-out indicators on both ends signalling hidden content
+- **Fluid URL input** — URL bar grows vertically with content (`min-height` + vertical padding via `useAutoGrow`)
+
+#### Sidebar CSS Rewrite
+
+- **Custom `sidebar.css`** — Replaced all Tailwind utility classes in the sidebar bundle with semantic, maintainable CSS
+  - `FolderActionsDropdown`, `ImportDropdown`, `RequestActionsDropdown`, `Sidebar.tsx` — Tailwind utility strings fully removed
+  - Sidebar bundle now loads `sidebar.css` exclusively with no Tailwind dependency
+
+---
+
+## 1.5.5 (2026-06-05)
+
+- fix: bundle issue (#16) ([488bfd1](https://github.com/slverma/REST-Lab/commit/488bfd1))
+
+## 1.5.4 (2026-05-18)
+
+- fix: remove vscode ignore (#18) ([d537771](https://github.com/slverma/REST-Lab/commit/d537771))
+
+## 1.5.3 (2026-05-18)
+
+- fix: build issue (#17) ([05bfe40](https://github.com/slverma/REST-Lab/commit/05bfe40))
+
+## 1.5.2 (2026-05-18)
+
+- fix: deployment issue (#15) ([1138d19](https://github.com/slverma/REST-Lab/commit/1138d19))
+
+## 1.5.1 (2026-05-18)
+
+- fix: include dist/ in vsix package by overriding .gitignore (#14) ([86f765e](https://github.com/slverma/REST-Lab/commit/86f765e))
+
+## 1.5.0 (2026-05-17)
+
+- feat: add cookie support for requests and responses (#13) ([8486f6b](https://github.com/slverma/REST-Lab/commit/8486f6b))
+
+## 1.4.0 (2026-05-17)
+
+- feat: add Basic Auth and API Key authentication types and fix action pipeline (#12) ([228bc6c](https://github.com/slverma/REST-Lab/commit/228bc6c))
+
+## 1.3.0 (2026-05-17)
+
+- feat: add Auth tab to request editor with inherit/bearer/none modes ([b546036](https://github.com/slverma/REST-Lab/commit/b546036))
+- feat: add Basic Auth and API Key authentication types (#10, #11) ([27328b7](https://github.com/slverma/REST-Lab/commit/27328b7))
+- feat: create ResponsePanel component with layout toggle and hide button ([119aef2](https://github.com/slverma/REST-Lab/commit/119aef2))
+- feat: inject resolved Bearer auth header into request execution and cURL export ([d18abd0](https://github.com/slverma/REST-Lab/commit/d18abd0))
+- fix: auth config takes priority over manual Authorization header ([7165928](https://github.com/slverma/REST-Lab/commit/7165928))
+- fix: enable clipboard paste in Monaco find widget ([4e4701f](https://github.com/slverma/REST-Lab/commit/4e4701f))
 
 ---
 
@@ -261,7 +233,7 @@ The following features are being considered for future releases:
 
 ---
 
-## [0.0.5] 15-01-2026
+## [0.0.5] - 2026-01-15
 
 ### Added
 

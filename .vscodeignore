@@ -1,3 +1,16 @@
 **/*.ts
 **/tsconfig.json
 !file.ts
+docs
+src
+scripts
+.vscode
+.github
+.claude
+.releaserc.js
+tsconfig.json
+tailwind.config.js
+postcss.config.js
+docs
+node_modules
+CLAUDE.md

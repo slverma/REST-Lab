@@ -12,9 +12,9 @@ const isProd = process.env.NODE_ENV === "production";
 const extensionConfig: InlineConfig = {
   configFile: false,
   root: rootDir,
-  // node_modules/ is excluded from the vsix; these must be bundled into extension.js
+  // node_modules/ is excluded from the vsix; everything must be bundled into extension.js
   ssr: {
-    noExternal: ["axios", "form-data"],
+    noExternal: true,
   },
   build: {
     lib: {
