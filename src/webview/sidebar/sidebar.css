@@ -365,7 +365,7 @@ body {
   justify-content: center;
   gap: var(--rl-sp3);
   flex: 1;
-  min-height: var(--rl-ctrl);
+  height: var(--rl-ctrl);
   padding: 0 var(--rl-sp4);
   border: none;
   border-radius: var(--rl-r3);
