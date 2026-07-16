@@ -138,6 +138,7 @@ async function buildAll() {
     build(createWebviewConfig("sidebar")),
     build(createWebviewConfig("editor")),
     build(createWebviewConfig("request")),
+    build(createWebviewConfig("history")),
   ]);
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
