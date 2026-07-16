@@ -4,10 +4,12 @@ import ChevronIcon from "../components/icons/ChevronIcon";
 import CollectionAddIcon from "../components/icons/CollectionAddIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
 import FolderIcon from "../components/icons/FolderIcon";
+import HistoryIcon from "../components/icons/HistoryIcon";
 import NoItemsIcon from "../components/icons/NoItemsIcon";
 import PlusIcon from "../components/icons/PlusIcon";
 import { Folder, Request } from "../types/internal.types";
 import FolderActionsDropdown from "./FolderActionsDropdown";
+import HistoryPanel from "./HistoryPanel";
 import ImportDropdown from "./ImportDropdown";
 import RequestActionsDropdown from "./RequestActionsDropdown";
 
@@ -17,7 +19,7 @@ declare function acquireVsCodeApi(): {
   setState: (state: unknown) => void;
 };
 
-const vscode = acquireVsCodeApi();
+export const vscode = acquireVsCodeApi();
 
 // Drag data type constants
 const DRAG_TYPE_REQUEST = "application/x-restlab-request";
@@ -272,6 +274,9 @@ export const Sidebar: React.FC = () => {
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [activeView, setActiveView] = useState<"collections" | "history">(
+    "collections",
+  );
 
   const initialLoadDone = useRef(false);
 
@@ -336,6 +341,10 @@ export const Sidebar: React.FC = () => {
 
   const handleImportCollection = (providerId: string) => {
     vscode.postMessage({ type: "importCollection", provider: providerId });
+  };
+
+  const handleClearAllHistory = () => {
+    vscode.postMessage({ type: "clearAllHistory" });
   };
 
   const handleToggleFolder = (folderId: string) => {
@@ -592,77 +601,110 @@ export const Sidebar: React.FC = () => {
         <h2 className="sb-title">
           REST Lab
         </h2>
-        <div className="sb-head-actions">
+        <div className="sb-view-toggle">
           <button
-            className="btn-primary"
-            onClick={handleCreateFolder}
-            title="Create Collection"
+            className={`sb-view-btn ${activeView === "collections" ? "active" : ""}`}
+            onClick={() => setActiveView("collections")}
+            title="Collections"
           >
-            <CollectionAddIcon />
-            <span>New Collection</span>
+            <CollectionIcon />
+            <span>Collections</span>
           </button>
-          <ImportDropdown onSelect={handleImportCollection} />
+          <button
+            className={`sb-view-btn ${activeView === "history" ? "active" : ""}`}
+            onClick={() => setActiveView("history")}
+            title="History"
+          >
+            <HistoryIcon />
+            <span>History</span>
+          </button>
+        </div>
+        <div className="sb-head-actions">
+          {activeView === "collections" ? (
+            <>
+              <button
+                className="btn-primary"
+                onClick={handleCreateFolder}
+                title="Create Collection"
+              >
+                <CollectionAddIcon />
+                <span>New Collection</span>
+              </button>
+              <ImportDropdown onSelect={handleImportCollection} />
+            </>
+          ) : (
+            <button
+              className="btn-primary"
+              onClick={handleClearAllHistory}
+              title="Clear All History"
+            >
+              <span>Clear All</span>
+            </button>
+          )}
         </div>
       </div>
 
-      <div
-        className={`sb-tree${isDragging ? " root-drop-zone" : ""}`}
-        onDragOver={(e) => {
-          if (e.dataTransfer.types.includes(DRAG_TYPE_FOLDER)) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = "move";
-          }
-        }}
-        onDrop={handleDropOnRoot}
-      >
-        {folders.length === 0 ? (
-          <div className="empty-state">
-            <NoItemsIcon />
-            <p className="empty-state-title">No collections yet</p>
-            <p className="empty-state-hint">
-              Create your first collection to get started
-            </p>
-          </div>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <FolderItem
-                key={folder.id}
-                folder={folder}
-                depth={0}
-                isDragging={isDragging}
-                dragOverFolderId={dragOverFolderId}
-                expandedFolders={expandedFolders}
-                activeRequestId={activeRequestId}
-                onToggleFolder={handleToggleFolder}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onAddRequest={handleAddRequest}
-                onAddRequestFromCurl={handleAddRequestFromCurl}
-                onAddSubfolder={handleAddSubfolder}
-                onOpenFolder={handleOpenFolder}
-                onExportCollection={handleExportCollection}
-                onDuplicateFolder={handleDuplicateFolder}
-                onRenameFolder={handleRenameFolder}
-                onDeleteFolder={handleDeleteFolder}
-                onOpenRequest={handleOpenRequest}
-                onRenameRequest={handleRenameRequest}
-                onDuplicateRequest={handleDuplicateRequest}
-                onDeleteRequest={handleDeleteRequest}
-              />
-            ))}
-            {/* Drop zone indicator at root level */}
-            {isDragging && (
-              <div className="root-drop-indicator">
-                <span>Drop here to move to root level</span>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      {activeView === "collections" ? (
+        <div
+          className={`sb-tree${isDragging ? " root-drop-zone" : ""}`}
+          onDragOver={(e) => {
+            if (e.dataTransfer.types.includes(DRAG_TYPE_FOLDER)) {
+              e.preventDefault();
+              e.dataTransfer.dropEffect = "move";
+            }
+          }}
+          onDrop={handleDropOnRoot}
+        >
+          {folders.length === 0 ? (
+            <div className="empty-state">
+              <NoItemsIcon />
+              <p className="empty-state-title">No collections yet</p>
+              <p className="empty-state-hint">
+                Create your first collection to get started
+              </p>
+            </div>
+          ) : (
+            <>
+              {folders.map((folder) => (
+                <FolderItem
+                  key={folder.id}
+                  folder={folder}
+                  depth={0}
+                  isDragging={isDragging}
+                  dragOverFolderId={dragOverFolderId}
+                  expandedFolders={expandedFolders}
+                  activeRequestId={activeRequestId}
+                  onToggleFolder={handleToggleFolder}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onAddRequest={handleAddRequest}
+                  onAddRequestFromCurl={handleAddRequestFromCurl}
+                  onAddSubfolder={handleAddSubfolder}
+                  onOpenFolder={handleOpenFolder}
+                  onExportCollection={handleExportCollection}
+                  onDuplicateFolder={handleDuplicateFolder}
+                  onRenameFolder={handleRenameFolder}
+                  onDeleteFolder={handleDeleteFolder}
+                  onOpenRequest={handleOpenRequest}
+                  onRenameRequest={handleRenameRequest}
+                  onDuplicateRequest={handleDuplicateRequest}
+                  onDeleteRequest={handleDeleteRequest}
+                />
+              ))}
+              {isDragging && (
+                <div className="root-drop-indicator">
+                  <span>Drop here to move to root level</span>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      ) : (
+        <HistoryPanel />
+      )}
     </div>
   );
 };

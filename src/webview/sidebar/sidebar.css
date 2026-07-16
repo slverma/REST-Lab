@@ -770,3 +770,43 @@ body {
   align-items: center;
   gap: var(--rl-sp2);
 }
+
+.sb-view-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 0 var(--rl-sp4);
+  margin-top: var(--rl-sp2);
+}
+
+.sb-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--rl-r2);
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.sb-view-btn.active {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  color: var(--vscode-foreground);
+}
+
+.sb-history {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.response-headers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
