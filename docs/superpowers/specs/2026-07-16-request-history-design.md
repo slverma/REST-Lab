@@ -28,16 +28,21 @@ export interface HistoryEntry {
   timestamp: number;
   request: {
     method: string;
-    url: string;                  // fully resolved URL actually sent, post-interpolation
-    headers: Header[];            // interpolated headers actually sent
-    body?: string;
-    formData?: FormDataItem[];    // file entries kept as { key, fileName } only; fileData stripped
+    url: string;                  // AS CONFIGURED — relative to folder baseUrl, may contain {{vars}}. This is what Restore writes back.
+    resolvedUrl: string;          // fully resolved URL actually sent, post-interpolation — DISPLAY ONLY, never restored
+    headers: Header[];            // request-level headers as configured (not merged with inherited folder headers)
+    params: Header[];             // request-level params as configured
+    body?: string;                // as configured, pre-interpolation
+    contentType?: string;
+    formData?: FormDataItem[];    // file entries kept as { key, type, fileName } only; fileData stripped
     cookies?: Cookie[];
   };
-  response: ResponseData;         // reuses existing type: status, statusText, headers, data, time, size, cookies
+  response: ResponseData;         // reuses existing type: status, statusText, headers, data, time, size, cookies — this reflects the actual interpolated call
   truncated?: boolean;            // true if request.body or response.data was capped before storing
 }
 ```
+
+**Why raw, not resolved, for `request.*`:** `RequestConfig.url`/`headers`/`body` are stored relative to the folder's `baseUrl` and may contain `{{variable}}` placeholders — that's the form the editor and `globalState` both expect. If history stored the fully-interpolated values that were actually put on the wire, restoring them would double-prepend `baseUrl` and freeze variable placeholders into literal values. So `request.*` captures the same pre-interpolation, request-level-only snapshot the editor already holds in its `config` state (excluding inherited folder headers/params, which don't belong on the request), and only `resolvedUrl` — a single extra string — captures what was truly sent, for display purposes.
 
 Stored under a new `globalState` key, `restlab.history`, as `HistoryEntry[]`, newest-first.
 
@@ -60,12 +65,13 @@ A plain class wrapping `context.globalState`, with no webview of its own:
 ## Extension Host Wiring
 
 - `extension.ts` creates one `HistoryManager` instance in `activate()`, passed to `SidebarProvider` (constructor) and to every `RequestEditorProvider.openRequestEditor(...)` call (new required parameter).
-- `RequestEditorProvider`'s `sendRequest` handler: after producing `response` (both the success path and the existing catch-block error-response path), call `historyManager.addEntry(...)` with the method/url/headers/body/cookies that were actually sent (i.e. the same values already used to build the axios config) plus the response. Then:
+- The `sendRequest` message posted from the webview gains one extra field, `historySnapshot`, carrying the raw pre-interpolation `{ method, url, headers, params, body, contentType, formData, cookies }` straight from `config` (the same values the form already holds) — distinct from the interpolated `method`/`url`/`headers`/`body`/`formData`/`cookies` fields used to actually execute the axios call.
+- `RequestEditorProvider`'s `sendRequest` handler: after producing `response` (both the success path and the existing catch-block error-response path), call `historyManager.addEntry(...)` with `historySnapshot` as `request.*` (stripping file `fileData` from any `formData` entries), `message.url` as `resolvedUrl`, and the response. Then:
   - `panel.webview.postMessage({ type: 'historyUpdated', entries: historyManager.getForRequest(requestId) })` so that panel's History tab updates live.
   - `sidebarProvider.notifyHistoryChanged()` — pushes `historyManager.getAll()` to the sidebar webview if it is currently resolved/visible.
 - New per-panel messages handled in `RequestEditorProvider`:
   - `getRequestHistory` → replies `historyUpdated` with `getForRequest(requestId)`.
-  - `restoreHistoryEntry` (`entryId`) → looks up the entry, merges its `request.*` fields into the in-memory `RequestConfig`, saves via `globalState.update`, and replies with a `configLoaded`-shaped refresh so the form updates; the client marks the config unsaved (no auto-send).
+  - `restoreHistoryEntry` (`entryId`) → looks up the entry and replies with a `historyRestored` message carrying `entry.request.*`; the client merges those fields into the in-memory `RequestConfig` and marks it unsaved. Nothing is written to `globalState` until the user hits Save — no auto-send.
   - `deleteHistoryEntry` (`entryId`) → `historyManager.deleteEntry`, replies with refreshed `historyUpdated`.
   - `clearRequestHistory` → `historyManager.clearForRequest(requestId)`, replies with refreshed (empty) `historyUpdated`.
 - New messages handled in `SidebarProvider` for the global view:
@@ -99,7 +105,10 @@ A new `HistoryEntryList.tsx` component (used by both the per-request tab and the
 
 ### Restore semantics
 
-Restoring writes the historic `method`/`url`/`headers`/`body`/`formData`/`cookies` into the live `RequestConfig` and marks it unsaved (`isSaved: false`) — the user must hit Save to persist, matching how every other in-place edit in the editor already behaves. Restore never auto-sends.
+The two entry points restore differently, because only one of them has a live editor form to leave "unsaved":
+
+- **From the per-request History tab** (an open editor panel): merges the historic `method`/`url`/`headers`/`params`/`body`/`contentType`/`formData`/`cookies` into the in-memory `RequestConfig` and marks it unsaved (`isSaved: false`) — the user must hit Save to persist, matching how every other in-place edit in the editor already behaves. Never auto-sends.
+- **From the global History sidebar** (no editor form in scope): writes the same fields directly into `restlab.request.<requestId>` in `globalState` immediately, then refreshes that request's panel if it's open (via `RequestEditorProvider.refreshPanelConfig`). There is no "unsaved" intermediate state here since the sidebar has nothing to leave pending.
 
 ## Edge Cases
 
