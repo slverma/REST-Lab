@@ -9,7 +9,6 @@ import NoItemsIcon from "../components/icons/NoItemsIcon";
 import PlusIcon from "../components/icons/PlusIcon";
 import { Folder, Request } from "../types/internal.types";
 import FolderActionsDropdown from "./FolderActionsDropdown";
-import HistoryPanel from "./HistoryPanel";
 import ImportDropdown from "./ImportDropdown";
 import RequestActionsDropdown from "./RequestActionsDropdown";
 
@@ -274,9 +273,6 @@ export const Sidebar: React.FC = () => {
   const [activeRequestId, setActiveRequestId] = useState<string | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [activeView, setActiveView] = useState<"collections" | "history">(
-    "collections",
-  );
 
   const initialLoadDone = useRef(false);
 
@@ -343,8 +339,8 @@ export const Sidebar: React.FC = () => {
     vscode.postMessage({ type: "importCollection", provider: providerId });
   };
 
-  const handleClearAllHistory = () => {
-    vscode.postMessage({ type: "clearAllHistory" });
+  const handleOpenHistory = () => {
+    vscode.postMessage({ type: "openHistory" });
   };
 
   const handleToggleFolder = (folderId: string) => {
@@ -601,60 +597,34 @@ export const Sidebar: React.FC = () => {
         <h2 className="sb-title">
           REST Lab
         </h2>
-        <div className="sb-view-toggle">
-          <button
-            className={`sb-view-btn ${activeView === "collections" ? "active" : ""}`}
-            onClick={() => setActiveView("collections")}
-            title="Collections"
-          >
-            <CollectionIcon />
-            <span>Collections</span>
-          </button>
-          <button
-            className={`sb-view-btn ${activeView === "history" ? "active" : ""}`}
-            onClick={() => setActiveView("history")}
-            title="History"
-          >
-            <HistoryIcon />
-            <span>History</span>
-          </button>
-        </div>
         <div className="sb-head-actions">
-          {activeView === "collections" ? (
-            <>
-              <button
-                className="btn-primary"
-                onClick={handleCreateFolder}
-                title="Create Collection"
-              >
-                <CollectionAddIcon />
-                <span>New Collection</span>
-              </button>
-              <ImportDropdown onSelect={handleImportCollection} />
-            </>
-          ) : (
-            <button
-              className="btn-primary"
-              onClick={handleClearAllHistory}
-              title="Clear All History"
-            >
-              <span>Clear All</span>
+          <button
+            className="btn-primary"
+            onClick={handleCreateFolder}
+            title="Create Collection"
+          >
+            <CollectionAddIcon />
+            <span>New Collection</span>
+          </button>
+          <ImportDropdown onSelect={handleImportCollection} />
+          <Tooltip text="View Request History" position="bottom">
+            <button className="header-action-btn" onClick={handleOpenHistory}>
+              <HistoryIcon />
             </button>
-          )}
+          </Tooltip>
         </div>
       </div>
 
-      {activeView === "collections" ? (
-        <div
-          className={`sb-tree${isDragging ? " root-drop-zone" : ""}`}
-          onDragOver={(e) => {
-            if (e.dataTransfer.types.includes(DRAG_TYPE_FOLDER)) {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-            }
-          }}
-          onDrop={handleDropOnRoot}
-        >
+      <div
+        className={`sb-tree${isDragging ? " root-drop-zone" : ""}`}
+        onDragOver={(e) => {
+          if (e.dataTransfer.types.includes(DRAG_TYPE_FOLDER)) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+          }
+        }}
+        onDrop={handleDropOnRoot}
+      >
           {folders.length === 0 ? (
             <div className="empty-state">
               <NoItemsIcon />
@@ -701,10 +671,7 @@ export const Sidebar: React.FC = () => {
               )}
             </>
           )}
-        </div>
-      ) : (
-        <HistoryPanel />
-      )}
+      </div>
     </div>
   );
 };

@@ -168,22 +168,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             message.expandedFolderIds,
           );
           break;
-        case "getHistory":
-          this._sendHistoryToWebview();
-          break;
-        case "deleteHistoryEntry":
-          await this.deleteHistoryEntryById(message.entryId);
-          this._sendHistoryToWebview();
-          break;
-        case "clearAllHistory": {
-          const cleared = await this.clearAllHistoryEntries();
-          if (cleared) {
-            this._sendHistoryToWebview();
-          }
-          break;
-        }
-        case "restoreHistoryEntry":
-          await this.restoreHistoryEntryById(message.entryId);
+        case "openHistory":
+          vscode.commands.executeCommand("restlab.openHistory");
           break;
       }
     });
@@ -1227,15 +1213,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     vscode.window.showInformationMessage(
       `Restored "${entry.requestName}" from history`,
     );
-  }
-
-  private _sendHistoryToWebview() {
-    if (this._view) {
-      this._view.webview.postMessage({
-        type: "historyUpdated",
-        entries: this._historyManager.getAll(),
-      });
-    }
   }
 
   private _sendFoldersToWebview() {
