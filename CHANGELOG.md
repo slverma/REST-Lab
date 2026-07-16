@@ -8,7 +8,7 @@ All notable changes to the REST Lab extension will be documented in this file.
 
 ## Future Roadmap
 
-- [ ] Request history
+- [x] Request history
 - [ ] Pre-request scripts
 - [ ] Test scripts / assertions
 - [ ] Code generation (JS fetch, Python requests, curl, etc.)
