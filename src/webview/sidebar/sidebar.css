@@ -122,6 +122,7 @@ body {
   display: flex;
   align-items: center;
   gap: var(--rl-sp2);
+  margin-top: var(--rl-sp3);
 }
 
 /* ---- Tree ---- */
