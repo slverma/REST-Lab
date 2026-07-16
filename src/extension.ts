@@ -3,6 +3,7 @@ import { Folder, Request, SidebarProvider } from "./providers/SidebarProvider";
 import { FolderEditorProvider } from "./providers/FolderEditorProvider";
 import { HistoryManager } from "./providers/HistoryManager";
 import { RequestEditorProvider } from "./providers/RequestEditorProvider";
+import { HistoryEditorProvider } from "./providers/HistoryEditorProvider";
 import {
   FolderConfig,
   RequestConfig,
@@ -233,6 +234,13 @@ export async function activate(context: vscode.ExtensionContext) {
         );
       },
     ),
+  );
+
+  // Register command to open the global history panel
+  context.subscriptions.push(
+    vscode.commands.registerCommand("restlab.openHistory", () => {
+      HistoryEditorProvider.openHistoryPanel(context, sidebarProvider);
+    }),
   );
 
   // Register command to import collection

@@ -1229,10 +1229,6 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     );
   }
 
-  public notifyHistoryChanged(): void {
-    this._sendHistoryToWebview();
-  }
-
   private _sendHistoryToWebview() {
     if (this._view) {
       this._view.webview.postMessage({

@@ -8,6 +8,7 @@ import {
   ResponseCookie,
   ResponseData,
 } from "../webview/types/internal.types";
+import { HistoryEditorProvider } from "./HistoryEditorProvider";
 import { HistoryManager } from "./HistoryManager";
 import { SidebarProvider } from "./SidebarProvider";
 
@@ -342,7 +343,7 @@ export class RequestEditorProvider {
               type: "historyUpdated",
               entries: historyManager.getForRequest(requestId),
             });
-            sidebarProvider?.notifyHistoryChanged();
+            HistoryEditorProvider.refreshIfOpen(sidebarProvider);
           };
 
           try {
@@ -400,7 +401,7 @@ export class RequestEditorProvider {
             type: "historyUpdated",
             entries: historyManager.getForRequest(requestId),
           });
-          sidebarProvider?.notifyHistoryChanged();
+          HistoryEditorProvider.refreshIfOpen(sidebarProvider);
           break;
         case "clearRequestHistory":
           await historyManager.clearForRequest(requestId);
@@ -408,7 +409,7 @@ export class RequestEditorProvider {
             type: "historyUpdated",
             entries: historyManager.getForRequest(requestId),
           });
-          sidebarProvider?.notifyHistoryChanged();
+          HistoryEditorProvider.refreshIfOpen(sidebarProvider);
           break;
         case "showInfo":
           vscode.window.showInformationMessage(message.message);
