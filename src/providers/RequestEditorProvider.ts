@@ -72,6 +72,7 @@ export class RequestEditorProvider {
     requestId: string,
     folderId: string,
     sidebarProvider: SidebarProvider,
+    historyManager: HistoryManager,
   ): void {
     const panel = RequestEditorProvider.openPanels.get(requestId);
     if (!panel) return;
@@ -107,6 +108,7 @@ export class RequestEditorProvider {
       collectionId,
       environments: collectionData.environments,
       activeEnvironmentId: collectionData.activeEnvironmentId,
+      history: historyManager.getForRequest(requestId),
     });
   }
 

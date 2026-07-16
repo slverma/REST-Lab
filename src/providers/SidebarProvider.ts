@@ -168,6 +168,73 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             message.expandedFolderIds,
           );
           break;
+        case "getHistory":
+          this._sendHistoryToWebview();
+          break;
+        case "deleteHistoryEntry":
+          await this._historyManager.deleteEntry(message.entryId);
+          this._sendHistoryToWebview();
+          break;
+        case "clearAllHistory": {
+          const confirm = await vscode.window.showWarningMessage(
+            "Clear all request history? This cannot be undone.",
+            { modal: true },
+            "Clear All",
+          );
+          if (confirm === "Clear All") {
+            await this._historyManager.clearAll();
+            this._sendHistoryToWebview();
+          }
+          break;
+        }
+        case "restoreHistoryEntry": {
+          const entry = this._historyManager
+            .getAll()
+            .find((e) => e.id === message.entryId);
+          if (!entry) break;
+
+          const folder = this._findFolder(entry.folderId);
+          const requestExists = folder?.requests?.some(
+            (r) => r.id === entry.requestId,
+          );
+          if (!requestExists) {
+            vscode.window.showWarningMessage(
+              `Cannot restore "${entry.requestName}" — the original request no longer exists.`,
+            );
+            break;
+          }
+
+          const existingConfig =
+            this._context.globalState.get<any>(
+              `restlab.request.${entry.requestId}`,
+            ) || {};
+          const restoredConfig = {
+            ...existingConfig,
+            method: entry.request.method,
+            url: entry.request.url,
+            headers: entry.request.headers,
+            params: entry.request.params,
+            body: entry.request.body,
+            contentType: entry.request.contentType,
+            formData: entry.request.formData,
+            cookies: entry.request.cookies,
+          };
+          await this._context.globalState.update(
+            `restlab.request.${entry.requestId}`,
+            restoredConfig,
+          );
+          RequestEditorProvider.refreshPanelConfig(
+            this._context,
+            entry.requestId,
+            entry.folderId,
+            this,
+            this._historyManager,
+          );
+          vscode.window.showInformationMessage(
+            `Restored "${entry.requestName}" from history`,
+          );
+          break;
+        }
       }
     });
 
