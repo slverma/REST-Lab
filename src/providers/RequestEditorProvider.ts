@@ -2,7 +2,13 @@ import axios, { AxiosRequestConfig } from "axios";
 import FormData from "form-data";
 import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
-import { RequestConfig, ResponseCookie } from "../webview/types/internal.types";
+import {
+  FormDataItem,
+  RequestConfig,
+  ResponseCookie,
+  ResponseData,
+} from "../webview/types/internal.types";
+import { HistoryManager } from "./HistoryManager";
 import { SidebarProvider } from "./SidebarProvider";
 
 function parseSetCookie(raw: string): ResponseCookie {
@@ -60,11 +66,56 @@ export class RequestEditorProvider {
     });
   }
 
+  /** Push a fresh configLoaded payload to a single open panel, if it exists. Used after a global-history restore, which has no open editor form of its own to update. */
+  public static refreshPanelConfig(
+    context: vscode.ExtensionContext,
+    requestId: string,
+    folderId: string,
+    sidebarProvider: SidebarProvider,
+  ): void {
+    const panel = RequestEditorProvider.openPanels.get(requestId);
+    if (!panel) return;
+
+    const savedRequest = context.globalState.get<RequestConfig>(
+      `restlab.request.${requestId}`,
+    );
+    if (!savedRequest) return;
+
+    const folderConfig = sidebarProvider.getInheritedConfig(folderId);
+    const envVariables = sidebarProvider.getActiveEnvVariables(folderId);
+    const collectionId = sidebarProvider.getRootCollectionId(folderId);
+    const collectionData = sidebarProvider.getCollectionData(folderId);
+
+    panel.webview.postMessage({
+      type: "configLoaded",
+      config: {
+        id: requestId,
+        name: savedRequest.name,
+        folderId,
+        method: savedRequest.method || "GET",
+        url: savedRequest.url || "",
+        headers: savedRequest.headers || [],
+        params: savedRequest.params || [],
+        body: savedRequest.body || "",
+        contentType: savedRequest.contentType || "",
+        formData: savedRequest.formData || [],
+        auth: savedRequest.auth,
+        cookies: savedRequest.cookies || [],
+      },
+      folderConfig,
+      envVariables,
+      collectionId,
+      environments: collectionData.environments,
+      activeEnvironmentId: collectionData.activeEnvironmentId,
+    });
+  }
+
   public static openRequestEditor(
     context: vscode.ExtensionContext,
     requestId: string,
     requestName: string,
     folderId: string,
+    historyManager: HistoryManager,
     sidebarProvider?: SidebarProvider,
   ) {
     // Check if panel already exists for this request
@@ -204,6 +255,7 @@ export class RequestEditorProvider {
             collectionId: collectionId,
             environments: collectionData.environments,
             activeEnvironmentId: collectionData.activeEnvironmentId,
+            history: historyManager.getForRequest(requestId),
           });
           break;
         case "saveConfig":
@@ -248,7 +300,39 @@ export class RequestEditorProvider {
             });
           }
           break;
-        case "sendRequest":
+        case "sendRequest": {
+          const recordHistory = async (response: ResponseData) => {
+            const snapshot = message.historySnapshot || {};
+            const strippedFormData: FormDataItem[] = (snapshot.formData || []).map(
+              (field: FormDataItem) =>
+                field.type === "file"
+                  ? { key: field.key, type: field.type, fileName: field.fileName }
+                  : field,
+            );
+            await historyManager.addEntry({
+              requestId,
+              requestName,
+              folderId,
+              request: {
+                method: snapshot.method || message.method,
+                url: snapshot.url || "",
+                resolvedUrl: message.url,
+                headers: snapshot.headers || [],
+                params: snapshot.params || [],
+                body: snapshot.body,
+                contentType: snapshot.contentType,
+                formData: strippedFormData,
+                cookies: snapshot.cookies,
+              },
+              response,
+            });
+            panel.webview.postMessage({
+              type: "historyUpdated",
+              entries: historyManager.getForRequest(requestId),
+            });
+            sidebarProvider?.notifyHistoryChanged();
+          };
+
           try {
             const response = await provider._sendHttpRequest(
               message.method,
@@ -262,18 +346,55 @@ export class RequestEditorProvider {
               type: "responseReceived",
               response,
             });
+            await recordHistory(response);
           } catch (error: any) {
+            const errorResponse: ResponseData = {
+              status: 0,
+              statusText: "Error",
+              headers: {},
+              data: error.message || "Request failed",
+              time: 0,
+              size: 0,
+            };
             panel.webview.postMessage({
               type: "responseReceived",
-              response: {
-                status: 0,
-                statusText: "Error",
-                headers: {},
-                data: error.message || "Request failed",
-                time: 0,
-              },
+              response: errorResponse,
+            });
+            await recordHistory(errorResponse);
+          }
+          break;
+        }
+        case "getRequestHistory":
+          panel.webview.postMessage({
+            type: "historyUpdated",
+            entries: historyManager.getForRequest(requestId),
+          });
+          break;
+        case "restoreHistoryEntry": {
+          const entry = historyManager
+            .getForRequest(requestId)
+            .find((e) => e.id === message.entryId);
+          if (entry) {
+            panel.webview.postMessage({
+              type: "historyRestored",
+              request: entry.request,
             });
           }
+          break;
+        }
+        case "deleteHistoryEntry":
+          await historyManager.deleteEntry(message.entryId);
+          panel.webview.postMessage({
+            type: "historyUpdated",
+            entries: historyManager.getForRequest(requestId),
+          });
+          break;
+        case "clearRequestHistory":
+          await historyManager.clearForRequest(requestId);
+          panel.webview.postMessage({
+            type: "historyUpdated",
+            entries: historyManager.getForRequest(requestId),
+          });
           break;
         case "showInfo":
           vscode.window.showInformationMessage(message.message);

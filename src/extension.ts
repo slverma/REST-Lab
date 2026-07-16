@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Folder, Request, SidebarProvider } from "./providers/SidebarProvider";
 import { FolderEditorProvider } from "./providers/FolderEditorProvider";
+import { HistoryManager } from "./providers/HistoryManager";
 import { RequestEditorProvider } from "./providers/RequestEditorProvider";
 import {
   FolderConfig,
@@ -155,8 +156,13 @@ export async function activate(context: vscode.ExtensionContext) {
   console.log("REST Lab extension is now active!");
   await seedDefaultData(context);
 
-  // Initialize the sidebar provider
-  const sidebarProvider = new SidebarProvider(context.extensionUri, context);
+  // Initialize the history manager and sidebar provider
+  const historyManager = new HistoryManager(context);
+  const sidebarProvider = new SidebarProvider(
+    context.extensionUri,
+    context,
+    historyManager,
+  );
 
   // Register the sidebar webview provider
   context.subscriptions.push(
@@ -222,6 +228,7 @@ export async function activate(context: vscode.ExtensionContext) {
           requestId,
           requestName,
           folderId,
+          historyManager,
           sidebarProvider,
         );
       },

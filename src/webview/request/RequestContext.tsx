@@ -505,6 +505,16 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
       body: requestBody,
       formData: formDataWithFiles,
       cookies: enabledCookies,
+      historySnapshot: {
+        method: config.method,
+        url: config.url,
+        headers: config.headers || [],
+        params: config.params || [],
+        body: config.body,
+        contentType: config.contentType,
+        formData: config.formData,
+        cookies: config.cookies,
+      },
     });
 
     vscode.postMessage({ type: "saveConfig", config });

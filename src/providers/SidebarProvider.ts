@@ -9,6 +9,7 @@ import { getNonce } from "../utils/getNonce";
 import { ImportResult, parseImportedFile } from "../utils/importParser";
 import { AuthConfig } from "../webview/types/internal.types";
 import { FolderEditorProvider } from "./FolderEditorProvider";
+import { HistoryManager } from "./HistoryManager";
 import { RequestEditorProvider } from "./RequestEditorProvider";
 
 export interface Request {
@@ -53,6 +54,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly _context: vscode.ExtensionContext,
+    private readonly _historyManager: HistoryManager,
   ) {
     // Load saved folders from global state
     this._folders = this._context.globalState.get<Folder[]>(
@@ -1122,6 +1124,19 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       this._view.webview.postMessage({
         type: "activeRequestChanged",
         requestId,
+      });
+    }
+  }
+
+  public notifyHistoryChanged(): void {
+    this._sendHistoryToWebview();
+  }
+
+  private _sendHistoryToWebview() {
+    if (this._view) {
+      this._view.webview.postMessage({
+        type: "historyUpdated",
+        entries: this._historyManager.getAll(),
       });
     }
   }
