@@ -67,6 +67,16 @@ export class RequestEditorProvider {
   }
 
   /** Push a fresh configLoaded payload to a single open panel, if it exists. Used after a global-history restore, which has no open editor form of its own to update. */
+  /** Push a fresh historyUpdated payload to a single open panel, if it exists. Used after a global-history delete/clear affecting that request. */
+  public static refreshPanelHistory(requestId: string, historyManager: HistoryManager): void {
+    const panel = RequestEditorProvider.openPanels.get(requestId);
+    if (!panel) return;
+    panel.webview.postMessage({
+      type: "historyUpdated",
+      entries: historyManager.getForRequest(requestId),
+    });
+  }
+
   public static refreshPanelConfig(
     context: vscode.ExtensionContext,
     requestId: string,
@@ -308,7 +318,7 @@ export class RequestEditorProvider {
             const strippedFormData: FormDataItem[] = (snapshot.formData || []).map(
               (field: FormDataItem) =>
                 field.type === "file"
-                  ? { key: field.key, type: field.type, fileName: field.fileName }
+                  ? { key: field.key, type: field.type, value: "", fileName: field.fileName }
                   : field,
             );
             await historyManager.addEntry({
@@ -390,6 +400,7 @@ export class RequestEditorProvider {
             type: "historyUpdated",
             entries: historyManager.getForRequest(requestId),
           });
+          sidebarProvider?.notifyHistoryChanged();
           break;
         case "clearRequestHistory":
           await historyManager.clearForRequest(requestId);
@@ -397,6 +408,7 @@ export class RequestEditorProvider {
             type: "historyUpdated",
             entries: historyManager.getForRequest(requestId),
           });
+          sidebarProvider?.notifyHistoryChanged();
           break;
         case "showInfo":
           vscode.window.showInformationMessage(message.message);

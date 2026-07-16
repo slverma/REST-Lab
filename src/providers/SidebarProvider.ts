@@ -171,10 +171,15 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         case "getHistory":
           this._sendHistoryToWebview();
           break;
-        case "deleteHistoryEntry":
+        case "deleteHistoryEntry": {
+          const entryBeingDeleted = this._historyManager.getAll().find((e) => e.id === message.entryId);
           await this._historyManager.deleteEntry(message.entryId);
           this._sendHistoryToWebview();
+          if (entryBeingDeleted) {
+            RequestEditorProvider.refreshPanelHistory(entryBeingDeleted.requestId, this._historyManager);
+          }
           break;
+        }
         case "clearAllHistory": {
           const confirm = await vscode.window.showWarningMessage(
             "Clear all request history? This cannot be undone.",
@@ -182,8 +187,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             "Clear All",
           );
           if (confirm === "Clear All") {
+            const affectedRequestIds = [...new Set(this._historyManager.getAll().map((e) => e.requestId))];
             await this._historyManager.clearAll();
             this._sendHistoryToWebview();
+            for (const requestId of affectedRequestIds) {
+              RequestEditorProvider.refreshPanelHistory(requestId, this._historyManager);
+            }
           }
           break;
         }
