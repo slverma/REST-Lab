@@ -11,6 +11,7 @@ import AuthTab from "./AuthTab";
 import BodyTab from "./BodyTab";
 import CookieTab from "./CookieTab";
 import HeaderTab from "./HeaderTab";
+import HistoryTab from "./HistoryTab";
 import ParamsTab from "./ParamsTab";
 import { RequestContextProvider, useRequestContext } from "./RequestContext";
 import ResponsePanel from "./ResponsePanel";
@@ -53,6 +54,7 @@ const RequestEditorContent: React.FC = () => {
     isLoading,
     activeTab,
     isSaved,
+    historyEntries,
     splitLayout,
     requestSize,
     isResponseHidden,
@@ -269,6 +271,15 @@ const RequestEditorContent: React.FC = () => {
                   </span>
                 )}
               </button>
+              <button
+                className={`tab ${activeTab === "history" ? "active" : ""}`}
+                onClick={() => setActiveTab("history")}
+              >
+                History
+                {historyEntries.length > 0 && (
+                  <span className="badge">{historyEntries.length}</span>
+                )}
+              </button>
             </div>
             </div>
 
@@ -293,6 +304,7 @@ const RequestEditorContent: React.FC = () => {
                 />
               )}
               {activeTab === "cookies" && <CookieTab />}
+              {activeTab === "history" && <HistoryTab />}
             </div>
           </div>
         </div>

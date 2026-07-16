@@ -26,6 +26,7 @@ import {
   Cookie,
   FolderConfig,
   FormDataItem,
+  HistoryEntry,
   RequestConfig,
   RequestEditorProps,
   ResponseData,
@@ -40,7 +41,7 @@ declare function acquireVsCodeApi(): {
 const vscode = acquireVsCodeApi();
 
 type SplitLayout = "horizontal" | "vertical";
-type ActiveTab = "headers" | "body" | "params" | "auth" | "cookies";
+type ActiveTab = "headers" | "body" | "params" | "auth" | "cookies" | "history";
 type ResponseTab = "body" | "headers" | "cookies";
 
 interface RequestContextValue {
@@ -55,6 +56,7 @@ interface RequestContextValue {
   activeTab: ActiveTab;
   responseTab: ResponseTab;
   isSaved: boolean;
+  historyEntries: HistoryEntry[];
   splitLayout: SplitLayout;
   requestSize: number;
   isResizing: boolean;
@@ -86,6 +88,9 @@ interface RequestContextValue {
   toggleLayout: () => void;
   handleResizeStart: (e: React.MouseEvent) => void;
   handleSetActiveEnvironment: (envId: string | null) => void;
+  handleRestoreHistoryEntry: (entryId: string) => void;
+  handleDeleteHistoryEntry: (entryId: string) => void;
+  handleClearRequestHistory: () => void;
 
   // Header handlers
   handleAddHeader: () => void;
@@ -181,6 +186,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
   const [activeTab, setActiveTab] = useState<ActiveTab>("headers");
   const [responseTab, setResponseTab] = useState<ResponseTab>("body");
   const [isSaved, setIsSaved] = useState(true);
+  const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
 
   // Layout state
   const [splitLayout, setSplitLayout] = useState<SplitLayout>("vertical");
@@ -295,6 +301,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
           setActiveEnvironmentId(message.activeEnvironmentId ?? null);
           setCollectionId(message.collectionId ?? null);
           collectionIdRef.current = message.collectionId ?? null;
+          setHistoryEntries(message.history || []);
           setIsSaved(true);
           if (METHODS_WITH_BODY.includes(message.config.method)) {
             setActiveTab("body");
@@ -329,6 +336,23 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
         case "responseReceived":
           setResponse(message.response);
           setIsLoading(false);
+          break;
+        case "historyUpdated":
+          setHistoryEntries(message.entries || []);
+          break;
+        case "historyRestored":
+          setConfig((prev) => ({
+            ...prev,
+            method: message.request.method,
+            url: message.request.url,
+            headers: message.request.headers,
+            params: message.request.params,
+            body: message.request.body,
+            contentType: message.request.contentType,
+            formData: message.request.formData,
+            cookies: message.request.cookies,
+          }));
+          setIsSaved(false);
           break;
       }
     };
@@ -532,6 +556,18 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
 
   const handleSetActiveEnvironment = useCallback((envId: string | null) => {
     vscode.postMessage({ type: "setActiveEnvironment", envId });
+  }, []);
+
+  const handleRestoreHistoryEntry = useCallback((entryId: string) => {
+    vscode.postMessage({ type: "restoreHistoryEntry", entryId });
+  }, []);
+
+  const handleDeleteHistoryEntry = useCallback((entryId: string) => {
+    vscode.postMessage({ type: "deleteHistoryEntry", entryId });
+  }, []);
+
+  const handleClearRequestHistory = useCallback(() => {
+    vscode.postMessage({ type: "clearRequestHistory" });
   }, []);
 
   const handleAuthChange = useCallback((auth: AuthConfig | undefined) => {
@@ -861,6 +897,7 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     activeTab,
     responseTab,
     isSaved,
+    historyEntries,
     splitLayout,
     requestSize,
     isResizing,
@@ -892,6 +929,9 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
     toggleLayout,
     handleResizeStart,
     handleSetActiveEnvironment,
+    handleRestoreHistoryEntry,
+    handleDeleteHistoryEntry,
+    handleClearRequestHistory,
 
     // Header handlers
     handleAddHeader,
