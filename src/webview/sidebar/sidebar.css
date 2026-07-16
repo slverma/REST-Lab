@@ -576,3 +576,197 @@ body {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ============================================================
+   STATUS & RESPONSE BADGES (ported from request editor)
+   ============================================================ */
+.status-badge {
+  padding: 0.18em 0.55em;
+  border-radius: 1.4em;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+.status-success {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.2) 0%, rgba(74, 222, 128, 0.2) 100%);
+  color: #22c55e;
+}
+.status-redirect {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+  color: #3b82f6;
+}
+.status-client-error {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(251, 191, 36, 0.2) 100%);
+  color: #f59e0b;
+}
+.status-server-error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%);
+  color: #ef4444;
+}
+.status-error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.time-badge {
+  padding: 0.18em 0.55em;
+  border-radius: 1.4em;
+  font-size: 0.7em;
+  font-weight: 600;
+  background: var(--glass-bg);
+  color: var(--vscode-foreground);
+}
+
+.empty-hint {
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px dashed var(--vscode-panel-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+}
+.add-btn:hover {
+  border-color: var(--restlab-accent);
+  color: var(--restlab-accent);
+}
+
+.remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rl-ctrl);
+  height: var(--rl-ctrl);
+  border: none;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  border-radius: var(--rl-r2);
+  cursor: pointer;
+}
+.remove-btn:hover {
+  background: var(--restlab-danger-subtle);
+  color: var(--restlab-danger);
+}
+
+.response-header-row {
+  display: flex;
+  padding: var(--rl-sp2) var(--rl-sp3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  font-size: 12px;
+}
+.response-header-row .header-name {
+  font-weight: 700;
+  min-width: 11em;
+  background: var(--restlab-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.response-header-row .header-value {
+  flex: 1;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  word-break: break-all;
+  opacity: 0.9;
+}
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp2);
+  padding: var(--rl-sp3);
+}
+
+.history-entry {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  background: var(--glass-bg);
+  overflow: hidden;
+}
+
+.history-entry-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp3);
+  padding: var(--rl-sp3);
+  cursor: pointer;
+}
+.history-entry-row:hover {
+  background: rgba(56, 189, 248, 0.05);
+}
+
+.history-request-name {
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.history-url {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.history-timestamp {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+}
+
+.history-entry-details {
+  border-top: 1px solid var(--glass-border);
+  padding: var(--rl-sp3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp3);
+}
+
+.history-detail-section h4 {
+  margin: 0 0 var(--rl-sp2) 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.history-detail-line {
+  font-size: 12px;
+  margin: 0 0 var(--rl-sp2) 0;
+  word-break: break-all;
+}
+
+.history-body {
+  margin: var(--rl-sp2) 0 0 0;
+  padding: var(--rl-sp3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.history-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp2);
+}
