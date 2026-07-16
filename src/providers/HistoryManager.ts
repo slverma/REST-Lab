@@ -11,11 +11,11 @@ function truncateIfNeeded(value: string | undefined): {
   truncated: boolean;
 } {
   if (!value) return { value, truncated: false };
-  const byteLength = Buffer.byteLength(value, "utf8");
-  if (byteLength <= MAX_BODY_BYTES) return { value, truncated: false };
-  const sliced = value.slice(0, MAX_BODY_BYTES);
+  const buffer = Buffer.from(value, "utf8");
+  if (buffer.byteLength <= MAX_BODY_BYTES) return { value, truncated: false };
+  const sliced = buffer.subarray(0, MAX_BODY_BYTES).toString("utf8");
   return {
-    value: `${sliced}\n...[truncated for storage, original size ${byteLength} bytes]`,
+    value: `${sliced}\n...[truncated for storage, original size ${buffer.byteLength} bytes]`,
     truncated: true,
   };
 }
