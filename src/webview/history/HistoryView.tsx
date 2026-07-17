@@ -58,7 +58,7 @@ export const HistoryView: React.FC = () => {
               checked={enabled}
               onChange={handleToggleEnabled}
             />
-            <span>Record new requests</span>
+            <span>Keep recording</span>
           </label>
           {entries.length > 0 && (
             <button className="add-btn" onClick={handleClearAll}>
