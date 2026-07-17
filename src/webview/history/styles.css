@@ -334,3 +334,28 @@ body {
   align-items: center;
   gap: var(--rl-sp2);
 }
+
+.history-page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp4);
+}
+
+.history-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp2);
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  user-select: none;
+}
+
+.history-toggle input[type="checkbox"] {
+  accent-color: var(--restlab-accent);
+  cursor: pointer;
+}
+
+.history-paused-hint {
+  margin-bottom: var(--rl-sp3);
+}

@@ -12,6 +12,7 @@ const vscode = acquireVsCodeApi();
 
 export const HistoryView: React.FC = () => {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [enabled, setEnabled] = useState(true);
 
   useEffect(() => {
     vscode.postMessage({ type: "getHistory" });
@@ -20,6 +21,7 @@ export const HistoryView: React.FC = () => {
       const message = event.data;
       if (message.type === "historyUpdated") {
         setEntries(message.entries || []);
+        setEnabled(message.enabled ?? true);
       }
     };
 
@@ -39,16 +41,37 @@ export const HistoryView: React.FC = () => {
     vscode.postMessage({ type: "clearAllHistory" });
   };
 
+  const handleToggleEnabled = () => {
+    const next = !enabled;
+    setEnabled(next);
+    vscode.postMessage({ type: "setHistoryEnabled", enabled: next });
+  };
+
   return (
     <div className="history-page">
       <div className="history-page-header">
         <h1>Request History</h1>
-        {entries.length > 0 && (
-          <button className="add-btn" onClick={handleClearAll}>
-            Clear All
-          </button>
-        )}
+        <div className="history-page-header-actions">
+          <label className="history-toggle">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={handleToggleEnabled}
+            />
+            <span>Record new requests</span>
+          </label>
+          {entries.length > 0 && (
+            <button className="add-btn" onClick={handleClearAll}>
+              Clear All
+            </button>
+          )}
+        </div>
       </div>
+      {!enabled && (
+        <p className="empty-hint history-paused-hint">
+          Recording is paused — new requests won't be added to history.
+        </p>
+      )}
       <div className="history-page-body">
         <HistoryEntryList
           entries={entries}

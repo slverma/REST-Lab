@@ -8,10 +8,17 @@ export class HistoryEditorProvider {
   /** Push a fresh historyUpdated payload to the History panel, if it's open. */
   public static refreshIfOpen(sidebarProvider?: SidebarProvider): void {
     if (!HistoryEditorProvider.panel || !sidebarProvider) return;
-    HistoryEditorProvider.panel.webview.postMessage({
+    HistoryEditorProvider.panel.webview.postMessage(
+      HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+    );
+  }
+
+  private static _buildHistoryPayload(sidebarProvider: SidebarProvider) {
+    return {
       type: "historyUpdated",
       entries: sidebarProvider.getHistoryEntries(),
-    });
+      enabled: sidebarProvider.isHistoryEnabled(),
+    };
   }
 
   public static openHistoryPanel(
@@ -48,34 +55,36 @@ export class HistoryEditorProvider {
     panel.webview.onDidReceiveMessage(async (message) => {
       switch (message.type) {
         case "getHistory":
-          panel.webview.postMessage({
-            type: "historyUpdated",
-            entries: sidebarProvider.getHistoryEntries(),
-          });
+          panel.webview.postMessage(
+            HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+          );
           break;
         case "deleteHistoryEntry":
           await sidebarProvider.deleteHistoryEntryById(message.entryId);
-          panel.webview.postMessage({
-            type: "historyUpdated",
-            entries: sidebarProvider.getHistoryEntries(),
-          });
+          panel.webview.postMessage(
+            HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+          );
           break;
         case "clearAllHistory": {
           const cleared = await sidebarProvider.clearAllHistoryEntries();
           if (cleared) {
-            panel.webview.postMessage({
-              type: "historyUpdated",
-              entries: sidebarProvider.getHistoryEntries(),
-            });
+            panel.webview.postMessage(
+              HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+            );
           }
           break;
         }
         case "restoreHistoryEntry":
           await sidebarProvider.restoreHistoryEntryById(message.entryId);
-          panel.webview.postMessage({
-            type: "historyUpdated",
-            entries: sidebarProvider.getHistoryEntries(),
-          });
+          panel.webview.postMessage(
+            HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+          );
+          break;
+        case "setHistoryEnabled":
+          await sidebarProvider.setHistoryEnabled(message.enabled);
+          panel.webview.postMessage(
+            HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
+          );
           break;
       }
     });
