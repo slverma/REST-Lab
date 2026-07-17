@@ -1137,6 +1137,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
     return this._historyManager.getAll();
   }
 
+  public isHistoryEnabled(): boolean {
+    return this._historyManager.isEnabled();
+  }
+
+  public async setHistoryEnabled(enabled: boolean): Promise<void> {
+    await this._historyManager.setEnabled(enabled);
+  }
+
   public async deleteHistoryEntryById(entryId: string): Promise<void> {
     const entryBeingDeleted = this._historyManager
       .getAll()

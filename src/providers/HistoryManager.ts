@@ -2,6 +2,7 @@ import type * as vscode from "vscode";
 import { HistoryEntry } from "../webview/types/internal.types";
 
 const STORAGE_KEY = "restlab.history";
+const ENABLED_KEY = "restlab.history.enabled";
 const MAX_PER_REQUEST = 20;
 const MAX_GLOBAL = 200;
 const MAX_BODY_BYTES = 200_000;
@@ -23,6 +24,14 @@ function truncateIfNeeded(value: string | undefined): {
 export class HistoryManager {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
+  public isEnabled(): boolean {
+    return this.context.globalState.get<boolean>(ENABLED_KEY, true);
+  }
+
+  public async setEnabled(enabled: boolean): Promise<void> {
+    await this.context.globalState.update(ENABLED_KEY, enabled);
+  }
+
   private _getAll(): HistoryEntry[] {
     return this.context.globalState.get<HistoryEntry[]>(STORAGE_KEY, []);
   }
@@ -41,7 +50,9 @@ export class HistoryManager {
 
   public async addEntry(
     input: Omit<HistoryEntry, "id" | "timestamp" | "truncated">,
-  ): Promise<HistoryEntry> {
+  ): Promise<HistoryEntry | null> {
+    if (!this.isEnabled()) return null;
+
     const bodyResult = truncateIfNeeded(input.request.body);
     const responseDataResult = truncateIfNeeded(input.response.data);
 
