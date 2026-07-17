@@ -7,8 +7,9 @@ import {
 } from "../utils/exportParser";
 import { getNonce } from "../utils/getNonce";
 import { ImportResult, parseImportedFile } from "../utils/importParser";
-import { AuthConfig } from "../webview/types/internal.types";
+import { AuthConfig, HistoryEntry } from "../webview/types/internal.types";
 import { FolderEditorProvider } from "./FolderEditorProvider";
+import { HistoryManager } from "./HistoryManager";
 import { RequestEditorProvider } from "./RequestEditorProvider";
 
 export interface Request {
@@ -53,6 +54,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     private readonly _context: vscode.ExtensionContext,
+    private readonly _historyManager: HistoryManager,
   ) {
     // Load saved folders from global state
     this._folders = this._context.globalState.get<Folder[]>(
@@ -165,6 +167,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             "restlab.expandedFolders",
             message.expandedFolderIds,
           );
+          break;
+        case "openHistory":
+          vscode.commands.executeCommand("restlab.openHistory");
           break;
       }
     });
@@ -1124,6 +1129,98 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         requestId,
       });
     }
+  }
+
+  // ── History operations (shared by the sidebar's own messages and HistoryEditorProvider) ──
+
+  public getHistoryEntries(): HistoryEntry[] {
+    return this._historyManager.getAll();
+  }
+
+  public isHistoryEnabled(): boolean {
+    return this._historyManager.isEnabled();
+  }
+
+  public async setHistoryEnabled(enabled: boolean): Promise<void> {
+    await this._historyManager.setEnabled(enabled);
+  }
+
+  public async deleteHistoryEntryById(entryId: string): Promise<void> {
+    const entryBeingDeleted = this._historyManager
+      .getAll()
+      .find((e) => e.id === entryId);
+    await this._historyManager.deleteEntry(entryId);
+    if (entryBeingDeleted) {
+      RequestEditorProvider.refreshPanelHistory(
+        entryBeingDeleted.requestId,
+        this._historyManager,
+      );
+    }
+  }
+
+  /** Returns true if the user confirmed and history was actually cleared. */
+  public async clearAllHistoryEntries(): Promise<boolean> {
+    const confirm = await vscode.window.showWarningMessage(
+      "Clear all request history? This cannot be undone.",
+      { modal: true },
+      "Clear All",
+    );
+    if (confirm !== "Clear All") return false;
+
+    const affectedRequestIds = [
+      ...new Set(this._historyManager.getAll().map((e) => e.requestId)),
+    ];
+    await this._historyManager.clearAll();
+    for (const requestId of affectedRequestIds) {
+      RequestEditorProvider.refreshPanelHistory(requestId, this._historyManager);
+    }
+    return true;
+  }
+
+  public async restoreHistoryEntryById(entryId: string): Promise<void> {
+    const entry = this._historyManager.getAll().find((e) => e.id === entryId);
+    if (!entry) return;
+
+    const folder = this._findFolder(entry.folderId);
+    const requestExists = folder?.requests?.some(
+      (r) => r.id === entry.requestId,
+    );
+    if (!requestExists) {
+      vscode.window.showWarningMessage(
+        `Cannot restore "${entry.requestName}" — the original request no longer exists.`,
+      );
+      return;
+    }
+
+    const existingConfig =
+      this._context.globalState.get<any>(
+        `restlab.request.${entry.requestId}`,
+      ) || {};
+    const restoredConfig = {
+      ...existingConfig,
+      method: entry.request.method,
+      url: entry.request.url,
+      headers: entry.request.headers,
+      params: entry.request.params,
+      body: entry.request.body,
+      contentType: entry.request.contentType,
+      formData: entry.request.formData,
+      cookies: entry.request.cookies,
+    };
+    await this._context.globalState.update(
+      `restlab.request.${entry.requestId}`,
+      restoredConfig,
+    );
+    RequestEditorProvider.refreshPanelConfig(
+      this._context,
+      entry.requestId,
+      entry.folderId,
+      this,
+      this._historyManager,
+    );
+    vscode.window.showInformationMessage(
+      `Restored "${entry.requestName}" from history`,
+    );
   }
 
   private _sendFoldersToWebview() {

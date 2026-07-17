@@ -4,6 +4,7 @@ import ChevronIcon from "../components/icons/ChevronIcon";
 import CollectionAddIcon from "../components/icons/CollectionAddIcon";
 import CollectionIcon from "../components/icons/CollectionIcon";
 import FolderIcon from "../components/icons/FolderIcon";
+import HistoryIcon from "../components/icons/HistoryIcon";
 import NoItemsIcon from "../components/icons/NoItemsIcon";
 import PlusIcon from "../components/icons/PlusIcon";
 import { Folder, Request } from "../types/internal.types";
@@ -17,7 +18,7 @@ declare function acquireVsCodeApi(): {
   setState: (state: unknown) => void;
 };
 
-const vscode = acquireVsCodeApi();
+export const vscode = acquireVsCodeApi();
 
 // Drag data type constants
 const DRAG_TYPE_REQUEST = "application/x-restlab-request";
@@ -338,6 +339,10 @@ export const Sidebar: React.FC = () => {
     vscode.postMessage({ type: "importCollection", provider: providerId });
   };
 
+  const handleOpenHistory = () => {
+    vscode.postMessage({ type: "openHistory" });
+  };
+
   const handleToggleFolder = (folderId: string) => {
     setExpandedFolders((prev) => {
       const next = new Set(prev);
@@ -602,6 +607,11 @@ export const Sidebar: React.FC = () => {
             <span>New Collection</span>
           </button>
           <ImportDropdown onSelect={handleImportCollection} />
+          <Tooltip text="View Request History" position="bottom">
+            <button className="header-action-btn" onClick={handleOpenHistory}>
+              <HistoryIcon />
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -615,53 +625,52 @@ export const Sidebar: React.FC = () => {
         }}
         onDrop={handleDropOnRoot}
       >
-        {folders.length === 0 ? (
-          <div className="empty-state">
-            <NoItemsIcon />
-            <p className="empty-state-title">No collections yet</p>
-            <p className="empty-state-hint">
-              Create your first collection to get started
-            </p>
-          </div>
-        ) : (
-          <>
-            {folders.map((folder) => (
-              <FolderItem
-                key={folder.id}
-                folder={folder}
-                depth={0}
-                isDragging={isDragging}
-                dragOverFolderId={dragOverFolderId}
-                expandedFolders={expandedFolders}
-                activeRequestId={activeRequestId}
-                onToggleFolder={handleToggleFolder}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onAddRequest={handleAddRequest}
-                onAddRequestFromCurl={handleAddRequestFromCurl}
-                onAddSubfolder={handleAddSubfolder}
-                onOpenFolder={handleOpenFolder}
-                onExportCollection={handleExportCollection}
-                onDuplicateFolder={handleDuplicateFolder}
-                onRenameFolder={handleRenameFolder}
-                onDeleteFolder={handleDeleteFolder}
-                onOpenRequest={handleOpenRequest}
-                onRenameRequest={handleRenameRequest}
-                onDuplicateRequest={handleDuplicateRequest}
-                onDeleteRequest={handleDeleteRequest}
-              />
-            ))}
-            {/* Drop zone indicator at root level */}
-            {isDragging && (
-              <div className="root-drop-indicator">
-                <span>Drop here to move to root level</span>
-              </div>
-            )}
-          </>
-        )}
+          {folders.length === 0 ? (
+            <div className="empty-state">
+              <NoItemsIcon />
+              <p className="empty-state-title">No collections yet</p>
+              <p className="empty-state-hint">
+                Create your first collection to get started
+              </p>
+            </div>
+          ) : (
+            <>
+              {folders.map((folder) => (
+                <FolderItem
+                  key={folder.id}
+                  folder={folder}
+                  depth={0}
+                  isDragging={isDragging}
+                  dragOverFolderId={dragOverFolderId}
+                  expandedFolders={expandedFolders}
+                  activeRequestId={activeRequestId}
+                  onToggleFolder={handleToggleFolder}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onAddRequest={handleAddRequest}
+                  onAddRequestFromCurl={handleAddRequestFromCurl}
+                  onAddSubfolder={handleAddSubfolder}
+                  onOpenFolder={handleOpenFolder}
+                  onExportCollection={handleExportCollection}
+                  onDuplicateFolder={handleDuplicateFolder}
+                  onRenameFolder={handleRenameFolder}
+                  onDeleteFolder={handleDeleteFolder}
+                  onOpenRequest={handleOpenRequest}
+                  onRenameRequest={handleRenameRequest}
+                  onDuplicateRequest={handleDuplicateRequest}
+                  onDeleteRequest={handleDeleteRequest}
+                />
+              ))}
+              {isDragging && (
+                <div className="root-drop-indicator">
+                  <span>Drop here to move to root level</span>
+                </div>
+              )}
+            </>
+          )}
       </div>
     </div>
   );

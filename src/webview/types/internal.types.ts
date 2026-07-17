@@ -103,6 +103,27 @@ export interface ResponseData {
   cookies?: ResponseCookie[];
 }
 
+export interface HistoryEntry {
+  id: string;
+  requestId: string;
+  requestName: string;
+  folderId: string;
+  timestamp: number;
+  request: {
+    method: string;
+    url: string;
+    resolvedUrl: string;
+    headers: Header[];
+    params: Header[];
+    body?: string;
+    contentType?: string;
+    formData?: FormDataItem[];
+    cookies?: Cookie[];
+  };
+  response: ResponseData;
+  truncated?: boolean;
+}
+
 export interface RequestEditorProps {
   requestId: string;
   requestName: string;
