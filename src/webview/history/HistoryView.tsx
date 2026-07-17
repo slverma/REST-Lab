@@ -58,7 +58,7 @@ export const HistoryView: React.FC = () => {
               checked={enabled}
               onChange={handleToggleEnabled}
             />
-            <span>Keep tracking</span>
+            <span>Enable History</span>
           </label>
           {entries.length > 0 && (
             <button className="add-btn" onClick={handleClearAll}>
@@ -69,7 +69,7 @@ export const HistoryView: React.FC = () => {
       </div>
       {!enabled && (
         <p className="empty-hint history-paused-hint">
-          Tracking is paused — new requests won't be added to history.
+          History is paused — new requests won't be added to history.
         </p>
       )}
       <div className="history-page-body">
