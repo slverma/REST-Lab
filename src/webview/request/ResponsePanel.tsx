@@ -105,6 +105,7 @@ const ResponsePanel: React.FC = () => {
                       ? "Switch to side-by-side view"
                       : "Switch to stacked view"
                   }
+                  position="top-right"
                 >
                   <button
                     className="layout-toggle-btn"
@@ -113,7 +114,7 @@ const ResponsePanel: React.FC = () => {
                     <SplitIcon splitLayout={splitLayout} />
                   </button>
                 </Tooltip>
-                <Tooltip text="Hide response">
+                <Tooltip text="Hide response" position="top-right">
                   <button
                     className="response-hide-btn"
                     onClick={toggleResponseHidden}
@@ -194,7 +195,7 @@ const ResponsePanel: React.FC = () => {
                             <DownloadIcon />
                           </button>
                         </Tooltip>
-                        <Tooltip text="Open response in VS Code editor">
+                        <Tooltip text="Open response in VS Code editor" position="top-right">
                           <button
                             className="action-btn"
                             onClick={() => {

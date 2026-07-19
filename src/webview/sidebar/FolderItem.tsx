@@ -106,7 +106,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
         onClick={() => onToggleFolder(folder.id)}
         role="button"
         tabIndex={0}
-        style={{ paddingLeft: `${8 + depth * 16}px` }}
+        style={{ paddingLeft: `${8 + depth * 10}px` }}
         onDragOver={(e) => onDragOver(e, folder.id)}
         onDragLeave={(e) => onDragLeave(e, folder.id)}
         onDrop={(e) => onDrop(e, folder.id)}
@@ -133,7 +133,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           {folder.name}
         </span>
         <div className="tree-actions">
-          <Tooltip text="Add Request">
+          <Tooltip text="Add Request" position="top-right">
             <button
               className="action-btn"
               onClick={(e) => onAddRequest(e, folder.id)}
@@ -191,7 +191,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           {/* Render requests */}
           <div
             className={`req-zone${isDropTarget ? " drop-zone-highlight" : ""}`}
-            style={{ paddingLeft: `${20 + depth * 16}px` }}
+            style={{ paddingLeft: `${16 + depth * 10}px` }}
             onDragOver={(e) => onDragOver(e, folder.id)}
             onDrop={(e) => onDrop(e, folder.id)}
           >

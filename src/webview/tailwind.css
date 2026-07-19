@@ -201,7 +201,7 @@
     pointer-events: none;
     background: var(--vscode-editorWidget-background, #252526);
     color: var(--vscode-editorWidget-foreground, #cccccc);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
     border: 1px solid var(--vscode-editorWidget-border, #454545);
     z-index: 2147483647;
     animation: tooltipFadeIn 0.15s ease-out;
@@ -218,6 +218,16 @@
     border-top-color: var(--vscode-editorWidget-background, #252526);
   }
 
+  /* Tooltip arrow - top-right position */
+  .custom-tooltip.tooltip-top-right::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    right: 10px;
+    border: 4px solid transparent;
+    border-top-color: var(--vscode-editorWidget-background, #252526);
+  }
+
   /* Tooltip arrow - bottom position */
   .custom-tooltip.tooltip-bottom::after {
     content: "";
@@ -225,6 +235,16 @@
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-bottom-color: var(--vscode-editorWidget-background, #252526);
+  }
+
+  /* Tooltip arrow - bottom-right position */
+  .custom-tooltip.tooltip-bottom-right::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    right: 10px;
     border: 4px solid transparent;
     border-bottom-color: var(--vscode-editorWidget-background, #252526);
   }

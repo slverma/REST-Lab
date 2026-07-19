@@ -368,7 +368,7 @@ export const Sidebar: React.FC = () => {
             <span>New Collection</span>
           </button>
           <ImportDropdown onSelect={handleImportCollection} />
-          <Tooltip text="View Request History" position="bottom">
+          <Tooltip text="View Request History" position="top-right">
             <button className="header-action-btn" onClick={handleOpenHistory}>
               <HistoryIcon />
             </button>

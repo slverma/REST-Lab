@@ -846,17 +846,6 @@ body {
   position: relative;
 }
 
-.request-content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: var(--restlab-gradient);
-  opacity: 0.5;
-}
-
 .tab-content {
   padding: var(--rl-sp2) 0;
   flex: 1;
@@ -1492,17 +1481,6 @@ fieldset.form-section {
   position: relative;
   backdrop-filter: blur(8px);
   overflow: visible;
-}
-
-.response-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: var(--restlab-gradient);
-  opacity: 0.5;
 }
 
 .response-header {

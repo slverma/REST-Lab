@@ -1,7 +1,13 @@
 import React, { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 
-type TooltipPosition = "top" | "bottom" | "left" | "right";
+type TooltipPosition =
+  | "top"
+  | "bottom"
+  | "left"
+  | "right"
+  | "top-right"
+  | "bottom-right";
 
 // Custom Tooltip Component
 const Tooltip: React.FC<{
@@ -23,11 +29,27 @@ const Tooltip: React.FC<{
           top: rect.top - offset,
           transform: "translate(-50%, -100%)",
         };
+      case "top-right":
+        // Anchors the tooltip's right edge to the trigger's right edge
+        // instead of centering it, so triggers near the right edge of a
+        // narrow panel don't get their tooltip clipped off-screen.
+        return {
+          left: rect.right,
+          top: rect.top - offset,
+          transform: "translate(-100%, -100%)",
+        };
       case "bottom":
         return {
           left: rect.left + rect.width / 2,
           top: rect.bottom + offset,
           transform: "translate(-50%, 0)",
+        };
+      case "bottom-right":
+        // Same right-edge anchoring as top-right, but below the trigger.
+        return {
+          left: rect.right,
+          top: rect.bottom + offset,
+          transform: "translate(-100%, 0)",
         };
       case "left":
         return {

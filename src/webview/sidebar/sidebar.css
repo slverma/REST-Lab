@@ -25,7 +25,7 @@ body {
   font-size: var(--vscode-font-size, 13px);
   color: var(--vscode-foreground);
   background-color: var(--vscode-sideBar-background);
-  line-height: 1.45;
+  line-height: 1.3;
 }
 
 /* ---- Brand & VS Code tokens ---- */
@@ -150,26 +150,13 @@ body {
 .tree-row {
   display: flex;
   align-items: center;
-  gap: var(--rl-sp3);
-  padding: var(--rl-sp2) var(--rl-sp3);
-  margin-bottom: var(--rl-sp1);
+  padding: var(--rl-sp1) var(--rl-sp3);
+  margin-bottom: 2px;
   cursor: pointer;
   border-radius: var(--rl-r2);
   border: 1px solid transparent;
   position: relative;
   transition: background 0.15s ease, border-color 0.15s ease;
-}
-.tree-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  border-radius: 0 2px 2px 0;
-  background: var(--restlab-gradient);
-  transition: height 0.2s ease;
 }
 .tree-row:hover,
 .tree-row:focus-visible {
@@ -177,8 +164,6 @@ body {
   border-color: var(--glass-border);
   outline: none;
 }
-.tree-row:hover::before,
-.tree-row:focus-visible::before { height: 60%; }
 .tree-row:focus-visible {
   border-color: var(--restlab-accent);
   background: var(--restlab-accent-subtle);
@@ -199,8 +184,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--rl-icon);
-  height: var(--rl-icon);
+  width: 0.9em;
+  height: 0.9em;
   color: var(--vscode-descriptionForeground);
   cursor: grab;
   opacity: 0;
@@ -222,28 +207,22 @@ body {
   white-space: nowrap;
   font-size: 0.95em;
   font-weight: 600;
+  margin-left: var(--rl-sp2);
 }
 
 .tree-actions {
   display: flex;
   align-items: center;
   gap: var(--rl-sp1);
-  margin-left: auto;
-  flex-shrink: 0;
-}
-
-/* ---- Tree children connector ---- */
-.tree-children {
-  position: relative;
-}
-.tree-children::before {
-  content: "";
   position: absolute;
-  left: calc(var(--rl-sp4) + 0.3em);
-  top: 0;
-  bottom: var(--rl-sp3);
-  width: 1px;
-  background: linear-gradient(var(--glass-border), transparent);
+  right: var(--rl-sp3);
+  top: 50%;
+  transform: translateY(-50%);
+  /* translateY() creates a new stacking context, which would otherwise
+     trap the open dropdown-menu's z-index and let .tree-children (the
+     folder's expanded rows, right after .tree-row in the DOM) paint over
+     it. An explicit z-index here elevates the whole context instead. */
+  z-index: 2;
 }
 
 /* ============================================================
@@ -254,35 +233,28 @@ body {
 .req-row {
   display: flex;
   align-items: center;
-  gap: var(--rl-sp2);
+  gap: var(--rl-sp1);
   padding: 3px var(--rl-sp3);
   margin-bottom: 1px;
-  margin-left: 0.6em;
   cursor: pointer;
   border-radius: var(--rl-r2);
   border: 1px solid transparent;
   position: relative;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
-.req-row::before {
-  content: "";
-  position: absolute;
-  left: -0.6em;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  border-radius: 0 2px 2px 0;
-  background: var(--restlab-gradient);
-  transition: height 0.2s ease;
-}
 .req-row:hover { background: var(--glass-bg); border-color: var(--glass-border); }
-.req-row:hover::before { height: 55%; }
 .req-row.active {
   background: rgba(56, 189, 248, 0.15);
   border-color: rgba(56, 189, 248, 0.3);
 }
-.req-row.active::before { height: 55%; }
+.req-row > .dropdown-wrap {
+  position: absolute;
+  right: var(--rl-sp3);
+  top: 50%;
+  transform: translateY(-50%);
+  /* Same stacking-context trap as .tree-actions above. */
+  z-index: 2;
+}
 
 .req-label {
   flex: 1;
@@ -454,13 +426,33 @@ body {
   opacity: 0;
   transition: all 0.15s ease;
 }
-.tree-row:hover .action-btn,
-.req-row:hover .action-btn { opacity: 0.6; }
 .action-btn:hover { opacity: 1 !important; background: var(--restlab-accent-subtle); color: var(--restlab-accent); }
 .action-btn svg { width: var(--rl-icon); height: var(--rl-icon); display: block; }
 
+/* Row-level action buttons overlay directly on top of the label (see
+   .tree-actions / .req-row > .dropdown-wrap), so they need an opaque
+   backing to stay legible against the text underneath — and to actually
+   read as opaque, they're fully visible once revealed, not the dimmer
+   0.6 the plain (non-overlaid) .action-btn hover state uses elsewhere. */
+.tree-row .action-btn,
+.req-row .action-btn {
+  width: 1.6em;
+  height: 1.6em;
+  background: var(--vscode-sideBar-background);
+}
+.tree-row:hover .action-btn,
+.req-row:hover .action-btn {
+  opacity: 1;
+}
+.tree-row .action-btn svg,
+.req-row .action-btn svg {
+  width: 1em;
+  height: 1em;
+}
+
 /* ---- Chevron rotation utility ---- */
 .rotate-90 { transform: rotate(90deg); transition: transform 0.2s ease; }
+.rotate-180 { transform: rotate(180deg); transition: transform 0.2s ease; }
 
 /* ============================================================
    DROPDOWN
@@ -475,10 +467,15 @@ body {
   top: calc(100% + 4px);
   right: 0;
   min-width: 180px;
-  background: var(--vscode-dropdown-background, #3c3c3c);
-  border: 1px solid var(--vscode-dropdown-border, #454545);
+  /* Some themes give --vscode-dropdown-background partial alpha, which
+     VS Code's native dropdowns get away with because the OS compositor
+     backs them with an opaque layer. A webview div has no such backing,
+     so use the same solid, already-verified-opaque token the tooltip
+     uses instead — otherwise row content underneath shows through. */
+  background: var(--vscode-editorWidget-background, #252526);
+  border: 1px solid var(--vscode-editorWidget-border, #454545);
   border-radius: var(--rl-r3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
   z-index: 1000;
   overflow: hidden;
   animation: sbFadeIn 0.15s ease-out;
@@ -543,7 +540,7 @@ body {
   pointer-events: none;
   background: var(--vscode-editorWidget-background, #252526);
   color: var(--vscode-editorWidget-foreground, #cccccc);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), 0 1px 3px rgba(0, 0, 0, 0.35);
   border: 1px solid var(--vscode-editorWidget-border, #454545);
   z-index: 2147483647;
   animation: sbTooltipFadeIn 0.15s ease-out;
@@ -557,12 +554,28 @@ body {
   border: 4px solid transparent;
   border-top-color: var(--vscode-editorWidget-background, #252526);
 }
+.custom-tooltip.tooltip-top-right::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 10px;
+  border: 4px solid transparent;
+  border-top-color: var(--vscode-editorWidget-background, #252526);
+}
 .custom-tooltip.tooltip-bottom::after {
   content: "";
   position: absolute;
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-bottom-color: var(--vscode-editorWidget-background, #252526);
+}
+.custom-tooltip.tooltip-bottom-right::after {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 10px;
   border: 4px solid transparent;
   border-bottom-color: var(--vscode-editorWidget-background, #252526);
 }

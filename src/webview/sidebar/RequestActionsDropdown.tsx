@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Request } from "../types/internal.types";
+import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
-import TrashIcon from "../components/icons/TrashIcon";
 import CopyIcon from "../components/icons/CopyIcon";
 import MoreActionIcon from "../components/icons/MoreActionIcon";
 import PencilIcon from "../components/icons/PencilIcon";
+import TrashIcon from "../components/icons/TrashIcon";
+import { Request } from "../types/internal.types";
 
 // Request Actions Dropdown Component
 const RequestActionsDropdown: React.FC<{
@@ -44,7 +44,7 @@ const RequestActionsDropdown: React.FC<{
 
   return (
     <div className="dropdown-wrap" ref={dropdownRef}>
-      <Tooltip text="More Actions" position="left">
+      <Tooltip text="More Actions" position="top-right">
         <button
           className="action-btn"
           onClick={handleClick}

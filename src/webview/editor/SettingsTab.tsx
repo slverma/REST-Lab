@@ -172,7 +172,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                   className="header-value"
                   envVariables={envVars}
                 />
-                <Tooltip text="Remove header">
+                <Tooltip text="Remove header" position="top-right">
                   <button
                     className="remove-btn"
                     onClick={() => onRemoveHeader(index)}
@@ -229,7 +229,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                   className="header-value"
                   envVariables={envVars}
                 />
-                <Tooltip text="Remove parameter">
+                <Tooltip text="Remove parameter" position="top-right">
                   <button
                     className="remove-btn"
                     onClick={() => onRemoveParam(index)}

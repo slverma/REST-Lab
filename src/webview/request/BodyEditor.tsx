@@ -1,6 +1,25 @@
 import Editor, { OnMount } from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+// VS Code sets one of these classes on <body> in every webview and keeps it
+// live-updated when the user switches color themes — no extension-host
+// round trip needed, we just watch the class attribute.
+const VSCODE_THEME_CLASS_TO_MONACO_THEME: Record<string, string> = {
+  "vscode-light": "vs",
+  "vscode-dark": "vs-dark",
+  "vscode-high-contrast": "hc-black",
+  "vscode-high-contrast-light": "hc-light",
+};
+
+const getMonacoThemeFromBody = (): string => {
+  for (const [vscodeClass, monacoTheme] of Object.entries(
+    VSCODE_THEME_CLASS_TO_MONACO_THEME,
+  )) {
+    if (document.body.classList.contains(vscodeClass)) return monacoTheme;
+  }
+  return "vs-dark";
+};
 
 type MonacoEditorProps = {
   value: string;
@@ -33,6 +52,18 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
   const envVarsRef = useRef<Record<string, string>>(envVariables);
   const completionDisposableRef = useRef<Monaco.IDisposable | null>(null);
   const findWidgetListenerRef = useRef<((e: KeyboardEvent) => void) | null>(null);
+  const [monacoTheme, setMonacoTheme] = useState(getMonacoThemeFromBody);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setMonacoTheme(getMonacoThemeFromBody());
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     envVarsRef.current = envVariables;
@@ -178,7 +209,7 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
         height="100%"
         language={language}
         value={value}
-        theme="restlab-dark"
+        theme={monacoTheme}
         onChange={handleChange}
         onMount={handleEditorDidMount}
         options={{

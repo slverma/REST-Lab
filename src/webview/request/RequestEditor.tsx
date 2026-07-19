@@ -151,7 +151,7 @@ const RequestEditorContent: React.FC = () => {
           <span className="btn-text">{isSaved ? "Saved" : "Save"}</span>
         </button>
         <div className="request-more-container" ref={moreRef}>
-          <Tooltip text="More actions" position="bottom">
+          <Tooltip text="More actions" position="bottom-right">
             <button
               className="request-more-btn"
               onClick={() => setMoreOpen((o) => !o)}
