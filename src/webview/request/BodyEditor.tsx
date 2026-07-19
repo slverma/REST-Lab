@@ -129,7 +129,7 @@ const BodyEditor: React.FC<MonacoEditorProps> = ({
           editor.getModel()?.getLanguageId() ?? "plaintext",
           {
             triggerCharacters: ["{"],
-            provideCompletionItems: (model, position) => {
+            provideCompletionItems: (model: Monaco.editor.ITextModel, position: Monaco.Position) => {
               const textBefore = model.getValueInRange({
                 startLineNumber: position.lineNumber,
                 startColumn: 1,
