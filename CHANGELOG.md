@@ -1,3 +1,7 @@
+## 1.8.0 (2026-07-19)
+
+* feat: modern panel redesign, dot dividers, sidebar drag-grip fix (#23) ([aa63164](https://github.com/slverma/REST-Lab/commit/aa63164)), closes [#23](https://github.com/slverma/REST-Lab/issues/23)
+
 ## 1.7.0 (2026-07-17)
 
 * feat: add request history (#22) ([ea1767a](https://github.com/slverma/REST-Lab/commit/ea1767a)), closes [#22](https://github.com/slverma/REST-Lab/issues/22)
