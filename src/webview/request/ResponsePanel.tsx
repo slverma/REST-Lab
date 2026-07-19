@@ -65,7 +65,11 @@ const ResponsePanel: React.FC = () => {
         className={`resize-handle ${splitLayout} ${isResizing ? "active" : ""}`}
         onMouseDown={handleResizeStart}
       >
-        <div className="resize-handle-bar" />
+        <div className="resize-handle-dots">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
 
       <div className="response-panel" style={sizeStyle}>
