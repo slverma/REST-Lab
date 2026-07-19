@@ -91,7 +91,7 @@ const ParamsTab = () => {
                   placeholder="Value"
                   className="header-value"
                 />
-                <Tooltip text="Remove Parameter">
+                <Tooltip text="Remove Parameter" position="top-right">
                   <button
                     className="remove-btn"
                     onClick={() => handleRemoveParam(index)}

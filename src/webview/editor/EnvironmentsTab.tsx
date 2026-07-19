@@ -128,7 +128,7 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                       {env.name}
                     </span>
                   )}
-                  <Tooltip text="Delete environment">
+                  <Tooltip text="Delete environment" position="top-right">
                     <button
                       className="env-delete-btn"
                       onClick={(e) => {
@@ -218,7 +218,7 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                           onUpdateVariable(idx, "value", e.target.value)
                         }
                       />
-                      <Tooltip text="Remove variable">
+                      <Tooltip text="Remove variable" position="top-right">
                         <button
                           className="remove-btn"
                           onClick={() => onRemoveVariable(idx)}

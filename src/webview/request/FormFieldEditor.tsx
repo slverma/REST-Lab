@@ -89,7 +89,7 @@ const FormFieldEditor = () => {
               />
             )}
 
-            <Tooltip text="Remove field">
+            <Tooltip text="Remove field" position="top-right">
               <button
                 className="remove-btn"
                 onClick={() => handleRemoveFormData(index)}

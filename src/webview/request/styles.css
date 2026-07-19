@@ -838,6 +838,12 @@ body {
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  padding: var(--rl-sp0) var(--rl-sp2) var(--rl-sp2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r3);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  position: relative;
 }
 
 .tab-content {
@@ -861,7 +867,7 @@ body {
 
 /* Horizontal resize handle (for top/bottom split) */
 .resize-handle.horizontal {
-  height: 5px;
+  height: 8px;
   cursor: row-resize;
   margin: 0;
 }
@@ -872,18 +878,17 @@ body {
   left: 0;
   right: 0;
   top: 50%;
-  height: 1px;
-  background: var(--glass-border);
-  transition: background 0.15s ease;
-}
-
-.resize-handle.horizontal .resize-handle-bar {
-  display: none;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: 1px;
+  background: var(--restlab-gradient);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 /* Vertical resize handle (for left/right split) */
 .resize-handle.vertical {
-  width: 5px;
+  width: 8px;
   cursor: col-resize;
   margin: 0;
 }
@@ -894,42 +899,46 @@ body {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: 1px;
-  background: var(--glass-border);
-  transition: background 0.15s ease;
-}
-
-.resize-handle.vertical .resize-handle-bar {
-  display: none;
+  width: 2px;
+  transform: translateX(-50%);
+  border-radius: 1px;
+  background: var(--restlab-gradient);
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .resize-handle:hover::before,
 .resize-handle.active::before {
-  background: var(--restlab-gradient);
-}
-
-.resize-handle-bar {
-  border-radius: 2px;
-  background: var(--vscode-descriptionForeground);
-  opacity: 0.3;
-  transition: all 0.15s ease;
-  z-index: 1;
-}
-
-.resize-handle:hover .resize-handle-bar,
-.resize-handle.active .resize-handle-bar {
-  background: var(--restlab-gradient);
   opacity: 1;
 }
 
-.resize-handle.horizontal:hover .resize-handle-bar,
-.resize-handle.horizontal.active .resize-handle-bar {
-  width: 64px;
+/* Dot indicator — visible at rest, fades out for the bold line on hover/drag */
+.resize-handle-dots {
+  display: flex;
+  gap: 3px;
+  z-index: 1;
+  transition: opacity 0.15s ease;
 }
 
-.resize-handle.vertical:hover .resize-handle-bar,
-.resize-handle.vertical.active .resize-handle-bar {
-  height: 64px;
+.resize-handle.horizontal .resize-handle-dots {
+  flex-direction: row;
+}
+
+.resize-handle.vertical .resize-handle-dots {
+  flex-direction: column;
+}
+
+.resize-handle-dots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--vscode-descriptionForeground);
+  opacity: 0.5;
+}
+
+.resize-handle:hover .resize-handle-dots,
+.resize-handle.active .resize-handle-dots {
+  opacity: 0;
 }
 
 /* ── Auth / Form fields ─────────────────────────────────────────────── */
@@ -1463,7 +1472,7 @@ fieldset.form-section {
 .response-section {
   padding: var(--rl-sp0) var(--rl-sp2) var(--rl-sp2);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--rl-r3);
   background: var(--glass-bg);
   flex: 1;
   min-height: 0;
@@ -1472,17 +1481,6 @@ fieldset.form-section {
   position: relative;
   backdrop-filter: blur(8px);
   overflow: visible;
-}
-
-.response-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 24px;
-  right: 24px;
-  height: 1px;
-  background: var(--restlab-gradient);
-  opacity: 0.5;
 }
 
 .response-header {
@@ -1889,7 +1887,7 @@ fieldset.form-section {
 
   .split-container.vertical .resize-handle {
     width: auto;
-    height: 5px;
+    height: 8px;
     cursor: row-resize;
     margin: 0;
   }
@@ -1900,11 +1898,12 @@ fieldset.form-section {
     left: 0;
     right: 0;
     width: auto;
-    height: 1px;
+    height: 2px;
+    transform: translateY(-50%);
   }
 
-  .split-container.vertical .resize-handle-bar {
-    display: none;
+  .split-container.vertical .resize-handle-dots {
+    flex-direction: row;
   }
 }
 

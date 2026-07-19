@@ -124,7 +124,7 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
                   >
                     Restore
                   </button>
-                  <Tooltip text="Delete this entry">
+                  <Tooltip text="Delete this entry" position="top-right">
                     <button
                       className="remove-btn"
                       onClick={(e) => {

@@ -49,7 +49,7 @@ const CookieTab: React.FC = () => {
                 placeholder="value"
                 className="header-value"
               />
-              <Tooltip text="Remove Cookie">
+              <Tooltip text="Remove Cookie" position="top-right">
                 <button
                   className="remove-btn"
                   onClick={() => handleRemoveCookie(index)}

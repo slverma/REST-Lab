@@ -91,7 +91,7 @@ const HeaderTab = () => {
                   placeholder="Value"
                   className="header-value"
                 />
-                <Tooltip text="Remove Header">
+                <Tooltip text="Remove Header" position="top-right">
                   <button
                     className="remove-btn"
                     onClick={() => handleRemoveHeader(index)}

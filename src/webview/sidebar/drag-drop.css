@@ -74,7 +74,7 @@
 }
 
 /* Make items slightly transparent while dragging */
-.dragging-active[draggable="true"]:active {
+.dragging-active:active {
   opacity: 0.5;
 }
 
@@ -102,12 +102,12 @@
   opacity: 1;
 }
 
-/* Cursor styles during drag */
-[draggable="true"] {
+/* Cursor styles during drag — scoped to the grip handle, not the whole row */
+.row-grip {
   cursor: grab;
 }
 
-[draggable="true"]:active {
+.row-grip:active {
   cursor: grabbing;
 }
 
