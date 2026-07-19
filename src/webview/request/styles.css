@@ -1909,7 +1909,7 @@ fieldset.form-section {
 
   .split-container.vertical .resize-handle {
     width: auto;
-    height: 5px;
+    height: 8px;
     cursor: row-resize;
     margin: 0;
   }
@@ -1920,11 +1920,12 @@ fieldset.form-section {
     left: 0;
     right: 0;
     width: auto;
-    height: 1px;
+    height: 2px;
+    transform: translateY(-50%);
   }
 
-  .split-container.vertical .resize-handle-bar {
-    display: none;
+  .split-container.vertical .resize-handle-dots {
+    flex-direction: row;
   }
 }
 
