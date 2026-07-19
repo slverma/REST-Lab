@@ -838,6 +838,23 @@ body {
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+  padding: var(--rl-sp0) var(--rl-sp2) var(--rl-sp2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r3);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  position: relative;
+}
+
+.request-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: var(--restlab-gradient);
+  opacity: 0.5;
 }
 
 .tab-content {
@@ -1463,7 +1480,7 @@ fieldset.form-section {
 .response-section {
   padding: var(--rl-sp0) var(--rl-sp2) var(--rl-sp2);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: var(--rl-r3);
   background: var(--glass-bg);
   flex: 1;
   min-height: 0;
