@@ -3,7 +3,7 @@
   "displayName": "REST Lab",
   "description": "A modern REST API client for Visual Studio Code — compatible with all VS Code-supported platforms and extension hosts. Test, debug, and manage your APIs with a beautiful interface",
   "publisher": "slverma",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "icon": "resources/restlab-icon.png",
   "repository": {
     "type": "git",
