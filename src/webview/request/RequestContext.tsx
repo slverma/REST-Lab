@@ -340,6 +340,9 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
         case "historyUpdated":
           setHistoryEntries(message.entries || []);
           break;
+        case "requestRenamed":
+          setConfig((prev) => ({ ...prev, name: message.name }));
+          break;
         case "historyRestored":
           setConfig((prev) => ({
             ...prev,
