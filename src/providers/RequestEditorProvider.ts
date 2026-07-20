@@ -49,6 +49,9 @@ export class RequestEditorProvider {
     const panel = RequestEditorProvider.openPanels.get(requestId);
     if (panel) {
       panel.title = newTitle;
+      // Sync the webview's in-memory config so a subsequent save (e.g. from
+      // Send Request) doesn't post back the stale name and undo the rename.
+      panel.webview.postMessage({ type: "requestRenamed", name: newTitle });
     }
   }
 
