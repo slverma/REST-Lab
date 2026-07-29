@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { formatRelativeTime, getStatusColor } from "../helpers/helper";
 import { formatJson } from "../helpers/helper";
 import { HistoryEntry } from "../types/internal.types";
+import ConfirmDialog from "./ConfirmDialog";
 import HistoryResponseViewer from "./HistoryResponseViewer";
 import Tooltip from "./Tooltip";
 import TrashIcon from "./icons/TrashIcon";
@@ -113,35 +114,55 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
   );
 };
 
-// Placeholder for Task 4 — Task 4 replaces this with the real
-// restore-confirmation-aware implementation and removes this comment.
 const HistoryEntryActions: React.FC<{
   entry: HistoryEntry;
   onRestore: (entryId: string) => void;
   onDelete: (entryId: string) => void;
-}> = ({ entry, onRestore, onDelete }) => (
-  <div className="history-entry-actions">
-    <button
-      className="add-btn"
-      onClick={(e) => {
-        e.stopPropagation();
-        onRestore(entry.id);
-      }}
-    >
-      Restore
-    </button>
-    <Tooltip text="Delete this entry" position="top-right">
-      <button
-        className="remove-btn"
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(entry.id);
-        }}
+}> = ({ entry, onRestore, onDelete }) => {
+  const [confirmingRestore, setConfirmingRestore] = useState(false);
+
+  return (
+    <div className="history-entry-actions">
+      <Tooltip
+        text="Restore this request's saved method, URL, headers, params, and body into the editor — overwrites current values"
+        position="top-right"
       >
-        <TrashIcon />
-      </button>
-    </Tooltip>
-  </div>
-);
+        <button
+          className="add-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setConfirmingRestore(true);
+          }}
+        >
+          Restore
+        </button>
+      </Tooltip>
+      <Tooltip text="Delete this entry" position="top-right">
+        <button
+          className="remove-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(entry.id);
+          }}
+        >
+          <TrashIcon />
+        </button>
+      </Tooltip>
+      {confirmingRestore && (
+        <ConfirmDialog
+          title="Restore this request?"
+          message={`This will overwrite the current method, URL, headers, params, and body of "${entry.requestName}" with the values saved ${formatRelativeTime(entry.timestamp)}. This cannot be undone.`}
+          confirmLabel="Restore"
+          danger
+          onConfirm={() => {
+            setConfirmingRestore(false);
+            onRestore(entry.id);
+          }}
+          onCancel={() => setConfirmingRestore(false)}
+        />
+      )}
+    </div>
+  );
+};
 
 export default HistoryEntryList;
