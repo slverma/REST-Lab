@@ -1,17 +1,15 @@
 import React, { useState } from "react";
-import {
-  formatJson,
-  formatRelativeTime,
-  formatSize,
-  getStatusColor,
-} from "../helpers/helper";
+import { formatRelativeTime, getStatusColor } from "../helpers/helper";
+import { formatJson } from "../helpers/helper";
 import { HistoryEntry } from "../types/internal.types";
+import HistoryResponseViewer from "./HistoryResponseViewer";
 import Tooltip from "./Tooltip";
 import TrashIcon from "./icons/TrashIcon";
 
 interface HistoryEntryListProps {
   entries: HistoryEntry[];
   showRequestName?: boolean;
+  vscode: { postMessage: (message: unknown) => void };
   onRestore: (entryId: string) => void;
   onDelete: (entryId: string) => void;
 }
@@ -24,6 +22,7 @@ const renderBody = (body: string | undefined, contentType?: string): string => {
 const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
   entries,
   showRequestName = false,
+  vscode,
   onRestore,
   onDelete,
 }) => {
@@ -69,10 +68,6 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
 
             {isExpanded && (
               <div className="history-entry-details">
-                {entry.truncated && (
-                  <p className="empty-hint">Some content was truncated for storage.</p>
-                )}
-
                 <div className="history-detail-section">
                   <h4>Request</h4>
                   <p className="history-detail-line">
@@ -97,45 +92,18 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
 
                 <div className="history-detail-section">
                   <h4>Response</h4>
-                  <p className="history-detail-line">
-                    {entry.response.status} {entry.response.statusText} ·{" "}
-                    {formatSize(entry.response.size)}
-                  </p>
-                  <div className="response-headers">
-                    {Object.entries(entry.response.headers).map(([k, v]) => (
-                      <div key={k} className="response-header-row">
-                        <span className="header-name">{k}</span>
-                        <span className="header-value">{v}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <pre className="history-body">
-                    {renderBody(entry.response.data, entry.response.headers["content-type"])}
-                  </pre>
+                  <HistoryResponseViewer
+                    response={entry.response}
+                    truncated={entry.truncated}
+                    vscode={vscode}
+                  />
                 </div>
 
-                <div className="history-entry-actions">
-                  <button
-                    className="add-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRestore(entry.id);
-                    }}
-                  >
-                    Restore
-                  </button>
-                  <Tooltip text="Delete this entry" position="top-right">
-                    <button
-                      className="remove-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(entry.id);
-                      }}
-                    >
-                      <TrashIcon />
-                    </button>
-                  </Tooltip>
-                </div>
+                <HistoryEntryActions
+                  entry={entry}
+                  onRestore={onRestore}
+                  onDelete={onDelete}
+                />
               </div>
             )}
           </div>
@@ -144,5 +112,36 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
     </div>
   );
 };
+
+// Placeholder for Task 4 — Task 4 replaces this with the real
+// restore-confirmation-aware implementation and removes this comment.
+const HistoryEntryActions: React.FC<{
+  entry: HistoryEntry;
+  onRestore: (entryId: string) => void;
+  onDelete: (entryId: string) => void;
+}> = ({ entry, onRestore, onDelete }) => (
+  <div className="history-entry-actions">
+    <button
+      className="add-btn"
+      onClick={(e) => {
+        e.stopPropagation();
+        onRestore(entry.id);
+      }}
+    >
+      Restore
+    </button>
+    <Tooltip text="Delete this entry" position="top-right">
+      <button
+        className="remove-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(entry.id);
+        }}
+      >
+        <TrashIcon />
+      </button>
+    </Tooltip>
+  </div>
+);
 
 export default HistoryEntryList;

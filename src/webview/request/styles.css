@@ -1733,6 +1733,23 @@ fieldset.form-section {
   min-height: 0;
 }
 
+.history-response-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp2);
+}
+
+.history-response-viewer .response-editor {
+  height: 360px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  overflow: hidden;
+}
+
+.history-response-truncated-hint {
+  margin: 0;
+}
+
 .response-body {
   padding: 16px;
   background: linear-gradient(

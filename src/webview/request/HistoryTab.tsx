@@ -5,6 +5,7 @@ import { useRequestContext } from "./RequestContext";
 const HistoryTab: React.FC = () => {
   const {
     historyEntries,
+    vscode,
     handleRestoreHistoryEntry,
     handleDeleteHistoryEntry,
     handleClearRequestHistory,
@@ -23,6 +24,7 @@ const HistoryTab: React.FC = () => {
         </div>
         <HistoryEntryList
           entries={historyEntries}
+          vscode={vscode}
           onRestore={handleRestoreHistoryEntry}
           onDelete={handleDeleteHistoryEntry}
         />
