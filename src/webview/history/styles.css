@@ -33,6 +33,7 @@ body {
   --restlab-accent: #38bdf8;
   --restlab-accent-hover: #0ea5e9;
   --restlab-accent-subtle: rgba(56, 189, 248, 0.1);
+  --restlab-accent-glow: rgba(56, 189, 248, 0.4);
   --restlab-danger: #ef4444;
   --restlab-danger-subtle: rgba(239, 68, 68, 0.1);
   --glass-bg: rgba(255, 255, 255, 0.03);
@@ -358,4 +359,319 @@ body {
 
 .history-paused-hint {
   margin-bottom: var(--rl-sp3);
+}
+
+/* ---- Response tabs & actions (duplicated from request/styles.css) ---- */
+.tabs {
+  display: flex;
+  gap: var(--rl-sp1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: relative;
+}
+.tabs::-webkit-scrollbar {
+  height: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp2);
+  padding: var(--rl-sp2) var(--rl-sp2);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.92em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tab::before {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--restlab-gradient);
+  transform: scaleX(0);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1px;
+}
+
+.tab:hover {
+  color: var(--vscode-foreground);
+  background: var(--glass-bg);
+}
+
+.tab.active {
+  color: var(--restlab-accent);
+}
+
+.tab.active::before {
+  transform: scaleX(1);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4em;
+  height: 1.4em;
+  padding: 0 0.42em;
+  font-size: 0.72em;
+  font-weight: 700;
+  background: var(--restlab-gradient);
+  color: #ffffff;
+  border-radius: 0.8em;
+}
+
+.response-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--rl-sp2);
+  flex-wrap: wrap;
+  gap: var(--rl-sp3);
+}
+
+.response-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.response-actions .action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp2);
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  background: var(--glass-bg);
+  color: var(--vscode-foreground);
+  font-size: 0.8em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.response-actions .action-btn:hover {
+  background: var(--restlab-gradient);
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--restlab-accent-glow);
+}
+
+.response-actions .action-btn svg {
+  flex-shrink: 0;
+}
+
+.response-content {
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- History-specific response viewer sizing ---- */
+.history-response-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp2);
+}
+
+.history-response-viewer .response-content {
+  /* This component has no bounded-height ancestor here (unlike the live
+     Response panel's .response-panel, which gets a JS-set pixel height) —
+     cancel the inherited flex-grow/flex-basis:0 behavior so children size
+     themselves deterministically instead of collapsing or overflowing. */
+  flex: none;
+  min-height: 0;
+}
+
+.history-response-viewer .response-editor {
+  flex: none;
+  height: 360px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  overflow: hidden;
+}
+
+.history-response-viewer .response-content .response-headers {
+  flex: none;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.history-response-viewer .response-header-row {
+  /* .header-name only has a min-width floor (11em), no ceiling — long
+     names (access-control-allow-origin, access-control-allow-credentials,
+     etc.) overflow past their column and run into the value with no gap.
+     Stacking name above value sidesteps the column-width fight entirely,
+     the same way most REST clients/DevTools handle long header names. */
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.history-response-viewer .response-header-row .header-name {
+  min-width: 0;
+}
+
+.history-response-viewer .response-header-row .header-value {
+  /* flex: 1 items default to min-width: auto, refusing to shrink below
+     their content's natural width — the same class of bug fixed for the
+     sidebar's New Collection button, here for long unbroken header values. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.history-response-truncated-hint {
+  margin: 0;
+}
+
+.history-response-meta {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: var(--rl-sp2);
+}
+
+/* ---- Confirm dialog ---- */
+.confirm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.confirm-dialog {
+  width: min(360px, calc(100vw - 32px));
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  padding: var(--rl-sp4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp3);
+}
+
+.confirm-dialog-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.confirm-dialog-message {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rl-sp2);
+  margin-top: var(--rl-sp2);
+}
+
+.confirm-dialog-cancel,
+.confirm-dialog-confirm {
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
+  border-radius: var(--rl-r2);
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-dialog-cancel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--vscode-foreground);
+}
+
+.confirm-dialog-cancel:hover {
+  background: var(--glass-border);
+}
+
+.confirm-dialog-confirm {
+  background: var(--restlab-gradient);
+  color: #ffffff;
+}
+
+.confirm-dialog-confirm:hover {
+  filter: brightness(1.1);
+}
+
+.confirm-dialog-confirm.danger {
+  background: var(--restlab-danger);
+}
+
+.confirm-dialog-confirm.danger:hover {
+  background: #dc2626;
+}
+
+/* JSON Editor with Monaco (duplicated from request/styles.css) */
+.json-editor-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 150px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  background-color: var(--vscode-input-background);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.json-editor-container:focus-within {
+  border-color: var(--restlab-accent);
+}
+
+.editor-placeholder {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.6;
+  pointer-events: none;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  white-space: pre-wrap;
+}
+
+.json-editor-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-input-background);
+  border-top: 1px solid var(--glass-border);
+  opacity: 0.7;
+  z-index: 10;
+}
+
+.json-editor-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }

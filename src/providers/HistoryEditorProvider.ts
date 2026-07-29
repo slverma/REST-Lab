@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
 import { SidebarProvider } from "./SidebarProvider";
+import {
+  handleDownloadResponse,
+  handleOpenResponseInEditor,
+} from "../utils/responseFileActions";
 
 export class HistoryEditorProvider {
   private static panel: vscode.WebviewPanel | undefined;
@@ -86,6 +90,15 @@ export class HistoryEditorProvider {
             HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
           );
           break;
+        case "showInfo":
+          vscode.window.showInformationMessage(message.message);
+          break;
+        case "downloadResponse":
+          await handleDownloadResponse(message);
+          break;
+        case "openResponseInEditor":
+          await handleOpenResponseInEditor(message);
+          break;
       }
     });
   }
@@ -108,7 +121,7 @@ export class HistoryEditorProvider {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}';">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' ${webview.cspSource} 'unsafe-eval'; font-src ${webview.cspSource} data:; img-src ${webview.cspSource} data: blob:; worker-src blob:;">
         <link href="${styleUri}" rel="stylesheet">
         <title>History</title>
       </head>

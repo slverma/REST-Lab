@@ -11,6 +11,10 @@ import {
 import { HistoryEditorProvider } from "./HistoryEditorProvider";
 import { HistoryManager } from "./HistoryManager";
 import { SidebarProvider } from "./SidebarProvider";
+import {
+  handleDownloadResponse,
+  handleOpenResponseInEditor,
+} from "../utils/responseFileActions";
 
 function parseSetCookie(raw: string): ResponseCookie {
   const parts = raw.split(';').map((p) => p.trim());
@@ -418,49 +422,10 @@ export class RequestEditorProvider {
           vscode.window.showInformationMessage(message.message);
           break;
         case "downloadResponse":
-          const uri = await vscode.window.showSaveDialog({
-            defaultUri: vscode.Uri.file(message.filename),
-            filters: {
-              "All Files": ["*"],
-              JSON: ["json"],
-              XML: ["xml"],
-              Text: ["txt"],
-              HTML: ["html"],
-            },
-          });
-          if (uri) {
-            await vscode.workspace.fs.writeFile(
-              uri,
-              Buffer.from(message.content, "utf-8"),
-            );
-            vscode.window.showInformationMessage(
-              `Response saved to ${uri.fsPath}`,
-            );
-          }
+          await handleDownloadResponse(message);
           break;
         case "openResponseInEditor":
-          // Determine language ID based on extension or mime type
-          let languageId = "plaintext";
-          if (message.extension === "json") {
-            languageId = "json";
-          } else if (message.extension === "xml") {
-            languageId = "xml";
-          } else if (message.extension === "html") {
-            languageId = "html";
-          } else if (message.mimeType?.includes("json")) {
-            languageId = "json";
-          } else if (message.mimeType?.includes("xml")) {
-            languageId = "xml";
-          } else if (message.mimeType?.includes("html")) {
-            languageId = "html";
-          }
-
-          // Open a new untitled document with the response content
-          const doc = await vscode.workspace.openTextDocument({
-            content: message.content,
-            language: languageId,
-          });
-          await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+          await handleOpenResponseInEditor(message);
           break;
       }
     });

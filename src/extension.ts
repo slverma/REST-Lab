@@ -194,8 +194,8 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("restlab.createFolder", async () => {
       const folderName = await vscode.window.showInputBox({
-        prompt: "Enter folder name",
-        placeHolder: "New Folder",
+        prompt: "Enter Collection name",
+        placeHolder: "New Collection",
       });
 
       if (folderName) {

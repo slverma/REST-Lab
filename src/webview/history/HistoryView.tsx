@@ -76,6 +76,7 @@ export const HistoryView: React.FC = () => {
         <HistoryEntryList
           entries={entries}
           showRequestName
+          vscode={vscode}
           onRestore={handleRestore}
           onDelete={handleDelete}
         />

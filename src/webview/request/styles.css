@@ -1553,6 +1553,12 @@ fieldset.form-section {
   gap: var(--rl-sp3);
 }
 
+.history-response-meta {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: var(--rl-sp2);
+}
+
 .response-actions {
   display: flex;
   gap: 8px;
@@ -1731,6 +1737,62 @@ fieldset.form-section {
 .response-editor {
   flex: 1;
   min-height: 0;
+}
+
+.history-response-viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp2);
+}
+
+.history-response-viewer .response-content {
+  /* This component has no bounded-height ancestor here (unlike the live
+     Response panel's .response-panel, which gets a JS-set pixel height) —
+     cancel the inherited flex-grow/flex-basis:0 behavior so children size
+     themselves deterministically instead of collapsing or overflowing. */
+  flex: none;
+  min-height: 0;
+}
+
+.history-response-viewer .response-editor {
+  flex: none;
+  height: 360px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  overflow: hidden;
+}
+
+.history-response-viewer .response-content .response-headers {
+  flex: none;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.history-response-viewer .response-header-row {
+  /* .header-name only has a min-width floor (11em), no ceiling — long
+     names (access-control-allow-origin, access-control-allow-credentials,
+     etc.) overflow past their column and run into the value with no gap.
+     Stacking name above value sidesteps the column-width fight entirely,
+     the same way most REST clients/DevTools handle long header names. */
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.history-response-viewer .response-header-row .header-name {
+  min-width: 0;
+}
+
+.history-response-viewer .response-header-row .header-value {
+  /* flex: 1 items default to min-width: auto, refusing to shrink below
+     their content's natural width — the same class of bug fixed for the
+     sidebar's New Collection button, here for long unbroken header values. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.history-response-truncated-hint {
+  margin: 0;
 }
 
 .response-body {
@@ -2040,4 +2102,86 @@ fieldset.form-section {
   display: flex;
   align-items: center;
   gap: var(--rl-sp2);
+}
+
+/* ---- Confirm dialog ---- */
+.confirm-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.confirm-dialog {
+  width: min(360px, calc(100vw - 32px));
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--rl-r2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  padding: var(--rl-sp4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rl-sp3);
+}
+
+.confirm-dialog-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.confirm-dialog-message {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rl-sp2);
+  margin-top: var(--rl-sp2);
+}
+
+.confirm-dialog-cancel,
+.confirm-dialog-confirm {
+  height: var(--rl-ctrl);
+  padding: 0 var(--rl-sp4);
+  border-radius: var(--rl-r2);
+  font-size: 0.85em;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-dialog-cancel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--vscode-foreground);
+}
+
+.confirm-dialog-cancel:hover {
+  background: var(--glass-border);
+}
+
+.confirm-dialog-confirm {
+  background: var(--restlab-gradient);
+  color: #ffffff;
+}
+
+.confirm-dialog-confirm:hover {
+  filter: brightness(1.1);
+}
+
+.confirm-dialog-confirm.danger {
+  background: var(--restlab-danger);
+}
+
+.confirm-dialog-confirm.danger:hover {
+  background: #dc2626;
 }
