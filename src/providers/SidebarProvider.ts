@@ -82,8 +82,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       switch (message.type) {
         case "createFolder":
           const folderName = await vscode.window.showInputBox({
-            prompt: "Enter folder name",
-            placeHolder: "New Folder",
+            prompt: "Enter Collection name",
+            placeHolder: "New Collection",
           });
           if (folderName) {
             this.addFolder(folderName);

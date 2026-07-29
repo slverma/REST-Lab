@@ -87,7 +87,7 @@
     "commands": [
       {
         "command": "restlab.createFolder",
-        "title": "Create Folder",
+        "title": "Create Collection",
         "category": "REST Lab"
       },
       {
