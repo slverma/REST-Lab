@@ -1,3 +1,7 @@
+## 1.9.0 (2026-07-29)
+
+* feat: tabbed response viewer, actions, and safer Restore in History (#25) ([b3aa131](https://github.com/slverma/REST-Lab/commit/b3aa131)), closes [#25](https://github.com/slverma/REST-Lab/issues/25)
+
 ## <small>1.8.1 (2026-07-20)</small>
 
 * fix: request name reverts after renaming an open request panel (#24) ([7f3abbf](https://github.com/slverma/REST-Lab/commit/7f3abbf)), closes [#24](https://github.com/slverma/REST-Lab/issues/24)
