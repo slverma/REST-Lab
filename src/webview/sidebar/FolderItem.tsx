@@ -129,7 +129,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
         ) : (
           <FolderIcon className="tree-icon" />
         )}
-        <span className="tree-label">
+        <span className="tree-label" title={folder.name}>
           {folder.name}
         </span>
         <div className="tree-actions">
@@ -235,7 +235,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
                   >
                     {request.method}
                   </span>
-                  <span className="req-label">
+                  <span className="req-label" title={request.name}>
                     {request.name}
                   </span>
                   <RequestActionsDropdown

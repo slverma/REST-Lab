@@ -359,14 +359,12 @@ export const Sidebar: React.FC = () => {
           REST Lab
         </h2>
         <div className="sb-head-actions">
-          <button
-            className="btn-primary"
-            onClick={handleCreateFolder}
-            title="Create Collection"
-          >
-            <CollectionAddIcon />
-            <span>New Collection</span>
-          </button>
+          <Tooltip text="Create Collection">
+            <button className="btn-primary" onClick={handleCreateFolder}>
+              <CollectionAddIcon />
+              <span>New Collection</span>
+            </button>
+          </Tooltip>
           <ImportDropdown onSelect={handleImportCollection} />
           <Tooltip text="View Request History" position="top-right">
             <button className="header-action-btn" onClick={handleOpenHistory}>

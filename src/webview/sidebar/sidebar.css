@@ -124,6 +124,16 @@ body {
   gap: var(--rl-sp2);
   margin-top: var(--rl-sp3);
 }
+/* Tooltip renders an unstyled wrapper div ("inline-flex", a class name
+   with no matching rule in this Tailwind-free bundle) around its trigger.
+   That div — not the button inside it — is the actual flex item here, so
+   it needs to carry the flex/min-width fix instead of (or as well as)
+   .btn-primary, otherwise the button reverts to refusing to shrink. */
+.sb-head-actions > .inline-flex:first-child {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
 
 /* ---- Tree ---- */
 .sb-tree {
@@ -357,6 +367,11 @@ body {
   justify-content: center;
   gap: var(--rl-sp3);
   flex: 1;
+  /* Flex items default to min-width: auto, refusing to shrink below their
+     content's natural width. Without this, the two fixed-width buttons
+     next to it push this one past the sidebar edge and .sb's overflow:
+     hidden clips it, instead of the label truncating gracefully. */
+  min-width: 0;
   height: var(--rl-ctrl);
   padding: 0 var(--rl-sp4);
   border: none;
@@ -372,6 +387,12 @@ body {
   overflow: hidden;
   white-space: nowrap;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-primary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 .btn-primary::before {
   content: "";
