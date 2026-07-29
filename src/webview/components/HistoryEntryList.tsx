@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { formatRelativeTime, getStatusColor } from "../helpers/helper";
-import { formatJson } from "../helpers/helper";
+import { formatJson, formatRelativeTime, getStatusColor } from "../helpers/helper";
 import { HistoryEntry } from "../types/internal.types";
 import ConfirmDialog from "./ConfirmDialog";
 import HistoryResponseViewer from "./HistoryResponseViewer";

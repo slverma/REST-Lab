@@ -499,6 +499,12 @@ body {
   margin: 0;
 }
 
+.history-response-meta {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: var(--rl-sp2);
+}
+
 /* ---- Confirm dialog ---- */
 .confirm-dialog-overlay {
   position: fixed;
@@ -579,4 +585,54 @@ body {
 
 .confirm-dialog-confirm.danger:hover {
   background: #dc2626;
+}
+
+/* JSON Editor with Monaco (duplicated from request/styles.css) */
+.json-editor-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 150px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  background-color: var(--vscode-input-background);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.json-editor-container:focus-within {
+  border-color: var(--restlab-accent);
+}
+
+.editor-placeholder {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0.6;
+  pointer-events: none;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  white-space: pre-wrap;
+}
+
+.json-editor-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-input-background);
+  border-top: 1px solid var(--glass-border);
+  opacity: 0.7;
+  z-index: 10;
+}
+
+.json-editor-hint span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }

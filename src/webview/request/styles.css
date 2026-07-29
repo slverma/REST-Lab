@@ -1553,6 +1553,12 @@ fieldset.form-section {
   gap: var(--rl-sp3);
 }
 
+.history-response-meta {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: var(--rl-sp2);
+}
+
 .response-actions {
   display: flex;
   gap: 8px;

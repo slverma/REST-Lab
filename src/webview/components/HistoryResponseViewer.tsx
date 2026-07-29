@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   formatJson,
+  formatSize,
   getEditorLanguageFromContentType,
   getFileExtension,
 } from "../helpers/helper";
@@ -42,6 +43,9 @@ const HistoryResponseViewer: React.FC<HistoryResponseViewerProps> = ({
 
   return (
     <div className="history-response-viewer">
+      <div className="history-response-meta">
+        {response.statusText} · {formatSize(response.size)}
+      </div>
       <div className="response-toolbar">
         <div className="tabs">
           <button
@@ -124,7 +128,7 @@ const HistoryResponseViewer: React.FC<HistoryResponseViewerProps> = ({
 
       {truncated && (
         <p className="empty-hint history-response-truncated-hint">
-          Response content was truncated for storage — actions above use the
+          Some content was truncated for storage — actions above use the
           stored (possibly partial) data.
         </p>
       )}
