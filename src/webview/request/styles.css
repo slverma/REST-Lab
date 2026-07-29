@@ -1745,11 +1745,50 @@ fieldset.form-section {
   gap: var(--rl-sp2);
 }
 
+.history-response-viewer .response-content {
+  /* This component has no bounded-height ancestor here (unlike the live
+     Response panel's .response-panel, which gets a JS-set pixel height) —
+     cancel the inherited flex-grow/flex-basis:0 behavior so children size
+     themselves deterministically instead of collapsing or overflowing. */
+  flex: none;
+  min-height: 0;
+}
+
 .history-response-viewer .response-editor {
+  flex: none;
   height: 360px;
   border: 1px solid var(--glass-border);
   border-radius: var(--rl-r2);
   overflow: hidden;
+}
+
+.history-response-viewer .response-content .response-headers {
+  flex: none;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.history-response-viewer .response-header-row {
+  /* .header-name only has a min-width floor (11em), no ceiling — long
+     names (access-control-allow-origin, access-control-allow-credentials,
+     etc.) overflow past their column and run into the value with no gap.
+     Stacking name above value sidesteps the column-width fight entirely,
+     the same way most REST clients/DevTools handle long header names. */
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.history-response-viewer .response-header-row .header-name {
+  min-width: 0;
+}
+
+.history-response-viewer .response-header-row .header-value {
+  /* flex: 1 items default to min-width: auto, refusing to shrink below
+     their content's natural width — the same class of bug fixed for the
+     sidebar's New Collection button, here for long unbroken header values. */
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .history-response-truncated-hint {

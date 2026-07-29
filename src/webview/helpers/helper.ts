@@ -56,6 +56,18 @@ export const formatSize = (bytes: number): string => {
   return `${size} ${units[i]}`;
 };
 
+// Extract the pre-truncation byte size from the marker HistoryManager
+// appends to a body/response field it truncated for storage
+// (`...[truncated for storage, original size N bytes]`). Returns null when
+// the text carries no such marker (i.e. this field wasn't the one truncated).
+export const parseTruncationOriginalSize = (
+  text: string | undefined,
+): number | null => {
+  if (!text) return null;
+  const match = text.match(/\[truncated for storage, original size (\d+) bytes\]\s*$/);
+  return match ? parseInt(match[1], 10) : null;
+};
+
 // Get placeholder text for body editor based on content type
 export const getBodyPlaceholder = (contentType?: string): string => {
   switch (contentType) {

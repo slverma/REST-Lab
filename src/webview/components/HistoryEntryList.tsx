@@ -95,6 +95,7 @@ const HistoryEntryList: React.FC<HistoryEntryListProps> = ({
                   <HistoryResponseViewer
                     response={entry.response}
                     truncated={entry.truncated}
+                    requestBody={entry.request.body}
                     vscode={vscode}
                   />
                 </div>

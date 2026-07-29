@@ -4,6 +4,7 @@ import {
   formatSize,
   getEditorLanguageFromContentType,
   getFileExtension,
+  parseTruncationOriginalSize,
 } from "../helpers/helper";
 import BodyEditor from "../request/BodyEditor";
 import { ResponseData } from "../types/internal.types";
@@ -17,12 +18,44 @@ type ResponseTab = "body" | "headers" | "cookies";
 interface HistoryResponseViewerProps {
   response: ResponseData;
   truncated?: boolean;
+  requestBody?: string;
   vscode: { postMessage: (message: unknown) => void };
 }
+
+const byteLength = (text: string) => new TextEncoder().encode(text).length;
+
+// Builds a precise "storing X of Y" message from the truncation marker
+// HistoryManager embeds in whichever field(s) it actually truncated, rather
+// than a generic notice with no numbers.
+const buildTruncationMessage = (
+  response: ResponseData,
+  requestBody?: string,
+): string => {
+  const parts: string[] = [];
+
+  const responseOriginal = parseTruncationOriginalSize(response.data);
+  if (responseOriginal !== null) {
+    parts.push(
+      `response: storing ${formatSize(byteLength(response.data))} of ${formatSize(responseOriginal)}`,
+    );
+  }
+
+  const requestOriginal = parseTruncationOriginalSize(requestBody);
+  if (requestOriginal !== null && requestBody) {
+    parts.push(
+      `request body: storing ${formatSize(byteLength(requestBody))} of ${formatSize(requestOriginal)}`,
+    );
+  }
+
+  return parts.length > 0
+    ? `Truncated for storage (${parts.join("; ")}) — actions above use the stored, partial data.`
+    : "Some content was truncated for storage — actions above use the stored (possibly partial) data.";
+};
 
 const HistoryResponseViewer: React.FC<HistoryResponseViewerProps> = ({
   response,
   truncated,
+  requestBody,
   vscode,
 }) => {
   const [tab, setTab] = useState<ResponseTab>("body");
@@ -128,8 +161,7 @@ const HistoryResponseViewer: React.FC<HistoryResponseViewerProps> = ({
 
       {truncated && (
         <p className="empty-hint history-response-truncated-hint">
-          Some content was truncated for storage — actions above use the
-          stored (possibly partial) data.
+          {buildTruncationMessage(response, requestBody)}
         </p>
       )}
 
