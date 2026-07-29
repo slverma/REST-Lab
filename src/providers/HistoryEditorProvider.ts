@@ -1,6 +1,10 @@
 import * as vscode from "vscode";
 import { getNonce } from "../utils/getNonce";
 import { SidebarProvider } from "./SidebarProvider";
+import {
+  handleDownloadResponse,
+  handleOpenResponseInEditor,
+} from "../utils/responseFileActions";
 
 export class HistoryEditorProvider {
   private static panel: vscode.WebviewPanel | undefined;
@@ -85,6 +89,15 @@ export class HistoryEditorProvider {
           panel.webview.postMessage(
             HistoryEditorProvider._buildHistoryPayload(sidebarProvider),
           );
+          break;
+        case "showInfo":
+          vscode.window.showInformationMessage(message.message);
+          break;
+        case "downloadResponse":
+          await handleDownloadResponse(message);
+          break;
+        case "openResponseInEditor":
+          await handleOpenResponseInEditor(message);
           break;
       }
     });
