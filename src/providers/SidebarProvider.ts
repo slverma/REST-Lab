@@ -754,6 +754,11 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
       );
     }
 
+    // If this request is open in an editor panel, refresh it with the
+    // target folder's inherited config instead of leaving it pointed at
+    // the folder it was moved out of.
+    RequestEditorProvider.notifyRequestMoved(requestId, targetFolderId, this);
+
     this._saveFolders();
     this._sendFoldersToWebview();
     vscode.window.showInformationMessage(
@@ -882,6 +887,9 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             requestConfig,
           );
         }
+        // Refresh any open editor panel for this request with the new
+        // (possibly new-collection) inherited config.
+        RequestEditorProvider.notifyRequestMoved(request.id, folder.id, this);
       }
     }
 

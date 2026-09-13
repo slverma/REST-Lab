@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import Tooltip from "../components/Tooltip";
 import AutoGrowTextarea from "../components/AutoGrowTextarea";
+import CheckIcon from "../components/icons/CheckIcon";
 import PlusIcon from "../components/icons/PlusIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import { Environment, FolderConfig } from "./types";
@@ -72,7 +73,7 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
         </div>
         {envs.length > 0 && (
           <p className="env-list-hint">
-            ● = active &nbsp;·&nbsp; double-click name to rename
+            ✓ = active &nbsp;·&nbsp; double-click name to rename
           </p>
         )}
         {envs.length === 0 ? (
@@ -101,7 +102,9 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                         e.stopPropagation();
                         onSetActive(env.id);
                       }}
-                    />
+                    >
+                      <CheckIcon />
+                    </button>
                   </Tooltip>
                   {isRenaming ? (
                     <input
@@ -127,6 +130,9 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
                     >
                       {env.name}
                     </span>
+                  )}
+                  {isActive && !isRenaming && (
+                    <span className="env-active-badge">Active</span>
                   )}
                   <Tooltip text="Delete environment" position="top-right">
                     <button
@@ -186,46 +192,49 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
             ) : (
               <>
                 <div className="env-vars-col-header">
-                  <span />
                   <span>Key</span>
                   <span>Value</span>
-                  <span />
                 </div>
                 <div className="env-vars-list">
                   {selectedEnv.variables.map((v, idx) => (
                     <div key={idx} className="env-var-row">
-                      <Tooltip text={v.enabled ? "Disable" : "Enable"}>
-                        <button
-                          className={`env-var-toggle ${v.enabled ? "enabled" : ""}`}
-                          onClick={() =>
+                      <div className="header-row-key">
+                        <input
+                          type="checkbox"
+                          checked={v.enabled !== false}
+                          onChange={() =>
                             onUpdateVariable(idx, "enabled", !v.enabled)
                           }
+                          title={v.enabled !== false ? "Disable variable" : "Enable variable"}
+                          className="header-checkbox"
                         />
-                      </Tooltip>
-                      <AutoGrowTextarea
-                        className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
-                        placeholder="key"
-                        value={v.key}
-                        onChange={(e) =>
-                          onUpdateVariable(idx, "key", e.target.value)
-                        }
-                      />
-                      <AutoGrowTextarea
-                        className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
-                        placeholder="value"
-                        value={v.value}
-                        onChange={(e) =>
-                          onUpdateVariable(idx, "value", e.target.value)
-                        }
-                      />
-                      <Tooltip text="Remove variable" position="top-right">
-                        <button
-                          className="remove-btn"
-                          onClick={() => onRemoveVariable(idx)}
-                        >
-                          <TrashIcon />
-                        </button>
-                      </Tooltip>
+                        <AutoGrowTextarea
+                          className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
+                          placeholder="key"
+                          value={v.key}
+                          onChange={(e) =>
+                            onUpdateVariable(idx, "key", e.target.value)
+                          }
+                        />
+                      </div>
+                      <div className="header-row-value">
+                        <AutoGrowTextarea
+                          className={`env-var-input ${!v.enabled ? "disabled" : ""}`}
+                          placeholder="value"
+                          value={v.value}
+                          onChange={(e) =>
+                            onUpdateVariable(idx, "value", e.target.value)
+                          }
+                        />
+                        <Tooltip text="Remove variable" position="top-right">
+                          <button
+                            className="remove-btn"
+                            onClick={() => onRemoveVariable(idx)}
+                          >
+                            <TrashIcon />
+                          </button>
+                        </Tooltip>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -29,15 +29,19 @@ const ParamsTab = () => {
             );
             return (
               <div key={param.key} className="header-row inherited">
-                <input
-                  type="checkbox"
-                  checked={!isDisabledInRequest}
-                  onChange={() => handleToggleInheritedParam(param.key)}
-                  title="Enable/Disable inherited parameter"
-                  className="header-checkbox"
-                />
-                <span className="header-key">{param.key}</span>
-                <span className="header-value">{param.value}</span>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={!isDisabledInRequest}
+                    onChange={() => handleToggleInheritedParam(param.key)}
+                    title="Enable/Disable inherited parameter"
+                    className="header-checkbox"
+                  />
+                  <span className="header-key">{param.key}</span>
+                </div>
+                <div className="header-row-value">
+                  <span className="header-value">{param.value}</span>
+                </div>
               </div>
             );
           })}
@@ -69,36 +73,40 @@ const ParamsTab = () => {
             })
             .map((param, index) => (
               <div key={index} className="header-row">
-                <input
-                  type="checkbox"
-                  checked={param.enabled !== false}
-                  onChange={() => handleToggleParam(index)}
-                  title="Enable/Disable parameter"
-                  className="header-checkbox"
-                />
-                <input
-                  type="text"
-                  value={param.key}
-                  onChange={(e) =>
-                    handleUpdateParam(index, "key", e.target.value)
-                  }
-                  placeholder="Parameter name"
-                  className="header-key"
-                />
-                <VarInput
-                  value={param.value}
-                  onChange={(val) => handleUpdateParam(index, "value", val)}
-                  placeholder="Value"
-                  className="header-value"
-                />
-                <Tooltip text="Remove Parameter" position="top-right">
-                  <button
-                    className="remove-btn"
-                    onClick={() => handleRemoveParam(index)}
-                  >
-                    <TrashIcon />
-                  </button>
-                </Tooltip>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={param.enabled !== false}
+                    onChange={() => handleToggleParam(index)}
+                    title="Enable/Disable parameter"
+                    className="header-checkbox"
+                  />
+                  <input
+                    type="text"
+                    value={param.key}
+                    onChange={(e) =>
+                      handleUpdateParam(index, "key", e.target.value)
+                    }
+                    placeholder="Parameter name"
+                    className="header-key"
+                  />
+                </div>
+                <div className="header-row-value">
+                  <VarInput
+                    value={param.value}
+                    onChange={(val) => handleUpdateParam(index, "value", val)}
+                    placeholder="Value"
+                    className="header-value"
+                  />
+                  <Tooltip text="Remove Parameter" position="top-right">
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleRemoveParam(index)}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             ))
         )}

@@ -201,6 +201,7 @@ fieldset.form-section {
   border-radius: 8px;
   backdrop-filter: blur(8px);
   position: relative;
+  container-type: inline-size;
 }
 
 .section-legend {
@@ -257,7 +258,7 @@ fieldset.form-section {
 .form-group textarea {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 6px;
   background-color: var(--vscode-editor-background);
   color: var(--vscode-input-foreground);
@@ -350,10 +351,15 @@ fieldset.form-section {
   border-radius: 8px;
 }
 
+/* Two explicit column-groups (name+checkbox | value+buttons) rather than a
+   flat flex row — a flat row with mixed plain-<input> and wrapped
+   (AutocompleteInput/EnvVarInput) children never sized its columns evenly.
+   Collapses to a single stacked column once the fieldset is too narrow. */
 .header-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 6px;
-  align-items: center;
+  align-items: start;
   padding: 6px 8px;
   background: var(--vscode-editor-background);
   border: 1px solid var(--vscode-panel-border);
@@ -361,15 +367,38 @@ fieldset.form-section {
   transition: all 0.15s ease;
 }
 
+@container (max-width: 380px) {
+  .header-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .header-row:hover {
   border-color: var(--vscode-focusBorder);
+}
+
+.header-row-key,
+.header-row-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.header-checkbox {
+  flex-shrink: 0;
+}
+
+.header-row .remove-btn {
+  flex-shrink: 0;
 }
 
 .header-key,
 .header-value {
   flex: 1;
+  min-width: 0;
   padding: 5px 8px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 5px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -379,12 +408,19 @@ fieldset.form-section {
 }
 
 .header-key {
-  flex: 0.8;
   font-weight: 500;
 }
 
-.header-value {
-  flex: 1.2;
+/* The wrapper div AutocompleteInput/EnvVarInput render around their
+   <textarea> is the flex item here, not the .header-key/.header-value class
+   itself applied to the inner textarea. */
+.header-row-key > .autocomplete-container,
+.header-row-key > .var-input-container,
+.header-row-value > .autocomplete-container,
+.header-row-value > .var-input-container {
+  flex: 1;
+  min-width: 0;
+  width: auto;
 }
 
 .header-key:focus,
@@ -459,7 +495,7 @@ fieldset.form-section {
   width: 100%;
   height: 2em;
   padding: 0 10px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 6px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -516,7 +552,6 @@ fieldset.form-section {
 /* Autocomplete */
 .autocomplete-container {
   position: relative;
-  flex: 0.8;
 }
 
 .autocomplete-container input,
@@ -716,6 +751,7 @@ fieldset.form-section {
   flex-direction: column;
   flex: 1;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .env-list-header,
@@ -789,23 +825,32 @@ fieldset.form-section {
   );
 }
 
+/* Icon-only toggle — deliberately not checkbox/radio-shaped (no border, no
+   fill box). Active state shows a solid accent tick; hovering an inactive
+   row reveals a faint tick hinting it's clickable, mirroring how
+   .env-delete-btn only appears on hover. */
 .env-active-btn {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 1.5px solid var(--vscode-descriptionForeground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
   background: transparent;
+  color: transparent;
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition:
-    background 0.12s,
-    border-color 0.12s;
+  transition: color 0.12s;
 }
 
-.env-active-btn.active {
-  background: var(--restlab-accent);
-  border-color: var(--restlab-accent);
+.env-item:hover .env-active-btn {
+  color: var(--vscode-descriptionForeground);
+}
+
+.env-active-btn.active,
+.env-item:hover .env-active-btn.active {
+  color: var(--restlab-accent);
 }
 
 .env-name {
@@ -872,10 +917,11 @@ fieldset.form-section {
   opacity: 0.7;
 }
 
-/* Variables table */
+/* Variables table — same two column-group layout as .header-row (checkbox
+   + key | value + delete), collapsing to one column on a narrow panel. */
 .env-vars-col-header {
   display: grid;
-  grid-template-columns: 14px 1fr 1fr 28px;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
   align-items: center;
   padding: 6px 12px;
@@ -896,34 +942,30 @@ fieldset.form-section {
 
 .env-var-row {
   display: grid;
-  grid-template-columns: 14px 1fr 1fr 28px;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  align-items: flex-start;
-  padding: 3px 4px;
+  align-items: start;
+  padding: 3px 4px 8px;
+  margin-bottom: 4px;
   border-radius: 4px;
+  border-bottom: 1px solid var(--vscode-panel-border, var(--glass-border));
+}
+
+.env-vars-list .env-var-row:last-child {
+  padding-bottom: 3px;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+@container (max-width: 340px) {
+  .env-vars-col-header,
+  .env-var-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .env-var-row:hover {
   background: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.03));
-}
-
-.env-var-toggle {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
-  border: 1.5px solid var(--vscode-descriptionForeground);
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  transition:
-    background 0.12s,
-    border-color 0.12s;
-}
-
-.env-var-toggle.enabled {
-  background: var(--restlab-accent);
-  border-color: var(--restlab-accent);
 }
 
 .env-var-input {
@@ -935,6 +977,8 @@ fieldset.form-section {
   font-size: 12px;
   font-family: var(--vscode-editor-font-family, monospace);
   outline: none;
+  flex: 1;
+  min-width: 0;
   width: 100%;
   transition: border-color 0.12s;
 }
@@ -959,23 +1003,16 @@ fieldset.form-section {
   width: 100%;
 }
 
-/* In the header row, the value input container should take the same flex as .header-value */
-.header-row .var-input-container {
-  flex: 1.2;
-  width: auto;
-}
-
 .var-popup {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 280px;
+  /* position/top/left/min-width are set inline (see EnvVarInput), computed
+     from the input's live getBoundingClientRect() since this is portaled
+     to <body> to escape the fieldset's stacking context. */
   max-width: 480px;
   background: var(--vscode-editor-background);
   border: 1px solid var(--restlab-accent);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  z-index: 99999;
   overflow: hidden;
   max-height: 220px;
   overflow-y: auto;

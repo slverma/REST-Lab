@@ -46,6 +46,12 @@ export class RequestEditorProvider {
   // Track open panels by request ID
   private static openPanels: Map<string, vscode.WebviewPanel> = new Map();
 
+  // Tracks the folder a request's open panel currently belongs to, kept in
+  // sync when the request (or an ancestor folder) is moved elsewhere. The
+  // panel's message handlers read from this map instead of the folderId
+  // that was captured when the panel was first opened.
+  private static panelFolderIds: Map<string, string> = new Map();
+
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   // Update panel title for an open request editor
@@ -71,6 +77,38 @@ export class RequestEditorProvider {
   public static broadcastToAllPanels(message: unknown): void {
     RequestEditorProvider.openPanels.forEach((panel) => {
       panel.webview.postMessage(message);
+    });
+  }
+
+  /**
+   * Called when a request (or an ancestor folder) is moved to a new
+   * location. Updates the folder this panel's handlers resolve inherited
+   * config against, and — if the panel is open — pushes the new folder's
+   * inherited config/environment to the webview without touching the
+   * in-progress (possibly unsaved) request fields.
+   */
+  public static notifyRequestMoved(
+    requestId: string,
+    newFolderId: string,
+    sidebarProvider: SidebarProvider,
+  ): void {
+    RequestEditorProvider.panelFolderIds.set(requestId, newFolderId);
+
+    const panel = RequestEditorProvider.openPanels.get(requestId);
+    if (!panel) return;
+
+    const folderConfig = sidebarProvider.getInheritedConfig(newFolderId);
+    const envVariables = sidebarProvider.getActiveEnvVariables(newFolderId);
+    const collectionData = sidebarProvider.getCollectionData(newFolderId);
+    const collectionId = sidebarProvider.getRootCollectionId(newFolderId);
+
+    panel.webview.postMessage({
+      type: "folderConfigUpdated",
+      folderConfig,
+      envVariables,
+      environments: collectionData.environments,
+      activeEnvironmentId: collectionData.activeEnvironmentId,
+      collectionId,
     });
   }
 
@@ -174,6 +212,12 @@ export class RequestEditorProvider {
 
     // Store the panel reference
     RequestEditorProvider.openPanels.set(requestId, panel);
+    RequestEditorProvider.panelFolderIds.set(requestId, folderId);
+
+    // Resolves the request's current folder, kept up to date across moves
+    // (see notifyRequestMoved) instead of the folderId captured above.
+    const getFolderId = () =>
+      RequestEditorProvider.panelFolderIds.get(requestId) ?? folderId;
 
     // Notify sidebar of the initially active panel
     sidebarProvider?.notifyActiveRequest(requestId);
@@ -181,6 +225,7 @@ export class RequestEditorProvider {
     // Remove from map when panel is closed
     panel.onDidDispose(() => {
       RequestEditorProvider.openPanels.delete(requestId);
+      RequestEditorProvider.panelFolderIds.delete(requestId);
       sidebarProvider?.notifyActiveRequest(null);
     });
 
@@ -191,20 +236,25 @@ export class RequestEditorProvider {
       }
       if (e.webviewPanel.visible) {
         // Send updated folder config to webview
+        const currentFolderId = getFolderId();
         const folderConfig = sidebarProvider
-          ? sidebarProvider.getInheritedConfig(folderId)
+          ? sidebarProvider.getInheritedConfig(currentFolderId)
           : context.globalState.get<{
               baseUrl?: string;
               headers?: { key: string; value: string }[];
-            }>(`restlab.folder.${folderId}`) || {};
+            }>(`restlab.folder.${currentFolderId}`) || {};
 
         const envVariables = sidebarProvider
-          ? sidebarProvider.getActiveEnvVariables(folderId)
+          ? sidebarProvider.getActiveEnvVariables(currentFolderId)
           : {};
 
         const collectionData = sidebarProvider
-          ? sidebarProvider.getCollectionData(folderId)
+          ? sidebarProvider.getCollectionData(currentFolderId)
           : { environments: [], activeEnvironmentId: null };
+
+        const collectionId = sidebarProvider
+          ? sidebarProvider.getRootCollectionId(currentFolderId)
+          : currentFolderId;
 
         panel.webview.postMessage({
           type: "folderConfigUpdated",
@@ -212,6 +262,7 @@ export class RequestEditorProvider {
           envVariables: envVariables,
           environments: collectionData.environments,
           activeEnvironmentId: collectionData.activeEnvironmentId,
+          collectionId,
         });
       }
     });
@@ -227,31 +278,32 @@ export class RequestEditorProvider {
     // Handle messages from webview
     panel.webview.onDidReceiveMessage(async (message) => {
       switch (message.type) {
-        case "getConfig":
+        case "getConfig": {
           // Always read fresh config from globalState to get latest folder settings
+          const currentFolderId = getFolderId();
           const savedRequest = context.globalState.get<RequestConfig>(
             `restlab.request.${requestId}`,
           );
 
           // Get inherited config from sidebar provider (walks up parent chain)
           const folderConfig = sidebarProvider
-            ? sidebarProvider.getInheritedConfig(folderId)
+            ? sidebarProvider.getInheritedConfig(currentFolderId)
             : context.globalState.get<{
                 baseUrl?: string;
                 headers?: { key: string; value: string }[];
-              }>(`restlab.folder.${folderId}`) || {};
+              }>(`restlab.folder.${currentFolderId}`) || {};
 
           // Get active environment variables
           const envVariables = sidebarProvider
-            ? sidebarProvider.getActiveEnvVariables(folderId)
+            ? sidebarProvider.getActiveEnvVariables(currentFolderId)
             : {};
 
           const collectionId = sidebarProvider
-            ? sidebarProvider.getRootCollectionId(folderId)
-            : folderId;
+            ? sidebarProvider.getRootCollectionId(currentFolderId)
+            : currentFolderId;
 
           const collectionData = sidebarProvider
-            ? sidebarProvider.getCollectionData(folderId)
+            ? sidebarProvider.getCollectionData(currentFolderId)
             : { environments: [], activeEnvironmentId: null };
 
           panel.webview.postMessage({
@@ -259,7 +311,7 @@ export class RequestEditorProvider {
             config: {
               id: requestId,
               name: requestName,
-              folderId,
+              folderId: currentFolderId,
               method: savedRequest?.method || "GET",
               url: savedRequest?.url || "",
               headers: savedRequest?.headers || [],
@@ -278,15 +330,17 @@ export class RequestEditorProvider {
             history: historyManager.getForRequest(requestId),
           });
           break;
-        case "saveConfig":
+        }
+        case "saveConfig": {
           await context.globalState.update(
             `restlab.request.${requestId}`,
             message.config,
           );
+          const currentFolderId = getFolderId();
           // Update method in sidebar if it changed
           if (sidebarProvider && message.config.method) {
             sidebarProvider.updateRequestMethod(
-              folderId,
+              currentFolderId,
               requestId,
               message.config.method,
             );
@@ -294,7 +348,7 @@ export class RequestEditorProvider {
           // Update name in sidebar if it changed
           if (sidebarProvider && message.config.name) {
             sidebarProvider.updateRequestName(
-              folderId,
+              currentFolderId,
               requestId,
               message.config.name,
             );
@@ -302,15 +356,17 @@ export class RequestEditorProvider {
             panel.title = message.config.name;
           }
           break;
-        case "setActiveEnvironment":
+        }
+        case "setActiveEnvironment": {
           if (sidebarProvider) {
+            const currentFolderId = getFolderId();
             await sidebarProvider.setCollectionActiveEnvironment(
-              folderId,
+              currentFolderId,
               message.envId ?? null,
             );
-            const newEnvVars = sidebarProvider.getActiveEnvVariables(folderId);
-            const newCollData = sidebarProvider.getCollectionData(folderId);
-            const rootId = sidebarProvider.getRootCollectionId(folderId);
+            const newEnvVars = sidebarProvider.getActiveEnvVariables(currentFolderId);
+            const newCollData = sidebarProvider.getCollectionData(currentFolderId);
+            const rootId = sidebarProvider.getRootCollectionId(currentFolderId);
             RequestEditorProvider.broadcastToAllPanels({
               type: "environmentUpdated",
               collectionId: rootId,
@@ -320,6 +376,7 @@ export class RequestEditorProvider {
             });
           }
           break;
+        }
         case "sendRequest": {
           const recordHistory = async (response: ResponseData) => {
             const snapshot = message.historySnapshot || {};
@@ -332,7 +389,7 @@ export class RequestEditorProvider {
             await historyManager.addEntry({
               requestId,
               requestName,
-              folderId,
+              folderId: getFolderId(),
               request: {
                 method: snapshot.method || message.method,
                 url: snapshot.url || "",

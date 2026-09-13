@@ -195,7 +195,7 @@ body {
 .method-select {
   height: var(--rl-ctrl);
   padding: 0 0.7em;
-  border: 2px solid var(--glass-border);
+  border: 2px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -258,7 +258,7 @@ body {
   flex: 1 1 16em;
   min-width: 0;
   padding: var(--rl-sp0) var(--rl-sp1);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -603,16 +603,15 @@ body {
 }
 
 .var-popup {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 280px;
+  /* position/top/left/min-width are set inline (see VarInput), computed
+     from the input's live getBoundingClientRect() since this is portaled
+     to <body> to escape the enclosing fieldset's stacking context. */
   max-width: 480px;
   background: var(--vscode-editor-background);
   border: 1px solid var(--restlab-accent);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  z-index: 99999;
   overflow: hidden;
   max-height: 220px;
   overflow-y: auto;
@@ -996,7 +995,7 @@ fieldset.form-section {
 .form-group .var-input-container textarea {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 6px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1044,7 +1043,7 @@ fieldset.form-section {
 .form-select {
   height: var(--rl-ctrl);
   padding: 0 var(--rl-sp3);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1069,6 +1068,7 @@ fieldset.form-section {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  container-type: inline-size;
 }
 
 .inherited-headers {
@@ -1099,28 +1099,80 @@ fieldset.form-section {
   color: var(--vscode-foreground);
 }
 
+/* Two explicit column-groups (name+checkbox | value+buttons) rather than a
+   flat flex row — a flat row with mixed plain-<input> and wrapped
+   (AutocompleteInput/VarInput) children never sized its columns evenly, and
+   flex-wrap on 0-basis children never actually triggered. Collapses to a
+   single stacked column once the section is too narrow for both. */
 .header-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--rl-sp3);
-  align-items: center;
-  margin-bottom: var(--rl-sp2);
+  align-items: start;
+  padding-bottom: var(--rl-sp3);
+  margin-bottom: var(--rl-sp3);
+  border-bottom: 1px solid var(--vscode-panel-border, var(--glass-border));
+}
+
+/* Rows are separators between pairs, not around every pair — no trailing
+   line under the last row of a list. */
+.request-headers .header-row:last-child,
+.inherited-headers .header-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .header-row.inherited {
   opacity: 0.7;
 }
 
+.header-row-key,
+.header-row-value {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp3);
+  min-width: 0;
+}
+
+.header-checkbox {
+  flex-shrink: 0;
+}
+
+.header-row .remove-btn {
+  flex-shrink: 0;
+}
+
 .header-key,
 .header-value {
   flex: 1;
-  height: var(--rl-ctrl);
-  padding: 0 var(--rl-sp4);
-  border: 1px solid var(--vscode-panel-border);
+  min-width: 0;
+  min-height: var(--rl-ctrl);
+  padding: var(--rl-sp1) var(--rl-sp4);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
   font-size: 0.9em;
+}
+
+/* The wrapper div AutocompleteInput/VarInput render around their <textarea>
+   is the flex item here, not the .header-key/.header-value class itself.
+   (Cookies use VarInput for both the name and value field, so both group
+   columns need this, not just header-row-value.) */
+.header-row-key > .autocomplete-container,
+.header-row-key > .var-input-container,
+.header-row-value > .autocomplete-container,
+.header-row-value > .var-input-container {
+  flex: 1;
+  min-width: 0;
+}
+
+@container (max-width: 420px) {
+  .header-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .header-key:focus,
@@ -1160,6 +1212,7 @@ fieldset.form-section {
   justify-content: center;
   width: var(--rl-ctrl);
   height: var(--rl-ctrl);
+  flex-shrink: 0;
   border: none;
   border-radius: var(--rl-r2);
   background: transparent;
@@ -1207,7 +1260,7 @@ fieldset.form-section {
   flex: 1;
   max-width: 350px;
   height: var(--rl-ctrl-sm);
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1233,7 +1286,7 @@ fieldset.form-section {
   width: 100%;
   flex: 1;
   min-height: 150px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 8px;
   background-color: var(--vscode-input-background);
   overflow: hidden;
@@ -1350,6 +1403,7 @@ fieldset.form-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  container-type: inline-size;
 }
 
 .form-data-section .section-header {
@@ -1366,17 +1420,32 @@ fieldset.form-section {
 }
 
 .form-data-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--rl-sp3);
-  align-items: center;
+  align-items: start;
+  padding-bottom: var(--rl-sp3);
+  border-bottom: 1px solid var(--vscode-panel-border, var(--glass-border));
+}
+
+.form-data-section .form-data-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+@container (max-width: 420px) {
+  .form-data-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-data-key,
 .form-data-value {
   flex: 1;
-  height: var(--rl-ctrl);
-  padding: 0 var(--rl-sp4);
-  border: 1px solid var(--vscode-panel-border);
+  min-width: 0;
+  min-height: var(--rl-ctrl);
+  padding: var(--rl-sp1) var(--rl-sp4);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1420,6 +1489,7 @@ fieldset.form-section {
 /* File Input */
 .file-input-wrapper {
   flex: 1;
+  min-width: 0;
   position: relative;
 }
 
@@ -1621,29 +1691,16 @@ fieldset.form-section {
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.status-client-error {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.2) 0%,
-    rgba(251, 191, 36, 0.2) 100%
-  );
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.status-server-error {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.2) 0%,
-    rgba(249, 115, 22, 0.2) 100%
-  );
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
+/* 400+ (and the network-error fallback) get one unmistakable, solid red
+   treatment — a soft tinted badge reads too close to the success/redirect
+   badges next to it, which is exactly why an error response blends in. */
+.status-client-error,
+.status-server-error,
 .status-error {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: #ef4444;
+  color: #ffffff;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
 }
 
 .time-badge {
