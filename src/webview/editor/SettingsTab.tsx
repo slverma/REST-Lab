@@ -62,8 +62,12 @@ const InheritedList: React.FC<{ items: Header[]; label: string }> = ({
     <div className="inherited-headers-list">
       {items.map((item, index) => (
         <div key={`inherited-${index}`} className="header-row inherited">
-          <span className="header-key">{item.key}</span>
-          <span className="header-value">{item.value}</span>
+          <div className="header-row-key">
+            <span className="header-key">{item.key}</span>
+          </div>
+          <div className="header-row-value">
+            <span className="header-value">{item.value}</span>
+          </div>
         </div>
       ))}
     </div>
@@ -151,35 +155,39 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
           ) : (
             (config.headers || []).map((header, index) => (
               <div key={index} className="header-row">
-                <input
-                  type="checkbox"
-                  checked={header.enabled !== false}
-                  onChange={() => onToggleHeader(index)}
-                  title="Enable/Disable header"
-                  className="header-checkbox"
-                />
-                <AutocompleteInput
-                  value={header.key}
-                  onChange={(value) => onUpdateHeader(index, "key", value)}
-                  placeholder="Header name"
-                  suggestions={COMMON_HEADERS}
-                  className="header-key"
-                />
-                <EnvVarInput
-                  value={header.value}
-                  onChange={(val) => onUpdateHeader(index, "value", val)}
-                  placeholder="Header value"
-                  className="header-value"
-                  envVariables={envVars}
-                />
-                <Tooltip text="Remove header" position="top-right">
-                  <button
-                    className="remove-btn"
-                    onClick={() => onRemoveHeader(index)}
-                  >
-                    <TrashIcon />
-                  </button>
-                </Tooltip>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={header.enabled !== false}
+                    onChange={() => onToggleHeader(index)}
+                    title="Enable/Disable header"
+                    className="header-checkbox"
+                  />
+                  <AutocompleteInput
+                    value={header.key}
+                    onChange={(value) => onUpdateHeader(index, "key", value)}
+                    placeholder="Header name"
+                    suggestions={COMMON_HEADERS}
+                    className="header-key"
+                  />
+                </div>
+                <div className="header-row-value">
+                  <EnvVarInput
+                    value={header.value}
+                    onChange={(val) => onUpdateHeader(index, "value", val)}
+                    placeholder="Header value"
+                    className="header-value"
+                    envVariables={envVars}
+                  />
+                  <Tooltip text="Remove header" position="top-right">
+                    <button
+                      className="remove-btn"
+                      onClick={() => onRemoveHeader(index)}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             ))
           )}
@@ -208,35 +216,39 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
           ) : (
             (config.params || []).map((param, index) => (
               <div key={index} className="header-row">
-                <input
-                  type="checkbox"
-                  checked={param.enabled !== false}
-                  onChange={() => onToggleParam(index)}
-                  title="Enable/Disable parameter"
-                  className="header-checkbox"
-                />
-                <input
-                  type="text"
-                  value={param.key}
-                  onChange={(e) => onUpdateParam(index, "key", e.target.value)}
-                  placeholder="Parameter name"
-                  className="header-key"
-                />
-                <EnvVarInput
-                  value={param.value}
-                  onChange={(val) => onUpdateParam(index, "value", val)}
-                  placeholder="Parameter value"
-                  className="header-value"
-                  envVariables={envVars}
-                />
-                <Tooltip text="Remove parameter" position="top-right">
-                  <button
-                    className="remove-btn"
-                    onClick={() => onRemoveParam(index)}
-                  >
-                    <TrashIcon />
-                  </button>
-                </Tooltip>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={param.enabled !== false}
+                    onChange={() => onToggleParam(index)}
+                    title="Enable/Disable parameter"
+                    className="header-checkbox"
+                  />
+                  <input
+                    type="text"
+                    value={param.key}
+                    onChange={(e) => onUpdateParam(index, "key", e.target.value)}
+                    placeholder="Parameter name"
+                    className="header-key"
+                  />
+                </div>
+                <div className="header-row-value">
+                  <EnvVarInput
+                    value={param.value}
+                    onChange={(val) => onUpdateParam(index, "value", val)}
+                    placeholder="Parameter value"
+                    className="header-value"
+                    envVariables={envVars}
+                  />
+                  <Tooltip text="Remove parameter" position="top-right">
+                    <button
+                      className="remove-btn"
+                      onClick={() => onRemoveParam(index)}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             ))
           )}

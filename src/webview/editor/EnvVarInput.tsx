@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import ReactDOM from "react-dom";
 
 interface EnvVarInputProps {
   value: string;
@@ -23,7 +24,9 @@ const EnvVarInput: React.FC<EnvVarInputProps> = ({
   const [showPopup, setShowPopup] = React.useState(false);
   const [filterText, setFilterText] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
+  const [popupStyle, setPopupStyle] = React.useState<React.CSSProperties>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const el = inputRef.current;
@@ -57,6 +60,23 @@ const EnvVarInput: React.FC<EnvVarInputProps> = ({
       setShowPopup(false);
     }
   };
+
+  // Position the popup via a portal anchored to the input's live screen
+  // position instead of a locally `position: absolute` element. A locally
+  // absolute popup sits inside this input's fieldset stacking context, so a
+  // later sibling fieldset (e.g. "Headers") paints over it regardless of
+  // z-index — portaling to <body> with `position: fixed` escapes that.
+  React.useEffect(() => {
+    if (showPopup && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPopupStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        minWidth: Math.max(rect.width, 280),
+      });
+    }
+  }, [showPopup]);
 
   const getFiltered = () =>
     varKeys.filter((k) => k.toLowerCase().includes(filterText.toLowerCase()));
@@ -102,7 +122,7 @@ const EnvVarInput: React.FC<EnvVarInputProps> = ({
   const filtered = getFiltered();
 
   return (
-    <div className="var-input-container">
+    <div ref={containerRef} className="var-input-container">
       <textarea
         ref={inputRef}
         rows={1}
@@ -114,24 +134,27 @@ const EnvVarInput: React.FC<EnvVarInputProps> = ({
         className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
-      {showPopup && filtered.length > 0 && (
-        <div className="var-popup">
-          {filtered.map((k, i) => (
-            <div
-              key={k}
-              className={`var-popup-item ${i === activeIdx ? "active" : ""}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                insertVar(k);
-              }}
-              onMouseEnter={() => setActiveIdx(i)}
-            >
-              <span className="var-popup-key">{`{{${k}}}`}</span>
-              <span className="var-popup-value">{envVariables[k]}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {showPopup &&
+        filtered.length > 0 &&
+        ReactDOM.createPortal(
+          <div className="var-popup" style={popupStyle}>
+            {filtered.map((k, i) => (
+              <div
+                key={k}
+                className={`var-popup-item ${i === activeIdx ? "active" : ""}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  insertVar(k);
+                }}
+                onMouseEnter={() => setActiveIdx(i)}
+              >
+                <span className="var-popup-key">{`{{${k}}}`}</span>
+                <span className="var-popup-value">{envVariables[k]}</span>
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };
