@@ -371,11 +371,6 @@ fieldset.form-section {
   .header-row {
     grid-template-columns: 1fr;
   }
-
-  .header-row .header-row-key {
-    padding-right: 0;
-    border-right: none;
-  }
 }
 
 .header-row:hover {
@@ -388,13 +383,6 @@ fieldset.form-section {
   align-items: center;
   gap: 6px;
   min-width: 0;
-}
-
-/* Divider between the name and value columns, sitting in the row's own
-   column gap rather than on either field's own border. */
-.header-row-key {
-  padding-right: 6px;
-  border-right: 1px solid var(--vscode-panel-border, var(--glass-border));
 }
 
 .header-checkbox {
@@ -957,19 +945,22 @@ fieldset.form-section {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
   align-items: start;
-  padding: 3px 4px;
+  padding: 3px 4px 8px;
+  margin-bottom: 4px;
   border-radius: 4px;
+  border-bottom: 1px solid var(--vscode-panel-border, var(--glass-border));
+}
+
+.env-vars-list .env-var-row:last-child {
+  padding-bottom: 3px;
+  margin-bottom: 0;
+  border-bottom: none;
 }
 
 @container (max-width: 340px) {
   .env-vars-col-header,
   .env-var-row {
     grid-template-columns: 1fr;
-  }
-
-  .env-var-row .header-row-key {
-    padding-right: 0;
-    border-right: none;
   }
 }
 
