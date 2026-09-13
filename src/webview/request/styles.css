@@ -1691,29 +1691,16 @@ fieldset.form-section {
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
-.status-client-error {
-  background: linear-gradient(
-    135deg,
-    rgba(245, 158, 11, 0.2) 0%,
-    rgba(251, 191, 36, 0.2) 100%
-  );
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.status-server-error {
-  background: linear-gradient(
-    135deg,
-    rgba(239, 68, 68, 0.2) 0%,
-    rgba(249, 115, 22, 0.2) 100%
-  );
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
+/* 400+ (and the network-error fallback) get one unmistakable, solid red
+   treatment — a soft tinted badge reads too close to the success/redirect
+   badges next to it, which is exactly why an error response blends in. */
+.status-client-error,
+.status-server-error,
 .status-error {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: #ef4444;
+  color: #ffffff;
+  border: 1px solid #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
 }
 
 .time-badge {
