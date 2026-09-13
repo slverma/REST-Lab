@@ -318,6 +318,10 @@ export const RequestContextProvider: React.FC<RequestContextProviderProps> = ({
           if (message.activeEnvironmentId !== undefined) {
             setActiveEnvironmentId(message.activeEnvironmentId);
           }
+          if (message.collectionId !== undefined) {
+            setCollectionId(message.collectionId);
+            collectionIdRef.current = message.collectionId;
+          }
           break;
         case "environmentUpdated":
           if (
