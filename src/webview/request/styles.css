@@ -1124,6 +1124,13 @@ fieldset.form-section {
   min-width: 0;
 }
 
+/* Divider between the name and value columns, sitting in the row's own
+   column gap rather than on either field's own border. */
+.header-row-key {
+  padding-right: var(--rl-sp3);
+  border-right: 1px solid var(--vscode-panel-border, var(--glass-border));
+}
+
 .header-checkbox {
   flex-shrink: 0;
 }
@@ -1161,6 +1168,11 @@ fieldset.form-section {
 @container (max-width: 420px) {
   .header-row {
     grid-template-columns: 1fr;
+  }
+
+  .header-row .header-row-key {
+    padding-right: 0;
+    border-right: none;
   }
 }
 
@@ -1418,6 +1430,11 @@ fieldset.form-section {
 @container (max-width: 420px) {
   .form-data-row {
     grid-template-columns: 1fr;
+  }
+
+  .form-data-row .header-row-key {
+    padding-right: 0;
+    border-right: none;
   }
 }
 
