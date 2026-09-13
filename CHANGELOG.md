@@ -1,3 +1,8 @@
+## <small>1.9.1 (2026-09-13)</small>
+
+* fix: webview layout, input contrast, and error-status visibility (#27) ([3951e14](https://github.com/slverma/REST-Lab/commit/3951e14)), closes [#27](https://github.com/slverma/REST-Lab/issues/27)
+* chore: add graphify knowledge graph output (#26) ([b56e785](https://github.com/slverma/REST-Lab/commit/b56e785)), closes [#26](https://github.com/slverma/REST-Lab/issues/26)
+
 ## 1.9.0 (2026-07-29)
 
 * feat: tabbed response viewer, actions, and safer Restore in History (#25) ([b3aa131](https://github.com/slverma/REST-Lab/commit/b3aa131)), closes [#25](https://github.com/slverma/REST-Lab/issues/25)
