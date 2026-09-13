@@ -6,6 +6,7 @@ import PlusIcon from "../components/icons/PlusIcon";
 import TextIcon from "../components/icons/TextIcon";
 import TrashIcon from "../components/icons/TrashIcon";
 import UploadIcon from "../components/icons/UploadIcon";
+import WarningIcon from "../components/icons/WarningIcon";
 import { hasFileFields } from "../helpers/helper";
 import { useRequestContext } from "./RequestContext";
 
@@ -107,7 +108,8 @@ const FormFieldEditor = () => {
 
       {hasFileFields(config.formData) && (
         <p className="file-warning">
-          ⚠️ File uploads require multipart/form-data.
+          <WarningIcon size={14} className="file-warning-icon" />
+          File uploads require multipart/form-data.
         </p>
       )}
     </div>

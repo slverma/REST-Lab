@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Tooltip from "../components/Tooltip";
+import ChevronIcon from "../components/icons/ChevronIcon";
 import CodeIcon from "../components/icons/CodeIcon";
+import DotIcon from "../components/icons/DotIcon";
 import MoreActionIcon from "../components/icons/MoreActionIcon";
 import SaveIcon from "../components/icons/SaveIcon";
 import SendIcon from "../components/icons/SendIcon";
@@ -195,7 +197,15 @@ const RequestEditorContent: React.FC = () => {
             )}
             {hasVars && resolvedUrl && (
               <>
-                <span style={{ opacity: 0.5, margin: "0 6px" }}>→</span>
+                <span
+                  style={{
+                    opacity: 0.5,
+                    margin: "0 6px",
+                    display: "inline-flex",
+                  }}
+                >
+                  <ChevronIcon />
+                </span>
                 <code style={{ color: "rgba(56,189,248,0.8)" }}>
                   {resolvedUrl}
                 </code>
@@ -257,7 +267,9 @@ const RequestEditorContent: React.FC = () => {
               >
                 Auth
                 {config.auth !== undefined && (
-                  <span className="badge">•</span>
+                  <span className="badge">
+                    <DotIcon />
+                  </span>
                 )}
               </button>
               <button
