@@ -195,7 +195,7 @@ body {
 .method-select {
   height: var(--rl-ctrl);
   padding: 0 0.7em;
-  border: 2px solid var(--glass-border);
+  border: 2px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -258,7 +258,7 @@ body {
   flex: 1 1 16em;
   min-width: 0;
   padding: var(--rl-sp0) var(--rl-sp1);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -995,7 +995,7 @@ fieldset.form-section {
 .form-group .var-input-container textarea {
   width: 100%;
   padding: 6px 10px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 6px;
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1043,7 +1043,7 @@ fieldset.form-section {
 .form-select {
   height: var(--rl-ctrl);
   padding: 0 var(--rl-sp3);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--vscode-input-border, var(--glass-border));
   border-radius: var(--rl-r3);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1138,7 +1138,7 @@ fieldset.form-section {
   min-width: 0;
   min-height: var(--rl-ctrl);
   padding: var(--rl-sp1) var(--rl-sp4);
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1249,7 +1249,7 @@ fieldset.form-section {
   flex: 1;
   max-width: 350px;
   height: var(--rl-ctrl-sm);
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
@@ -1275,7 +1275,7 @@ fieldset.form-section {
   width: 100%;
   flex: 1;
   min-height: 150px;
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: 8px;
   background-color: var(--vscode-input-background);
   overflow: hidden;
@@ -1427,7 +1427,7 @@ fieldset.form-section {
   min-width: 0;
   min-height: var(--rl-ctrl);
   padding: var(--rl-sp1) var(--rl-sp4);
-  border: 1px solid var(--vscode-panel-border);
+  border: 1px solid var(--vscode-input-border, var(--vscode-panel-border));
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
