@@ -30,33 +30,37 @@ const CookieTab: React.FC = () => {
         ) : (
           (config.cookies || []).map((cookie, index) => (
             <div key={index} className="header-row">
-              <input
-                type="checkbox"
-                checked={cookie.enabled !== false}
-                onChange={() => handleToggleCookie(index)}
-                title="Enable/Disable cookie"
-                className="header-checkbox"
-              />
-              <VarInput
-                value={cookie.name}
-                onChange={(val) => handleUpdateCookie(index, "name", val)}
-                placeholder="name"
-                className="header-key"
-              />
-              <VarInput
-                value={cookie.value}
-                onChange={(val) => handleUpdateCookie(index, "value", val)}
-                placeholder="value"
-                className="header-value"
-              />
-              <Tooltip text="Remove Cookie" position="top-right">
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemoveCookie(index)}
-                >
-                  <TrashIcon />
-                </button>
-              </Tooltip>
+              <div className="header-row-key">
+                <input
+                  type="checkbox"
+                  checked={cookie.enabled !== false}
+                  onChange={() => handleToggleCookie(index)}
+                  title="Enable/Disable cookie"
+                  className="header-checkbox"
+                />
+                <VarInput
+                  value={cookie.name}
+                  onChange={(val) => handleUpdateCookie(index, "name", val)}
+                  placeholder="name"
+                  className="header-key"
+                />
+              </div>
+              <div className="header-row-value">
+                <VarInput
+                  value={cookie.value}
+                  onChange={(val) => handleUpdateCookie(index, "value", val)}
+                  placeholder="value"
+                  className="header-value"
+                />
+                <Tooltip text="Remove Cookie" position="top-right">
+                  <button
+                    className="remove-btn"
+                    onClick={() => handleRemoveCookie(index)}
+                  >
+                    <TrashIcon />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
           ))
         )}

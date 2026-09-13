@@ -36,67 +36,71 @@ const FormFieldEditor = () => {
       ) : (
         (config.formData || []).map((item, index) => (
           <div key={index} className="form-data-row">
-            <AutoGrowTextarea
-              value={item.key}
-              onChange={(e) =>
-                handleUpdateFormData(index, "key", e.target.value)
-              }
-              placeholder="Field name"
-              className="form-data-key"
-            />
+            <div className="header-row-key">
+              <AutoGrowTextarea
+                value={item.key}
+                onChange={(e) =>
+                  handleUpdateFormData(index, "key", e.target.value)
+                }
+                placeholder="Field name"
+                className="form-data-key"
+              />
+            </div>
 
-            {config.contentType === "multipart/form-data" && (
-              <Tooltip
-                text={item.type === "file" ? "Switch to text" : "Switch to file"}
-              >
-                <button
-                  className={`type-toggle ${
-                    item.type === "file" ? "file-type" : "text-type"
-                  }`}
-                  onClick={() => handleToggleFormDataType(index)}
+            <div className="header-row-value">
+              {config.contentType === "multipart/form-data" && (
+                <Tooltip
+                  text={item.type === "file" ? "Switch to text" : "Switch to file"}
                 >
-                  {item.type === "file" ? <FileIcon /> : <TextIcon />}
+                  <button
+                    className={`type-toggle ${
+                      item.type === "file" ? "file-type" : "text-type"
+                    }`}
+                    onClick={() => handleToggleFormDataType(index)}
+                  >
+                    {item.type === "file" ? <FileIcon /> : <TextIcon />}
+                  </button>
+                </Tooltip>
+              )}
+
+              {item.type === "file" ? (
+                <div className="file-input-wrapper">
+                  <input
+                    type="file"
+                    id={`file-input-${index}`}
+                    className="file-input-hidden"
+                    onChange={(e) =>
+                      handleFileSelect(index, e.target.files?.[0] || null)
+                    }
+                  />
+                  <label
+                    htmlFor={`file-input-${index}`}
+                    className="file-input-label"
+                  >
+                    <UploadIcon />
+                    {item.fileName || "Choose file"}
+                  </label>
+                </div>
+              ) : (
+                <AutoGrowTextarea
+                  value={item.value}
+                  onChange={(e) =>
+                    handleUpdateFormData(index, "value", e.target.value)
+                  }
+                  placeholder="Value"
+                  className="form-data-value"
+                />
+              )}
+
+              <Tooltip text="Remove field" position="top-right">
+                <button
+                  className="remove-btn"
+                  onClick={() => handleRemoveFormData(index)}
+                >
+                  <TrashIcon />
                 </button>
               </Tooltip>
-            )}
-
-            {item.type === "file" ? (
-              <div className="file-input-wrapper">
-                <input
-                  type="file"
-                  id={`file-input-${index}`}
-                  className="file-input-hidden"
-                  onChange={(e) =>
-                    handleFileSelect(index, e.target.files?.[0] || null)
-                  }
-                />
-                <label
-                  htmlFor={`file-input-${index}`}
-                  className="file-input-label"
-                >
-                  <UploadIcon />
-                  {item.fileName || "Choose file"}
-                </label>
-              </div>
-            ) : (
-              <AutoGrowTextarea
-                value={item.value}
-                onChange={(e) =>
-                  handleUpdateFormData(index, "value", e.target.value)
-                }
-                placeholder="Value"
-                className="form-data-value"
-              />
-            )}
-
-            <Tooltip text="Remove field" position="top-right">
-              <button
-                className="remove-btn"
-                onClick={() => handleRemoveFormData(index)}
-              >
-                <TrashIcon />
-              </button>
-            </Tooltip>
+            </div>
           </div>
         ))
       )}

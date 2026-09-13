@@ -603,16 +603,15 @@ body {
 }
 
 .var-popup {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 280px;
+  /* position/top/left/min-width are set inline (see VarInput), computed
+     from the input's live getBoundingClientRect() since this is portaled
+     to <body> to escape the enclosing fieldset's stacking context. */
   max-width: 480px;
   background: var(--vscode-editor-background);
   border: 1px solid var(--restlab-accent);
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 1000;
+  z-index: 99999;
   overflow: hidden;
   max-height: 220px;
   overflow-y: auto;
@@ -1069,6 +1068,7 @@ fieldset.form-section {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  container-type: inline-size;
 }
 
 .inherited-headers {
@@ -1099,10 +1099,16 @@ fieldset.form-section {
   color: var(--vscode-foreground);
 }
 
+/* Two explicit column-groups (name+checkbox | value+buttons) rather than a
+   flat flex row — a flat row with mixed plain-<input> and wrapped
+   (AutocompleteInput/VarInput) children never sized its columns evenly, and
+   flex-wrap on 0-basis children never actually triggered. Collapses to a
+   single stacked column once the section is too narrow for both. */
 .header-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--rl-sp3);
-  align-items: center;
+  align-items: start;
   margin-bottom: var(--rl-sp2);
 }
 
@@ -1110,17 +1116,52 @@ fieldset.form-section {
   opacity: 0.7;
 }
 
+.header-row-key,
+.header-row-value {
+  display: flex;
+  align-items: center;
+  gap: var(--rl-sp3);
+  min-width: 0;
+}
+
+.header-checkbox {
+  flex-shrink: 0;
+}
+
+.header-row .remove-btn {
+  flex-shrink: 0;
+}
+
 .header-key,
 .header-value {
   flex: 1;
-  height: var(--rl-ctrl);
-  padding: 0 var(--rl-sp4);
+  min-width: 0;
+  min-height: var(--rl-ctrl);
+  padding: var(--rl-sp1) var(--rl-sp4);
   border: 1px solid var(--vscode-panel-border);
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   font-family: inherit;
   font-size: 0.9em;
+}
+
+/* The wrapper div AutocompleteInput/VarInput render around their <textarea>
+   is the flex item here, not the .header-key/.header-value class itself.
+   (Cookies use VarInput for both the name and value field, so both group
+   columns need this, not just header-row-value.) */
+.header-row-key > .autocomplete-container,
+.header-row-key > .var-input-container,
+.header-row-value > .autocomplete-container,
+.header-row-value > .var-input-container {
+  flex: 1;
+  min-width: 0;
+}
+
+@container (max-width: 420px) {
+  .header-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .header-key:focus,
@@ -1160,6 +1201,7 @@ fieldset.form-section {
   justify-content: center;
   width: var(--rl-ctrl);
   height: var(--rl-ctrl);
+  flex-shrink: 0;
   border: none;
   border-radius: var(--rl-r2);
   background: transparent;
@@ -1350,6 +1392,7 @@ fieldset.form-section {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  container-type: inline-size;
 }
 
 .form-data-section .section-header {
@@ -1366,16 +1409,24 @@ fieldset.form-section {
 }
 
 .form-data-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--rl-sp3);
-  align-items: center;
+  align-items: start;
+}
+
+@container (max-width: 420px) {
+  .form-data-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-data-key,
 .form-data-value {
   flex: 1;
-  height: var(--rl-ctrl);
-  padding: 0 var(--rl-sp4);
+  min-width: 0;
+  min-height: var(--rl-ctrl);
+  padding: var(--rl-sp1) var(--rl-sp4);
   border: 1px solid var(--vscode-panel-border);
   border-radius: var(--rl-r2);
   background-color: var(--vscode-input-background);
@@ -1420,6 +1471,7 @@ fieldset.form-section {
 /* File Input */
 .file-input-wrapper {
   flex: 1;
+  min-width: 0;
   position: relative;
 }
 

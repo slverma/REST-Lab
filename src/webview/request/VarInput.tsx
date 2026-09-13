@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useAutoGrow } from "../helpers/useAutoGrow";
 import { useRequestContext } from "./RequestContext";
 
@@ -25,7 +26,9 @@ const VarInput: React.FC<VarInputProps> = ({
   const [showPopup, setShowPopup] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [activeIdx, setActiveIdx] = useState(0);
+  const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   useAutoGrow(inputRef, value);
 
   /** Returns the partial key after `{{` at the cursor, or null if not applicable */
@@ -50,6 +53,22 @@ const VarInput: React.FC<VarInputProps> = ({
 
   const getFiltered = () =>
     varKeys.filter((k) => k.toLowerCase().includes(filterText.toLowerCase()));
+
+  // Position the popup via a portal anchored to the input's live screen
+  // position instead of a locally `position: absolute` element, which would
+  // sit inside this input's own stacking context (e.g. an AuthTab fieldset)
+  // and get painted over by a later sibling section regardless of z-index.
+  React.useEffect(() => {
+    if (showPopup && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPopupStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        minWidth: Math.max(rect.width, 280),
+      });
+    }
+  }, [showPopup]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !showPopup) {
@@ -94,7 +113,7 @@ const VarInput: React.FC<VarInputProps> = ({
   const filtered = getFiltered();
 
   return (
-    <div className="var-input-container">
+    <div ref={containerRef} className="var-input-container">
       <textarea
         ref={inputRef}
         rows={1}
@@ -106,24 +125,27 @@ const VarInput: React.FC<VarInputProps> = ({
         className={`autogrow-textarea${className ? ` ${className}` : ""}`}
         autoComplete="off"
       />
-      {showPopup && filtered.length > 0 && (
-        <div className="var-popup">
-          {filtered.map((k, i) => (
-            <div
-              key={k}
-              className={`var-popup-item ${i === activeIdx ? "active" : ""}`}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                insertVar(k);
-              }}
-              onMouseEnter={() => setActiveIdx(i)}
-            >
-              <span className="var-popup-key">{`{{${k}}}`}</span>
-              <span className="var-popup-value">{envVariables[k]}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {showPopup &&
+        filtered.length > 0 &&
+        ReactDOM.createPortal(
+          <div className="var-popup" style={popupStyle}>
+            {filtered.map((k, i) => (
+              <div
+                key={k}
+                className={`var-popup-item ${i === activeIdx ? "active" : ""}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  insertVar(k);
+                }}
+                onMouseEnter={() => setActiveIdx(i)}
+              >
+                <span className="var-popup-key">{`{{${k}}}`}</span>
+                <span className="var-popup-value">{envVariables[k]}</span>
+              </div>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 };

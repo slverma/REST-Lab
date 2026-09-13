@@ -31,15 +31,19 @@ const HeaderTab = () => {
             );
             return (
               <div key={header.key} className="header-row inherited">
-                <input
-                  type="checkbox"
-                  checked={!isDisabledInRequest}
-                  onChange={() => handleToggleInheritedHeader(header.key)}
-                  title="Enable/Disable inherited header"
-                  className="header-checkbox"
-                />
-                <span className="header-key">{header.key}</span>
-                <span className="header-value">{header.value}</span>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={!isDisabledInRequest}
+                    onChange={() => handleToggleInheritedHeader(header.key)}
+                    title="Enable/Disable inherited header"
+                    className="header-checkbox"
+                  />
+                  <span className="header-key">{header.key}</span>
+                </div>
+                <div className="header-row-value">
+                  <span className="header-value">{header.value}</span>
+                </div>
               </div>
             );
           })}
@@ -71,34 +75,38 @@ const HeaderTab = () => {
             )
             .map(({ header, index }) => (
               <div key={index} className="header-row">
-                <input
-                  type="checkbox"
-                  checked={header.enabled !== false}
-                  onChange={() => handleToggleHeader(index)}
-                  title="Enable/Disable header"
-                  className="header-checkbox"
-                />
-                <AutocompleteInput
-                  value={header.key}
-                  onChange={(value) => handleUpdateHeader(index, "key", value)}
-                  placeholder="Header name"
-                  suggestions={COMMON_HEADERS}
-                  className="header-key"
-                />
-                <VarInput
-                  value={header.value}
-                  onChange={(val) => handleUpdateHeader(index, "value", val)}
-                  placeholder="Value"
-                  className="header-value"
-                />
-                <Tooltip text="Remove Header" position="top-right">
-                  <button
-                    className="remove-btn"
-                    onClick={() => handleRemoveHeader(index)}
-                  >
-                    <TrashIcon />
-                  </button>
-                </Tooltip>
+                <div className="header-row-key">
+                  <input
+                    type="checkbox"
+                    checked={header.enabled !== false}
+                    onChange={() => handleToggleHeader(index)}
+                    title="Enable/Disable header"
+                    className="header-checkbox"
+                  />
+                  <AutocompleteInput
+                    value={header.key}
+                    onChange={(value) => handleUpdateHeader(index, "key", value)}
+                    placeholder="Header name"
+                    suggestions={COMMON_HEADERS}
+                    className="header-key"
+                  />
+                </div>
+                <div className="header-row-value">
+                  <VarInput
+                    value={header.value}
+                    onChange={(val) => handleUpdateHeader(index, "value", val)}
+                    placeholder="Value"
+                    className="header-value"
+                  />
+                  <Tooltip text="Remove Header" position="top-right">
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleRemoveHeader(index)}
+                    >
+                      <TrashIcon />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
             ))
         )}
