@@ -159,12 +159,19 @@ export const FolderEditor: React.FC<FolderEditorProps> = ({
   };
 
   const handleAddEnvironment = () => {
+    const isFirstEnvironment = getEnvs().length === 0;
     const newEnv: Environment = {
       id: `env-${Date.now()}`,
       name: `Environment ${getEnvs().length + 1}`,
       variables: [],
     };
-    setConfig((prev) => ({ ...prev, environments: [...(prev.environments || []), newEnv] }));
+    setConfig((prev) => ({
+      ...prev,
+      environments: [...(prev.environments || []), newEnv],
+      activeEnvironmentId: isFirstEnvironment
+        ? newEnv.id
+        : prev.activeEnvironmentId,
+    }));
     setSelectedEnvId(newEnv.id);
     mark();
   };
