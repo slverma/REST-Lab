@@ -1,3 +1,7 @@
+## <small>1.9.2 (2026-10-12)</small>
+
+* fix: button hover flicker, SVG icons for text glyphs, and larger flask in extension icons (#28) ([5a72d5e](https://github.com/slverma/REST-Lab/commit/5a72d5e)), closes [#28](https://github.com/slverma/REST-Lab/issues/28)
+
 ## <small>1.9.1 (2026-09-13)</small>
 
 * fix: webview layout, input contrast, and error-status visibility (#27) ([3951e14](https://github.com/slverma/REST-Lab/commit/3951e14)), closes [#27](https://github.com/slverma/REST-Lab/issues/27)
