@@ -159,7 +159,6 @@ body {
 }
 
 .save-btn.dirty:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px var(--restlab-accent-glow);
 }
 

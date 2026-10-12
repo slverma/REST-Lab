@@ -464,7 +464,6 @@ body {
   background: var(--restlab-gradient);
   border-color: transparent;
   color: #ffffff;
-  transform: translateY(-1px);
   box-shadow: 0 4px 12px var(--restlab-accent-glow);
 }
 
