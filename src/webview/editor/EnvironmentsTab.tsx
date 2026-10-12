@@ -73,7 +73,10 @@ const EnvironmentsTab: React.FC<EnvironmentsTabProps> = ({
         </div>
         {envs.length > 0 && (
           <p className="env-list-hint">
-            ✓ = active &nbsp;·&nbsp; double-click name to rename
+            <span className="env-list-hint-icon">
+              <CheckIcon />
+            </span>{" "}
+            = active &nbsp;·&nbsp; double-click name to rename
           </p>
         )}
         {envs.length === 0 ? (

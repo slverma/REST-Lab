@@ -10,22 +10,25 @@
       <stop offset="100%" style="stop-color:#e0e7ff"/>
     </linearGradient>
   </defs>
-  
+
   <!-- Rounded background -->
   <rect x="0" y="0" width="128" height="128" rx="24" ry="24" fill="url(#bgGrad)"/>
-  
+
   <!-- Flask body -->
-  <g transform="translate(24, 16) scale(3.3)">
-    <path d="M9 3h6v5l4 9a2 2 0 0 1-1.8 2.9H6.8A2 2 0 0 1 5 17l4-9V3z" 
-          fill="url(#flaskGrad)" 
-          stroke="#ffffff" 
-          stroke-width="1.5" 
-          stroke-linecap="round" 
+  <g transform="translate(-3.2, 0) scale(5.6)">
+    <path d="M9 3h6v5l4 9a2 2 0 0 1-1.8 2.9H6.8A2 2 0 0 1 5 17l4-9V3z"
+          fill="url(#flaskGrad)"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          stroke-linecap="round"
           stroke-linejoin="round"/>
     <!-- Flask neck line -->
     <line x1="9" y1="3" x2="15" y2="3" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- URL-scheme label band, wrapped around the flask like a reagent-bottle label -->
+    <rect x="3" y="10.4" width="18" height="3.4" rx="0.9" fill="#312e81"/>
+    <text x="12" y="13.1" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="3.4" fill="#ffffff">://</text>
     <!-- Liquid -->
-    <path d="M7 14.5 L17 14.5 L18.2 17.5 Q18.5 18.5 17.5 19 L6.5 19 Q5.5 18.5 5.8 17.5 Z" 
+    <path d="M7 14.5 L17 14.5 L18.2 17.5 Q18.5 18.5 17.5 19 L6.5 19 Q5.5 18.5 5.8 17.5 Z"
           fill="rgba(56, 189, 248, 0.6)"/>
     <!-- Bubbles -->
     <circle cx="10" cy="17" r="0.8" fill="#ffffff"/>

@@ -159,7 +159,6 @@ body {
 }
 
 .save-btn.dirty:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px var(--restlab-accent-glow);
 }
 
@@ -770,6 +769,10 @@ fieldset.form-section {
   padding: 4px 10px 2px;
   text-align: center;
   letter-spacing: 0.02em;
+}
+.env-list-hint-icon {
+  display: inline-flex;
+  vertical-align: -1px;
 }
 .env-section-label {
   font-size: 11px;
